@@ -25,13 +25,16 @@
 
 bitMap Movegen::MG_RANKMASK[squareNumber];
 bitMap Movegen::MG_FILEMASK[squareNumber];
+Vec2uq Movegen::MG_ROOKMASK[squareNumber];
 bitMap Movegen::MG_DIAGA8H1MASK[squareNumber];
 bitMap Movegen::MG_DIAGA1H8MASK[squareNumber];
 bitMap Movegen::MG_RANK_ATTACK[squareNumber][64];
 bitMap Movegen::MG_FILE_ATTACK[squareNumber][64];
 bitMap Movegen::MG_DIAGA8H1_ATTACK[squareNumber][64];
 bitMap Movegen::MG_DIAGA1H8_ATTACK[squareNumber][64];
-bitMap Movegen::MG_FILEMAGIC[64];
+bitMap Movegen::MG_FILEMAGIC[squareNumber];
+Vec2uq Movegen::MG_ROOKMAGIC[squareNumber];
+
 bitMap Movegen::MG_DIAGA8H1MAGIC[64];
 bitMap Movegen::MG_DIAGA1H8MAGIC[64];
 
@@ -291,10 +294,15 @@ void Movegen::initMovegenConstant(void){
 			MG_FILEMASK[BOARDINDEX[file][rank]]  = bitSet(BOARDINDEX[file][1]) | bitSet(BOARDINDEX[file][2]) | bitSet(BOARDINDEX[file][3]) ;
 			MG_FILEMASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[file][4]) | bitSet(BOARDINDEX[file][5]) | bitSet(BOARDINDEX[file][6]) ;
 
+
+			MG_ROOKMASK[BOARDINDEX[file][rank]] = Vec2uq(MG_RANKMASK[BOARDINDEX[file][rank]],MG_FILEMASK[BOARDINDEX[file][rank]]);
+
 			//===========================================================================
 			//Initialize file magic multiplication numbers, used in the movegenerator (see movegen.ccp)
 			//===========================================================================
 			MG_FILEMAGIC[BOARDINDEX[file][rank]] = FILEMAGICS[file];
+
+			MG_ROOKMAGIC[BOARDINDEX[file][rank]]=Vec2uq(1,MG_FILEMAGIC[BOARDINDEX[file][rank]]);
 
 			//===========================================================================
 			//Initialize 6-bit diagonal mask, used in the movegenerator (see movegen.ccp)

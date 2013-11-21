@@ -98,8 +98,10 @@ public:
 
 	inline static bitMap attackFromRook(tSquare from,bitMap & occupancy){
 		assert(from <=squareNumber);
-		bitMap res = MG_RANK_ATTACK[from][((occupancy & MG_RANKMASK[from]) >> RANKSHIFT[from])];
-		res |= MG_FILE_ATTACK[from][((occupancy & MG_FILEMASK[from])*MG_FILEMAGIC[from]) >> 57];
+		Vec2uq v=(MG_ROOKMASK[from]&Vec2uq(occupancy))*MG_ROOKMAGIC[from];
+
+		bitMap res = MG_RANK_ATTACK[from][(v[0] >> RANKSHIFT[from])];
+		res |= MG_FILE_ATTACK[from][(v[1]) >> 57];
 		return res;
 	}
 	inline static bitMap attackFromBishop(tSquare from,bitMap & occupancy){
@@ -137,13 +139,15 @@ private:
 
 	static bitMap MG_RANKMASK[squareNumber];
 	static bitMap MG_FILEMASK[squareNumber];
+	static Vec2uq MG_ROOKMASK[squareNumber];
 	static bitMap MG_DIAGA8H1MASK[squareNumber];
 	static bitMap MG_DIAGA1H8MASK[squareNumber];
 	static bitMap MG_RANK_ATTACK[squareNumber][64];
 	static bitMap MG_FILE_ATTACK[squareNumber][64];
 	static bitMap MG_DIAGA8H1_ATTACK[squareNumber][64];
 	static bitMap MG_DIAGA1H8_ATTACK[squareNumber][64];
-	static bitMap MG_FILEMAGIC[64];
+	static bitMap MG_FILEMAGIC[squareNumber];
+	static Vec2uq MG_ROOKMAGIC[squareNumber];
 	static bitMap MG_DIAGA8H1MAGIC[64];
 	static bitMap MG_DIAGA1H8MAGIC[64];
 
