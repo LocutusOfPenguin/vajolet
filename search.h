@@ -73,7 +73,7 @@ inline Score matedIn(int ply) {
 
 class search{
 
-	static Score futility[5];
+	static Score futility[2][5];
 	static Score futilityMargin[7];
 	static Score FutilityMoveCounts[11];
 	static Score PVreduction[32*ONE_PLY][64];

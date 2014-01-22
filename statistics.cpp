@@ -30,15 +30,29 @@ void Statistics::printNodeTypeStat(){
 
 	sync_cout<<"PV type %error : "<<(signed long long)(testedNodeTypePv-resultNodeTypePv)/float(resultNodeTypePv)*100.0<<sync_endl;
 	sync_cout<<"Cut type %error : "<<(signed long long)(testedNodeTypeCut-resultNodeTypeCut)/float(resultNodeTypeCut)*100.0<<sync_endl;
-	sync_cout<<"All type %error : "<<(signed long long)(testedNodeTypeAll-resultNodeTypeAll)/float(resultNodeTypeAll)*100.0<<sync_endl;
+	sync_cout<<"All type %error : "<<(signed long long)(testedNodeTypeAll-resultNodeTypeAll)/float(resultNodeTypeAll)*100.0<<std::endl<<sync_endl;
+
+
+	sync_cout<<"tested Pv razoring: "<<testedPvPruning<<sync_endl;
+	sync_cout<<"passed Pv razoring: "<<passedPvPruning<<sync_endl;
+	sync_cout<<"correct Pv razoring: "<<correctPvPruning<<sync_endl;
+	sync_cout<<"% correct Pv pruning: "<<(signed long long)(correctPvPruning)/float(passedPvPruning)*100.0<<std::endl<<sync_endl;
 
 	sync_cout<<"tested All razoring: "<<testedAllPruning<<sync_endl;
+	sync_cout<<"passed All razoring: "<<passedAllPruning<<sync_endl;
 	sync_cout<<"correct All razoring: "<<correctAllPruning<<sync_endl;
-	sync_cout<<"% correct All pruning: "<<(signed long long)(correctAllPruning)/float(testedAllPruning)*100.0<<std::endl<<sync_endl;
+	sync_cout<<"% correct All pruning: "<<(signed long long)(correctAllPruning)/float(passedAllPruning)*100.0<<std::endl<<sync_endl;
 
 	sync_cout<<"tested Cut razoring: "<<testedCutPruning<<sync_endl;
+	sync_cout<<"passed Cut razoring: "<<passedCutPruning<<sync_endl;
 	sync_cout<<"correct Cut razoring: "<<correctCutPruning<<sync_endl;
-	sync_cout<<"% correct Cut pruning: "<<(signed long long)(correctCutPruning)/float(testedCutPruning)*100.0<<std::endl<<sync_endl;
+	sync_cout<<"% correct Cut pruning: "<<(signed long long)(correctCutPruning)/float(passedCutPruning)*100.0<<std::endl<<sync_endl;
+
+	sync_cout<<"Cut razoring node count : "<<countNodeTestedPruning<<sync_endl;
+	sync_cout<<"NO Cut razoring node count: "<<countNodeTestedNoPruning<<sync_endl;
+	sync_cout<<"% saved Cut pruning: "<<(signed long long)(countNodeTestedNoPruning-countNodeTestedPruning)/float(countNodeTestedNoPruning)*100.0<<std::endl<<sync_endl;
+	sync_cout<<"avg nodes per pruning: "<<(signed long long)(countNodeTestedPruning)/float(testedCutPruning+testedAllPruning+testedPvPruning)<<std::endl<<sync_endl;
+
 }
 
 void Statistics::gatherNodeTypeStat(search::nodeType expectedNodeType,search::nodeType resultNodeType){
@@ -84,13 +98,20 @@ void Statistics::initNodeTypeStat(){
 	resultNodeTypeAll=0;
 	resultNodeTypePv=0;
 
-	testedAll=0;
 	testedAllPruning=0;
+	passedAllPruning=0;
 	correctAllPruning=0;
 
-	testedCut=0;
 	testedCutPruning=0;
+	passedCutPruning=0;
 	correctCutPruning=0;
+
+	testedPvPruning=0;
+	passedPvPruning=0;
+	correctPvPruning=0;
+
+	countNodeTestedPruning=0;
+	countNodeTestedNoPruning=0;
 }
 
 

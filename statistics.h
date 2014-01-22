@@ -31,13 +31,21 @@ public :
 	  return instance;
 	}
 
-	bool testedAll;
+
 	unsigned long long testedAllPruning;
+	unsigned long long passedAllPruning;
 	unsigned long long correctAllPruning;
 
-	bool testedCut;
 	unsigned long long testedCutPruning;
+	unsigned long long passedCutPruning;
 	unsigned long long correctCutPruning;
+
+	unsigned long long testedPvPruning;
+	unsigned long long passedPvPruning;
+	unsigned long long correctPvPruning;
+
+	unsigned long long countNodeTestedPruning;
+	unsigned long long countNodeTestedNoPruning;
 
 	unsigned long long testedNodeTypeCut;
 	unsigned long long testedNodeTypeAll;

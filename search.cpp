@@ -30,8 +30,14 @@
 #include "book.h"
 #include "thread.h"
 
-inline signed int razorMargin(unsigned int depth){
-	return 20000+depth*78;
+inline signed int razorMargin(unsigned int depth,search::nodeType nt){
+	if(nt==search::ALL_NODE){
+		return 10000+depth*78;
+	}
+	else{
+		return 20000+depth*78;
+	}
+
 }
 
 void search::printAllPV(Position & p, unsigned int count){
@@ -66,7 +72,7 @@ void search::printPV(Score res,unsigned int depth,unsigned int seldepth,Score al
 }
 
 
-Score search::futility[5]={0,6000,20000,30000,40000};
+Score search::futility[2][5]={{0,50000,70000,90000,90000},{0,2000,4000,7000,10000}};// {all},{cut}
 Score search::futilityMargin[7]={0,10000,20000,30000,40000,50000,60000};
 Score search::FutilityMoveCounts[11]={5,10,17,26,37,50,66,85,105,130,151};
 Score search::PVreduction[32*ONE_PLY][64];
@@ -478,68 +484,114 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 	}
 #ifdef PRINT_STATISTICS
-	Statistics::instance().testedAll=false;
-	Statistics::instance().testedCut=false;
+	bool testedPV=false;
+	bool testedAll=false;
+	bool testedCut=false;
 #endif
 	//------------------------
 	// razoring
 	//------------------------
 	// at very low deep and with an evaluation well below alpha, if a qsearch don't raise the evaluation then prune the node.
 	//------------------------
-	if (/*!PVnode
-		&& */!inCheck
+#if 1
+
+	if (!inCheck
 		&&  depth < 4 * ONE_PLY
-		&&  eval + razorMargin(depth) <= alpha
-		&&  alpha >= -SCORE_INFINITE+razorMargin(depth)
+		&&  eval + razorMargin(depth,type) <= alpha
+		&&  alpha >= -SCORE_INFINITE+razorMargin(depth,type)
 		//&&  abs(alpha) < SCORE_MATE_IN_MAX_PLY // implicito nell riga precedente
-		&&  ((/*type==CUT_NODE &&*/!ttMove.packed ) || type==ALL_NODE)
+		&&  ((!ttMove.packed ) || type==ALL_NODE)
 		&&  abs(beta) < SCORE_MATE_IN_MAX_PLY
 		&& !((pos.getActualState().nextMove && (pos.bitBoard[Position::blackPawns] & RANKMASK[A2])) || (!pos.getActualState().nextMove && (pos.bitBoard[Position::whitePawns] & RANKMASK[A7]) ) )
 	)
 	{
-		Score ralpha = alpha - razorMargin(depth);
+
+
+
+		Score ralpha = alpha - razorMargin(depth,type);
 		assert(ralpha>=-SCORE_INFINITE);
 		std::vector<Move> childPV;
 		Score v = qsearch<childNodesType>(ply,pos,0, ralpha, ralpha+1, childPV);
+
+
 		if (v <= ralpha)
 		{
 #ifdef PRINT_STATISTICS
-			if(type==ALL_NODE){
-				Statistics::instance().testedAll=true;
-				Statistics::instance().testedAllPruning++;
-			}
-			else{
-				Statistics::instance().testedCut=true;
-				Statistics::instance().testedCutPruning++;
-			}
 			Statistics::instance().gatherNodeTypeStat(type,ALL_NODE);
 #endif
+
 			return v;
 		}
 	}
+#endif
 
+#ifdef PRINT_STATISTICS
+	unsigned long long nodes=visitedNodes;
+#endif
 	//---------------------------
 	//	 STATIC NULL MOVE PRUNING
 	//---------------------------
 	//	at very low deep and with an evaluation well above beta, bet that we can found a move with a result above beta
 	//---------------------------
+#if 1
+	int nt;
+	if(type==ALL_NODE){
+		nt=0;
+	}
+	else{
+		nt=1;
+	}
 	if (!PVnode
 		&& !inCheck
 		&& !pos.getActualState().skipNullMove
-		&&  depth < 4 * ONE_PLY
-		&& eval >-SCORE_INFINITE + futility[depth>>ONE_PLY_SHIFT]
-		&&  eval - futility[depth>>ONE_PLY_SHIFT] >= beta
+		&&  depth < 5 * ONE_PLY
+		&& eval >-SCORE_INFINITE + futility[nt][depth>>ONE_PLY_SHIFT]
+		&&  eval - futility[nt][depth>>ONE_PLY_SHIFT] >= beta
 		&&  abs(beta) < SCORE_MATE_IN_MAX_PLY
 		//&&  abs(eval) < SCORE_KNOWN_WIN
 		&&  ((pos.getActualState().nextMove && pos.getActualState().nonPawnMaterial[2]>= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getActualState().nextMove && pos.getActualState().nonPawnMaterial[0]>= Position::pieceValue[Position::whiteKnights][0])))
 	{
-		assert((eval -futility[depth>>ONE_PLY_SHIFT] >-SCORE_INFINITE));
+		assert((depth>>ONE_PLY_SHIFT)<5);
+#ifdef PRINT_STATISTICS
+		unsigned long long nodes=visitedNodes;
+		if(type==PV_NODE){
+			Statistics::instance().testedPvPruning++;
+		}
+		if(type==ALL_NODE){
+			Statistics::instance().testedAllPruning++;
+		}
+		else{
+			Statistics::instance().testedCutPruning++;
+		}
+
+#endif
+#ifdef PRINT_STATISTICS
+		Statistics::instance().countNodeTestedPruning+=visitedNodes-nodes;
+#endif
+
+
+		assert((eval -futility[nt][depth>>ONE_PLY_SHIFT]) >-SCORE_INFINITE);
 #ifdef PRINT_STATISTICS
 		Statistics::instance().gatherNodeTypeStat(type,CUT_NODE);
 #endif
-		return eval - futility[depth>>ONE_PLY_SHIFT];
-	}
+#ifdef PRINT_STATISTICS
+		if(type==PV_NODE){
+			testedPV=true;
+			Statistics::instance().passedPvPruning++;
+		}
+		if(type==ALL_NODE){
+			testedAll=true;
+			Statistics::instance().passedAllPruning++;
+		}
+		else{
+			testedCut=true;
+			Statistics::instance().passedCutPruning++;
+		}
 
+#endif
+		return eval - futility[nt][depth>>ONE_PLY_SHIFT];
+	}
+#endif
 
 	//---------------------------
 	//	 NULL MOVE PRUNING
@@ -547,7 +599,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	// if the evaluation is above beta and after passing the move the result of a search is still above beta we bet there will be a beta cutoff
 	// this search let us know about threat move by the opponent.
 	//---------------------------
-
+#if 1
 	if(!PVnode
 		&& !inCheck
 		&& depth>=ONE_PLY
@@ -614,13 +666,13 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		}
 
 	}
-
+#endif
 	//------------------------
 	//	PROB CUT
 	//------------------------
 	//	at high depth we try the capture moves. if a reduced search of this moves gives us a result above beta we bet we can found with a regular search a move exceeding beta
 	//------------------------
-
+#if 1
 	if(!PVnode &&
 		!inCheck &&
 		depth>=5*ONE_PLY &&
@@ -652,7 +704,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 	}
-
+#endif
 	//------------------------
 	//	IID
 	//------------------------
@@ -675,6 +727,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		tte = TT.probe(posKey);
 		ttMove= tte!=nullptr ? tte->getPackedMove():0;
 	}
+
 
 
 
@@ -732,6 +785,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		//------------------------------
 		//	SINGULAR EXTENSION NODE
 		//------------------------------
+#if 1
 		if(singularExtensionNode
 			&& !ext
 			&&  m == ttMove
@@ -752,6 +806,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				ext = ONE_PLY;
 		    }
 		}
+#endif
 
 		int newDepth= depth-ONE_PLY+ext;
 
@@ -1030,17 +1085,27 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		}
 	}
 #ifdef PRINT_STATISTICS
-	if(bestScore>beta){
+
+	if(bestScore>=beta){
 		Statistics::instance().gatherNodeTypeStat(type,CUT_NODE);
-	}else if(PVnode && bestMove.packed){
-		Statistics::instance().gatherNodeTypeStat(type,PV_NODE);
-	}else{
-		if(Statistics::instance().testedAll==true){
+		if(testedPV ==true ){
+			Statistics::instance().countNodeTestedNoPruning+=visitedNodes-nodes;
+			Statistics::instance().correctPvPruning++;
+		}
+		if(testedAll==true){
+			Statistics::instance().countNodeTestedNoPruning+=visitedNodes-nodes;
 			Statistics::instance().correctAllPruning++;
 		}
-		if(Statistics::instance().testedCut==true){
+		if(testedCut==true){
+			Statistics::instance().countNodeTestedNoPruning+=visitedNodes-nodes;
 			Statistics::instance().correctCutPruning++;
 		}
+
+	}else if(bestScore>alpha){
+		Statistics::instance().gatherNodeTypeStat(type,PV_NODE);
+	}else{
+
+
 		Statistics::instance().gatherNodeTypeStat(type,ALL_NODE);
 	}
 #endif
