@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <map>
 #include <iomanip>
+#include <algorithm>
 #include "position.h"
 #include "move.h"
 #include "bitops.h"
@@ -65,62 +66,62 @@ const int KingExposed[] = {
 //------------------------------------------------
 //	PAWN Bonus/Penalties
 //------------------------------------------------
-simdScore isolatedPawnPenalty=simdScore(2000,2000,0,0);
-simdScore isolatedPawnPenaltyOpp=simdScore(1000,2000,0,0);
-simdScore doubledPawnPenalty=simdScore(500,500,0,0);
-simdScore backwardPawnPenalty=simdScore(600,600,0,0);
-simdScore chainedPawnBonus=simdScore(1200,1100,0,0);
-simdScore passedPawnFileAHPenalty = simdScore(0,2000,0,0);
-simdScore passedPawnSupportedBonus = simdScore(0,1000,0,0);
-simdScore candidateBonus = simdScore(1000,500,0,0);
+simdScore isolatedPawnPenalty={2000,2000,0,0};
+simdScore isolatedPawnPenaltyOpp={1000,2000,0,0};
+simdScore doubledPawnPenalty={500,500,0,0};
+simdScore backwardPawnPenalty={600,600,0,0};
+simdScore chainedPawnBonus={1200,1100,0,0};
+simdScore passedPawnFileAHPenalty = {0,2000,0,0};
+simdScore passedPawnSupportedBonus = {0,1000,0,0};
+simdScore candidateBonus = {1000,500,0,0};
 
 
-simdScore rookOn7Bonus=simdScore(5700,3600,0,0);
-simdScore rookOnPawns=simdScore(1000,3000,0,0);
-simdScore queenOn7Bonus=simdScore(200,1600,0,0);
-simdScore queenOnPawns=simdScore(500,1000,0,0);
-simdScore rookOnOpen=simdScore(2000,500,0,0);
-simdScore rookOnSemi=simdScore(1000,500,0,0);
+simdScore rookOn7Bonus={5700,3600,0,0};
+simdScore rookOnPawns={1000,3000,0,0};
+simdScore queenOn7Bonus={200,1600,0,0};
+simdScore queenOnPawns={500,1000,0,0};
+simdScore rookOnOpen={2000,500,0,0};
+simdScore rookOnSemi={1000,500,0,0};
 
-simdScore knightOnOutpost= simdScore(100,120,0,0);
-simdScore knightOnOutpostSupported= simdScore(210,190,0,0);
-simdScore knightOnHole= simdScore(310,390,0,0);
+simdScore knightOnOutpost= {100,120,0,0};
+simdScore knightOnOutpostSupported= {210,190,0,0};
+simdScore knightOnHole= {310,390,0,0};
 
-simdScore bishopOnOutpost= simdScore(80,110,0,0);
-simdScore bishopOnOutpostSupported= simdScore(1900,170,0,0);
-simdScore bishopOnHole= simdScore(290,370,0,0);
+simdScore bishopOnOutpost= {80,110,0,0};
+simdScore bishopOnOutpostSupported= {1900,170,0,0};
+simdScore bishopOnHole= {290,370,0,0};
 
-simdScore tempo= simdScore(700,700,0,0);
+simdScore tempo= {700,700,0,0};
 
 simdScore attackedByPawnPenalty[Position::separationBitmap]=
-{	simdScore(0,0,0,0),
-	simdScore(0,0,0,0),//king
-	simdScore(2500,3200,0,0),//queen
-	simdScore(1325,1527,0,0),//rook
-	simdScore(1300,1450,0,0),//bishop
-	simdScore(1200,1350,0,0),//knight
-	simdScore(0,0,0,0),//pawn
-	simdScore(0,0,0,0),
+{	{0,0,0,0},
+	{0,0,0,0},//king
+	{2500,3200,0,0},//queen
+	{1325,1527,0,0},//rook
+	{1300,1450,0,0},//bishop
+	{1200,1350,0,0},//knight
+	{0,0,0,0},//pawn
+	{0,0,0,0},
 };
 
 simdScore weakPiecePenalty[Position::separationBitmap][Position::separationBitmap]=
-{	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(0,0,0,0),			simdScore(0,0,0,0),		simdScore(0,0,0,0),		simdScore(0,0,0,0),	simdScore(0,0,0,0),	simdScore(0,0,0,0)},
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(0,0,0,0),			simdScore(0,0,0,0),		simdScore(0,0,0,0),		simdScore(0,0,0,0),	simdScore(0,0,0,0),	simdScore(0,0,0,0)},//king
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(600,400,0,0),		simdScore(802,420,0,0),	simdScore(1200,1000,0,0),simdScore(1200,1000,0,0),simdScore(3200,2000,0,0),	simdScore(0,0,0,0)},//queen
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(400,200,0,0),		simdScore(420,320,0,0),	simdScore(800,600,0,0),	simdScore(700,400,0,0),	simdScore(2400,2000,0,0),	simdScore(0,0,0,0)},//rook
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(200,100,0,0),		simdScore(220,150,0,0),	simdScore(400,200,0,0),	simdScore(500,300,0,0),	simdScore(1000,890,0,0),	simdScore(0,0,0,0)},//bishop
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(200,100,0,0),	simdScore(221,147,0,0),	simdScore(423,217,0,0),	simdScore(423,417,0,0),	simdScore(890,954,0,0),	simdScore(0,0,0,0)},//knight
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(50,40,0,0),	simdScore(60,50,0,0),	simdScore(100,80,0,0),	simdScore(150,90,0,0),	simdScore(200,170,0,0),	simdScore(0,0,0,0)},//pawn
-	{simdScore(0,0,0,0),simdScore(0,0,0,0),	simdScore(0,0,0,0),			simdScore(0,0,0,0),		simdScore(0,0,0,0),	simdScore(0,0,0,0),	simdScore(0,0,0,0),	simdScore(0,0,0,0)}
+{	{{0,0,0,0},{0,0,0,0},	{0,0,0,0},			{0,0,0,0},		{0,0,0,0},		{0,0,0,0},	{0,0,0,0},	{0,0,0,0}},
+	{{0,0,0,0},{0,0,0,0},	{0,0,0,0},			{0,0,0,0},		{0,0,0,0},		{0,0,0,0},	{0,0,0,0},	{0,0,0,0}},//king
+	{{0,0,0,0},{0,0,0,0},	{600,400,0,0},		{802,420,0,0},	{1200,1000,0,0},{1200,1000,0,0},{3200,2000,0,0},	{0,0,0,0}},//queen
+	{{0,0,0,0},{0,0,0,0},	{400,200,0,0},		{420,320,0,0},	{800,600,0,0},	{700,400,0,0},	{2400,2000,0,0},	{0,0,0,0}},//rook
+	{{0,0,0,0},{0,0,0,0},	{200,100,0,0},		{220,150,0,0},	{400,200,0,0},	{500,300,0,0},	{1000,890,0,0},	{0,0,0,0}},//bishop
+	{{0,0,0,0},{0,0,0,0},	{200,100,0,0},	{221,147,0,0},	{423,217,0,0},	{423,417,0,0},	{890,954,0,0},	{0,0,0,0}},//knight
+	{{0,0,0,0},{0,0,0,0},	{50,40,0,0},	{60,50,0,0},	{100,80,0,0},	{150,90,0,0},	{200,170,0,0},	{0,0,0,0}},//pawn
+	{{0,0,0,0},{0,0,0,0},	{0,0,0,0},			{0,0,0,0},		{0,0,0,0},	{0,0,0,0},	{0,0,0,0},	{0,0,0,0}}
 //						king				queen						rook					bishop				knight				pawn
 };
 //------------------------------------------------
 //king safety
 //------------------------------------------------
 const unsigned int KingAttackWeights[] = { 0, 0, 5, 3, 2, 2 };
-simdScore kingShieldBonus= simdScore(1600,0,0,0);
-simdScore kingFarShieldBonus= simdScore(1000,0,0,0);
-simdScore kingStormBonus= simdScore(100,0,0,0);
+int kingShieldBonus= 1600;
+int kingFarShieldBonus= 1000;
+int kingStormBonus= 100;
 //------------------------------------------------
 
 
@@ -246,7 +247,7 @@ bool evalKRvsKm(const Position& p, Score& res){
 void initMobilityBonus(void){
 	for(int i=0;i<Position::separationBitmap;i++){
 		for(int n=0;n<32;n++){
-			mobilityBonus[i][n] =0;
+			mobilityBonus[i][n] =simdScore{0,0,0,0};
 		}
 	}
 
@@ -261,28 +262,28 @@ void initMobilityBonus(void){
 		n1=5;
 		m0=2400.0/32.0;
 		m1=4800.0/32.0;
-		mobilityBonus[Position::Queens][n] =simdScore(m0*(n-n0),m1*(n-n1),0,0);
+		mobilityBonus[Position::Queens][n] =simdScore{m0*(n-n0),m1*(n-n1),0,0};
 	}
 	for(int n=0;n<32;n++){
 		n0=5;
 		n1=5;
 		m0=2400.0/16.0;
 		m1=4800.0/16.0;
-		mobilityBonus[Position::Rooks][n] =simdScore(m0*(n-n0),m1*(n-n1),0,0);
+		mobilityBonus[Position::Rooks][n] =simdScore{m0*(n-n0),m1*(n-n1),0,0};
 	}
 	for(int n=0;n<32;n++){
 		n0=4;
 		n1=4;
 		m0=5500.0/16.0;
 		m1=5500.0/16.0;
-		mobilityBonus[Position::Bishops][n] =simdScore(m0*(n-n0),m1*(n-n1),0,0);
+		mobilityBonus[Position::Bishops][n] =simdScore{m0*(n-n0),m1*(n-n1),0,0};
 	}
 	for(int n=0;n<32;n++){
 		n0=3;
 		n1=3;
 		m0=2800/8.0;
 		m1=2800/8.0;
-		mobilityBonus[Position::Knights][n] =simdScore(m0*(n-n0),m1*(n-n1),0,0);
+		mobilityBonus[Position::Knights][n] =simdScore{m0*(n-n0),m1*(n-n1),0,0};
 	}
 
 
@@ -758,7 +759,7 @@ const materialStruct* getMaterialData(const Position& p){
 template<color c>
 simdScore evalPawn(const Position & p,tSquare sq, bitMap & weakPawns, bitMap & passedPawns){
 
-	simdScore res=0;
+	simdScore res=simdScore{0,0,0,0};
 
 	bool passed, isolated, doubled, opposed, chain, backward;
 	const bitMap ourPawns =c?p.bitBoard[Position::blackPawns]:p.bitBoard[Position::whitePawns];
@@ -855,7 +856,7 @@ simdScore evalPawn(const Position & p,tSquare sq, bitMap & weakPawns, bitMap & p
 
 template<Position::bitboardIndex piece>
 simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitMap * const attackedSquares ,const bitMap * const holes, bitMap * const kingRing,unsigned int * const kingAttackersCount,unsigned int * const kingAttackersWeight,unsigned int * const kingAdjacentZoneAttacksCount){
-	simdScore res=0;
+	simdScore res=simdScore{0,0,0,0};
 	bitMap tempPieces=p.bitBoard[piece];
 	bitMap enemyKing =(piece>Position::separationBitmap)? p.bitBoard[Position::whiteKing]:p.bitBoard[Position::blackKing];
 	tSquare enemyKingSquare =(piece>Position::separationBitmap)? p.pieceList[Position::whiteKing][0]:p.pieceList[Position::blackKing][0];
@@ -922,7 +923,7 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 
 		bitMap defendedPieces=attack&ourPieces;
 		// piece coordination
-		res+=bitCnt(defendedPieces)*simdScore(200,180,0,0);
+		res+=(int)bitCnt(defendedPieces)*simdScore{200,180,0,0};
 
 		unsigned int mobility= bitCnt(attack&~(threatenSquares/*|ourPieces*/));
 		//sync_cout<<mobility<<sync_endl;
@@ -934,10 +935,10 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 		// center control
 		/////////////////////////////////////////
 		if(attack & centerBitmap){
-			res+=bitCnt(attack & centerBitmap)*simdScore(400,0,0,0);
+			res+=(int)bitCnt(attack & centerBitmap)*simdScore{400,0,0,0};
 		}
 		if(attack & bigCenterBitmap){
-			res+=bitCnt(attack & bigCenterBitmap)*simdScore(100,0,0,0);
+			res+=(int)bitCnt(attack & bigCenterBitmap)*simdScore{100,0,0,0};
 		}
 
 		//todo alfiere buono cattivo
@@ -1051,7 +1052,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		}
 	}
 
-	simdScore traceRes=0;
+	simdScore traceRes=simdScore{0,0,0,0};
 	if(trace){
 
 		sync_cout <<std::setprecision(3)<< std::setw(21) << "Eval term " << "|     White    |     Black    |      Total     \n"
@@ -1092,7 +1093,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	// todo modificare valori material value & pst
 	// material + pst
 
-	simdScore res=simdScore(st.material[0],st.material[1],0,0);
+	simdScore res=simdScore{st.material[0],st.material[1],0,0};
 
 
 
@@ -1159,7 +1160,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		if(pieceCount[whiteBishops]==2 && SQUARE_COLOR[pieceList[whiteBishops][0]]==SQUARE_COLOR[pieceList[whiteBishops][1]]){
 		}
 		else{
-			res+=simdScore(5000,5500,0,0);
+			res+=simdScore{5000,5500,0,0};
 		}
 	}
 
@@ -1167,7 +1168,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		if(pieceCount[blackBishops]==2 && SQUARE_COLOR[pieceList[blackBishops][0]]==SQUARE_COLOR[pieceList[blackBishops][1]]){
 		}
 		else{
-			res-=simdScore(5000,5500,0,0);
+			res-=simdScore{5000,5500,0,0};
 		}
 	}
 	if(trace){
@@ -1194,7 +1195,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	simdScore pawnResult;
 	pawnEntry* probePawn= pawnHashTable.probe(getActualState().pawnKey);
 	if(probePawn!=nullptr){
-		pawnResult=simdScore(probePawn->res[0],probePawn->res[1],0,0);
+		pawnResult=simdScore{probePawn->res[0],probePawn->res[1],0,0};
 		weakPawns=probePawn->weakPawns;
 		passedPawns=probePawn->passedPawns;
 		attackedSquares[whitePawns]=probePawn->pawnAttacks[0];
@@ -1210,7 +1211,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	{
 
 
-		pawnResult=0;
+		pawnResult=simdScore{0,0,0,0};
 		bitMap pawns= bitBoard[whitePawns];
 
 		while(pawns){
@@ -1268,7 +1269,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		temp|=temp>>32;
 
 		holes[black]= weakSquares[black]&temp;
-		pawnResult-=(bitCnt(holes[white])-bitCnt(holes[black]))*simdScore(80,100,0,0);
+		pawnResult-=(bitCnt(holes[white])-bitCnt(holes[black]))*simdScore{80,100,0,0};
 
 		pawnHashTable.insert(st.pawnKey,pawnResult, weakPawns, passedPawns,attackedSquares[whitePawns],attackedSquares[blackPawns],weakSquares[white],weakSquares[black],holes[white],holes[black]);
 
@@ -1279,17 +1280,17 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	res+=pawnResult;
 
 	if(attackedSquares[whitePawns] & centerBitmap){
-		res+=bitCnt(attackedSquares[whitePawns] & centerBitmap)*simdScore(100,0,0,0);
+		res+=bitCnt(attackedSquares[whitePawns] & centerBitmap)*simdScore{100,0,0,0};
 	}
 	if(attackedSquares[whitePawns] & bigCenterBitmap){
-		res+=bitCnt(attackedSquares[whitePawns] & bigCenterBitmap)*simdScore(50,0,0,0);
+		res+=bitCnt(attackedSquares[whitePawns] & bigCenterBitmap)*simdScore{50,0,0,0};
 	}
 
 	if(attackedSquares[blackPawns] & centerBitmap){
-		res-=bitCnt(attackedSquares[blackPawns] & centerBitmap)*simdScore(100,0,0,0);
+		res-=bitCnt(attackedSquares[blackPawns] & centerBitmap)*simdScore{100,0,0,0};
 	}
 	if(attackedSquares[blackPawns] & bigCenterBitmap){
-		res-=bitCnt(attackedSquares[blackPawns] & bigCenterBitmap)*simdScore(50,0,0,0);
+		res-=bitCnt(attackedSquares[blackPawns] & bigCenterBitmap)*simdScore{50,0,0,0};
 	}
 
 	if(trace){
@@ -1392,7 +1393,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	// white passed pawns
 	bitMap pp=passedPawns&bitBoard[whitePawns];
 
-	wScore=0;
+	wScore=simdScore{0,0,0,0};
 	while(pp){
 		simdScore passedPawnsBonus;
 		tSquare ppSq=firstOne(pp);
@@ -1404,13 +1405,13 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		int r=relativeRank-1;
 		int rr= r*(r-1);
 
-		passedPawnsBonus=simdScore(600*rr,1100*(rr+r+1),0,0);
+		passedPawnsBonus=simdScore{600*rr,1100*(rr+r+1),0,0};
 
 		if(rr){
 			tSquare blockingSquare=ppSq+pawnPush(white);
 			// bonus for king proximity to blocking square
-			passedPawnsBonus+=simdScore(0,SQUARE_DISTANCE[blockingSquare][pieceList[blackKing][0]]*150*rr,0,0);
-			passedPawnsBonus-=simdScore(0,SQUARE_DISTANCE[blockingSquare][pieceList[whiteKing][0]]*120*rr,0,0);
+			passedPawnsBonus+=simdScore{0,SQUARE_DISTANCE[blockingSquare][pieceList[blackKing][0]]*150*rr,0,0};
+			passedPawnsBonus-=simdScore{0,SQUARE_DISTANCE[blockingSquare][pieceList[whiteKing][0]]*120*rr,0,0};
 
 			if(squares[blockingSquare]==empty){
 				bitMap forwardSquares=SQUARES_IN_FRONT_OF[0][ppSq];
@@ -1419,15 +1420,15 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 				bitMap unsafeSquares = forwardSquares & (attackedSquares[blackPieces] |bitBoard[blackPieces] );
 
 				if(unsafeSquares){
-					passedPawnsBonus-=simdScore(100*rr,100*rr,0,0);
+					passedPawnsBonus-=simdScore{100*rr,100*rr,0,0};
 					if(unsafeSquares & bitSet(blockingSquare)){
-							passedPawnsBonus-=simdScore(100*rr,100*rr,0,0);
+							passedPawnsBonus-=simdScore{100*rr,100*rr,0,0};
 					}
 				}
 				if(defendedSquares==forwardSquares){
-					passedPawnsBonus+=simdScore(100*rr,100*rr,0,0);
+					passedPawnsBonus+=simdScore{100*rr,100*rr,0,0};
 					if(defendedSquares & bitSet(blockingSquare)){
-						passedPawnsBonus+=simdScore(20*rr,20*rr,0,0);
+						passedPawnsBonus+=simdScore{20*rr,20*rr,0,0};
 					}
 				}
 			}
@@ -1451,7 +1452,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	// todo unsotppable passed pawn: ( more value to unstoppable passed pawn, less value or 0 for stobbable ones
 	pp=passedPawns&bitBoard[blackPawns];
 
-	bScore=0;
+	bScore=simdScore{0,0,0,0};
 	while(pp){
 		simdScore passedPawnsBonus;
 		tSquare ppSq=firstOne(pp);
@@ -1462,14 +1463,14 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		int r=relativeRank-1;
 		int rr= r*(r-1);
 
-		passedPawnsBonus=simdScore(600*rr,1100*(rr+r+1),0,0);
+		passedPawnsBonus=simdScore{600*rr,1100*(rr+r+1),0,0};
 
 		if(rr){
 			tSquare blockingSquare=ppSq+pawnPush(black);
 
 			// bonus for king proximity to blocking square
-			passedPawnsBonus+=simdScore(0,SQUARE_DISTANCE[blockingSquare][pieceList[whiteKing][0]]*150*rr,0,0);
-			passedPawnsBonus-=simdScore(0,SQUARE_DISTANCE[blockingSquare][pieceList[blackKing][0]]*120*rr,0,0);
+			passedPawnsBonus+=simdScore{0,SQUARE_DISTANCE[blockingSquare][pieceList[whiteKing][0]]*150*rr,0,0};
+			passedPawnsBonus-=simdScore{0,SQUARE_DISTANCE[blockingSquare][pieceList[blackKing][0]]*120*rr,0,0};
 
 			if(squares[blockingSquare]==empty){
 				bitMap forwardSquares=SQUARES_IN_FRONT_OF[1][ppSq];
@@ -1479,15 +1480,15 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 
 
 				if(unsafeSquares){
-					passedPawnsBonus-=simdScore(100*rr,100*rr,0,0);
+					passedPawnsBonus-=simdScore{100*rr,100*rr,0,0};
 					if(unsafeSquares & bitSet(blockingSquare)){
-							passedPawnsBonus-=simdScore(100*rr,100*rr,0,0);
+							passedPawnsBonus-=simdScore{100*rr,100*rr,0,0};
 					}
 				}
 				if(defendedSquares==forwardSquares){
-					passedPawnsBonus+=simdScore(100*rr,100*rr,0,0);
+					passedPawnsBonus+=simdScore{100*rr,100*rr,0,0};
 					if(defendedSquares & bitSet(blockingSquare)){
-						passedPawnsBonus+=simdScore(20*rr,20*rr,0,0);
+						passedPawnsBonus+=simdScore{20*rr,20*rr,0,0};
 					}
 				}
 			}
@@ -1545,11 +1546,11 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	spaceb &=~attackedSquares[whitePieces];
 
 	//displayBitmap(spaceb);
-	res+=(bitCnt(spacew)-bitCnt(spaceb))*simdScore(800,0,0,0);
+	res+=(bitCnt(spacew)-bitCnt(spaceb))*simdScore{800,0,0,0};
 
 	if(trace){
-		wScore=bitCnt(spacew)*simdScore(800,0,0,0);
-		bScore=bitCnt(spaceb)*simdScore(800,0,0,0);
+		wScore=bitCnt(spacew)*simdScore{800,0,0,0};
+		bScore=bitCnt(spaceb)*simdScore{800,0,0,0};
 		sync_cout << std::setw(20) << "space" << " |"
 				  << std::setw(6)  << (wScore[0])/10000.0 << " "
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
@@ -1571,8 +1572,8 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	//--------------------------------------
 	//	weak pieces
 	//--------------------------------------
-	wScore=0;
-	bScore=0;
+	wScore=simdScore{0,0,0,0};
+	bScore=simdScore{0,0,0,0};
 	bitMap pawnAttackedPieces=bitBoard[whitePieces] & attackedSquares[blackPawns];
 	while(pawnAttackedPieces){
 		tSquare attacked=firstOne(pawnAttackedPieces);
@@ -1586,7 +1587,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	bitMap weakPieces=bitBoard[whitePieces] & attackedSquares[blackPieces] &~attackedSquares[whitePawns];
 	bitMap undefendedMinors =  (bitBoard[whiteKnights] | bitBoard[whiteBishops])  & ~attackedSquares[whitePieces];
 	if (undefendedMinors){
-		wScore-=simdScore(956,254,0,0);
+		wScore-=simdScore{956,254,0,0};
 	}
 	while(weakPieces){
 		tSquare p=firstOne(weakPieces);
@@ -1615,7 +1616,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	weakPieces=bitBoard[blackPieces] & attackedSquares[whitePieces] &~attackedSquares[blackPawns];
 	undefendedMinors =  (bitBoard[blackKnights] | bitBoard[blackBishops])  & ~attackedSquares[blackPieces];
 	if (undefendedMinors){
-		bScore-=simdScore(956,254,0,0);
+		bScore-=simdScore{956,254,0,0};
 	}
 	while(weakPieces){
 		tSquare p=firstOne(weakPieces);
@@ -1650,9 +1651,11 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 	//--------------------------------------
 	//	king safety
 	//--------------------------------------
-	wScore=0;
-	bScore=0;
-	simdScore kingSafety[2]={0,0};
+	wScore=simdScore{0,0,0,0};
+	bScore=simdScore{0,0,0,0};
+	int lwScore =0;
+	int lbScore =0;
+	int kingSafety[2]={0,0};
 
 	tSquare ksq=pieceList[whiteKing][0];
 	bitMap pawnShield=kingShield[white]&bitBoard[whitePawns];
@@ -1676,7 +1679,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		&& !(attackedSquares[blackPieces] & (bitSet(E1)|bitSet(F1)|bitSet(G1) ))
 		&& !(bitBoard[occupiedSquares] & (bitSet(F1)|bitSet(G1)))
 		){
-		simdScore ks=0;
+		int ks=0;
 		bitMap localKingRing=Movegen::attackFromKing(G1);
 		bitMap localKingShield=localKingRing;
 		localKingRing|=Movegen::attackFromKing(G2);
@@ -1696,14 +1699,14 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 			ks-=(8-SQUARE_DISTANCE[p][G1])*kingStormBonus;
 			pawnStorm&= pawnStorm-1;
 		}
-		kingSafety[0]=max(ks,kingSafety[0]);
+		kingSafety[0]=std::max(ks,kingSafety[0]);
 	}
 
 	if((st.castleRights & wCastleOOO)
 		&& !(attackedSquares[blackPieces] & (bitSet(E1)|bitSet(D1)|bitSet(C1) ))
 		&& !(bitBoard[occupiedSquares] & (bitSet(D1)|bitSet(C1)|bitSet(B1)))
 		){
-		simdScore ks=0;
+		int ks=0;
 		bitMap localKingRing=Movegen::attackFromKing(C1);
 		bitMap localKingShield=localKingRing;
 		localKingRing|=Movegen::attackFromKing(C2);
@@ -1724,9 +1727,9 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 			ks-=(8-SQUARE_DISTANCE[p][C1])*kingStormBonus;
 			pawnStorm&= pawnStorm-1;
 		}
-		kingSafety[0]=max(ks,kingSafety[0]);
+		kingSafety[0]=std::max(ks,kingSafety[0]);
 	}
-	wScore=kingSafety[0];
+	lwScore=kingSafety[0];
 
 
 	ksq=pieceList[blackKing][0];
@@ -1750,7 +1753,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		&& !(attackedSquares[whitePieces] & (bitSet(E8)|bitSet(F8)|bitSet(G8) ))
 		&& !(bitBoard[occupiedSquares] & (bitSet(F8)|bitSet(G8)))
 		){
-		simdScore ks=0;
+		int ks=0;
 		bitMap localKingRing=Movegen::attackFromKing(G8);
 		bitMap localKingShield=localKingRing;
 		localKingRing|=Movegen::attackFromKing(G7);
@@ -1770,14 +1773,14 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 			ks-=(8-SQUARE_DISTANCE[p][G8])*kingStormBonus;
 			pawnStorm&= pawnStorm-1;
 		}
-		kingSafety[1]=max(ks,kingSafety[1]);
+		kingSafety[1]=std::max(ks,kingSafety[1]);
 	}
 
 	if((st.castleRights & bCastleOOO)
 		&& !(attackedSquares[whitePieces] & (bitSet(E8)|bitSet(D8)|bitSet(C8) ))
 		&& !(bitBoard[occupiedSquares] & (bitSet(D8)|bitSet(C8)|bitSet(B8)))
 		){
-		simdScore ks=0;
+		int ks=0;
 		bitMap localKingRing=Movegen::attackFromKing(C8);
 		bitMap localKingShield=localKingRing;
 		localKingRing|=Movegen::attackFromKing(C7);
@@ -1797,9 +1800,9 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 			ks-=(8-SQUARE_DISTANCE[p][C8])*kingStormBonus;
 			pawnStorm&= pawnStorm-1;
 		}
-		kingSafety[1]=max(ks,kingSafety[1]);
+		kingSafety[1]=std::max(ks,kingSafety[1]);
 	}
-	bScore=kingSafety[1];
+	lbScore=kingSafety[1];
 
 	res+=kingSafety[0]-kingSafety[1];
 
@@ -1821,7 +1824,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		signed int attackUnits =  std::min((unsigned int)25, (kingAttackersCount[white] * kingAttackersWeight[white]) / 2)
 		                     + 3 * (kingAdjacentZoneAttacksCount[white] + bitCnt(undefendedSquares))
 		                     + KingExposed[63-pieceList[blackKing][0]]
-		                     - kingSafety[0][0] / 500;
+		                     - kingSafety[0] / 500;
 
 
 		// safe contact queen check
@@ -1865,9 +1868,10 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		}
 		attackUnits = std::min(99, std::max(0, attackUnits));
 		attackUnits*=attackUnits;
-		res+=simdScore(attackUnits*3,attackUnits/5,0,0);
+		res+=simdScore{attackUnits*3,attackUnits/5,0,0};
 		if(trace){
-			wScore +=simdScore(attackUnits*3,attackUnits/5,0,0);
+			wScore +=simdScore{attackUnits*3,attackUnits/5,0,0};
+			wScore += simdScore{ lwScore,0,0,0};
 		}
 
 	}
@@ -1889,7 +1893,7 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 		signed int attackUnits =  std::min((unsigned int)25, (kingAttackersCount[black] * kingAttackersWeight[black]) / 2)
 							 + 3 * (kingAdjacentZoneAttacksCount[black] + bitCnt(undefendedSquares))
 							 + KingExposed[pieceList[whiteKing][0]]
-							 - kingSafety[1][0] / 500;
+							 - kingSafety[1] / 500;
 
 		// safe contact queen check
 		bitMap safeContactSquare=undefendedSquares & attackedSquares[blackQueens];
@@ -1934,9 +1938,10 @@ Score Position::eval(pawnTable& pawnHashTable, evalTable& evalTable) const {
 
 		attackUnits = std::min(99, std::max(0, attackUnits));
 		attackUnits*=attackUnits;
-		res-=simdScore(attackUnits*3,attackUnits/5,0,0);
+		res-=simdScore{attackUnits*3,attackUnits/5,0,0};
 		if(trace){
-			bScore +=simdScore(attackUnits*3,attackUnits/5,0,0);
+			bScore +=simdScore{ attackUnits*3,attackUnits/5,0,0};
+			bScore += simdScore{ lbScore,0,0,0};
 		}
 
 

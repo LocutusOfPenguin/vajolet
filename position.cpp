@@ -158,8 +158,8 @@ void Position::setupFromFen(const std::string& fenStr){
 
 
 
-	calcNonPawnMaterialValue(x.nonPawnMaterial);
-	calcMaterialValue().store_partial(2,x.material);
+	x.nonPawnMaterial=calcNonPawnMaterialValue();
+	x.material=calcMaterialValue();
 
 	x.key=calcKey();
 	x.pawnKey=calcPawnKey();
@@ -182,62 +182,62 @@ void Position::initPstValues(void){
 		for(tSquare s=(tSquare)0;s<squareNumber;s++){
 			assert(piece<lastBitboard);
 			assert(s<squareNumber);
-			nonPawnValue[piece]=0;
-			pstValue[piece][s]=0;
+			nonPawnValue[piece]=simdScore{0,0,0,0};
+			pstValue[piece][s]=simdScore{0,0,0,0};
 			int rank=RANKS[s];
 			int file=FILES[s];
 
 			if(piece >occupiedSquares && piece <whitePieces ){
 
 				if(piece == Pawns){
-					pstValue[piece][s]=0;
+					pstValue[piece][s]=simdScore{0,0,0,0};
 					if(s== D5 || s==E5 || s== D3 || s==E3){
-						pstValue[piece][s].insert(0,935);
+						pstValue[piece][s][0]=935;
 					}
 					if(s== D4 || s==E4){
-						pstValue[piece][s].insert(0,1750);
+						pstValue[piece][s][0]=1750;
 					}
-					pstValue[piece][s].insert(1,10*(rank-2));
-					pstValue[piece][s]-=std::abs(file-3.5);
+					pstValue[piece][s][1]=10*(rank-2);
+					pstValue[piece][s]-=(int)(std::abs(file-3.5));
 				}
 				if(piece== Knights){
-					pstValue[piece][s]=simdScore(
+					pstValue[piece][s]=simdScore{
 							-(std::abs(file-3.5)+std::abs(rank-3.5))*95,
 							-(std::abs(file-3.5)+std::abs(rank-3.5))*32,
-							0,0);
+							0,0};
 				}
 				if(piece== Bishops){
-					pstValue[piece][s]=simdScore(
+					pstValue[piece][s]=simdScore{
 							-(std::abs(file-3.5)+std::abs(rank-3.5))*32,
 							-(std::abs(file-3.5)+std::abs(rank-3.5))*23,
-							0,0);
+							0,0};
 				}
 				if(piece==Rooks){
-					pstValue[piece][s]=simdScore(
+					pstValue[piece][s]=simdScore{
 						-std::abs(file-3.5)*28,
 						0,
-						0,0);
+						0,0};
 				}
 				if(piece== Queens){
-					pstValue[piece][s]=simdScore(
+					pstValue[piece][s]=simdScore{
 						0,
 						-(std::abs(file-3.5)+std::abs(rank-3.5))*42,
-						0,0);
+						0,0};
 				}
 				if(piece== King){
-					pstValue[piece][s]=simdScore(
+					pstValue[piece][s]=simdScore{
 						std::abs(file-3.5)*110+(1-rank)*150,
 						-(std::abs(file-3.5)+std::abs(rank-3.5))*127,
 
-						0,0);
+						0,0};
 				}
 				if(!isKing((bitboardIndex)piece)){
 					pstValue[piece][s]+=pieceValue[piece];
 				}
 
 				if(!isPawn((bitboardIndex)piece) && !isKing((bitboardIndex)piece)){
-					nonPawnValue[piece].insert(0,pieceValue[piece][0]);
-					nonPawnValue[piece].insert(1,pieceValue[piece][1]);
+					nonPawnValue[piece][0]=pieceValue[piece][0];
+					nonPawnValue[piece][1]=pieceValue[piece][1];
 				}
 
 			}
@@ -247,12 +247,12 @@ void Position::initPstValues(void){
 				pstValue[piece][s]=-pstValue[piece-separationBitmap][BOARDINDEX[f][r]];
 
 				if(!isPawn((bitboardIndex)piece) && !isKing((bitboardIndex)piece)){
-					nonPawnValue[piece].insert(2,-pieceValue[piece][0]);
-					nonPawnValue[piece].insert(3,-pieceValue[piece][1]);
+					nonPawnValue[piece][2]=-pieceValue[piece][0];
+					nonPawnValue[piece][3]=-pieceValue[piece][1];
 				}
 			}
 			else{
-				pstValue[piece][s]=0;
+				pstValue[piece][s]=simdScore{0,0,0,0};
 			}
 		}
 	}
@@ -270,14 +270,14 @@ void Position::initPstValues(void){
 */
 void Position::initScoreValues(void){
 	for(auto &val :pieceValue){
-		val=0;
+		val=simdScore{0,0,0,0};
 	}
-	pieceValue[whitePawns]=simdScore(7800,10000,0,0);
-	pieceValue[whiteKnights]=simdScore(32000,32000,0,0);
-	pieceValue[whiteBishops]=simdScore(32500,32500,0,0);
-	pieceValue[whiteRooks]=simdScore(53000,53000,0,0);
-	pieceValue[whiteQueens]=simdScore(99000,99000,0,0);
-	pieceValue[whiteKing]=simdScore(3000000,3000000,0,0);
+	pieceValue[whitePawns]=simdScore{7800,10000,0,0};
+	pieceValue[whiteKnights]=simdScore{32000,32000,0,0};
+	pieceValue[whiteBishops]=simdScore{32500,32500,0,0};
+	pieceValue[whiteRooks]=simdScore{53000,53000,0,0};
+	pieceValue[whiteQueens]=simdScore{99000,99000,0,0};
+	pieceValue[whiteKing]=simdScore{3000000,3000000,0,0};
 
 	pieceValue[blackPawns]=-pieceValue[whitePawns];
 	pieceValue[blackKnights]=-pieceValue[whiteKnights];
@@ -578,7 +578,7 @@ U64 Position::calcMaterialKey(void) const {
 	\date 27/10/2013
 */
 simdScore Position::calcMaterialValue(void) const{
-	simdScore score=0;
+	simdScore score=simdScore{0,0,0,0};
 	for (tSquare s=(tSquare)0;s<squareNumber;s++){
 		bitboardIndex val=squares[s];
 		score+=pstValue[val][s];
@@ -591,25 +591,18 @@ simdScore Position::calcMaterialValue(void) const{
 	\version 1.0
 	\date 27/10/2013
 */
-void Position::calcNonPawnMaterialValue(Score* s){
+simdScore Position::calcNonPawnMaterialValue(void) const{
 
-	simdScore t[2];
-	t[0]=0;
-	t[1]=0;
+	simdScore t;
+	t=simdScore{0,0,0,0};
 
 	for (tSquare n=(tSquare)0;n<squareNumber;n++){
 		bitboardIndex val=squares[n];
 		if(!isPawn(val) && !isKing(val)){
-			if(val>separationBitmap){
-				t[1]-=pieceValue[val];
-			}
-			else{
-				t[0]+=pieceValue[val];
-			}
+			t+=nonPawnValue[val];
 		}
 	}
-	t[0].store_partial(2,s);
-	t[1].store_partial(2,&s[2]);
+	return t;
 
 }
 /*! \brief do a null move
@@ -684,11 +677,6 @@ void Position::doMove(Move & m){
 	assert(capture!=whitePieces);
 	assert(capture!=blackPieces);
 
-	simdScore mv;
-	mv.load_partial(2,x.material);
-	simdScore npm;
-	npm.load(x.nonPawnMaterial);
-
 	// change side
 	x.key^=HashKeys::side;
 	x.ply++;
@@ -717,7 +705,7 @@ void Position::doMove(Move & m){
 		tSquare rTo = kingSide? to+ovest: to+est;
 		assert(rTo<squareNumber);
 		movePiece(rook,rFrom,rTo);
-		mv+=pstValue[rook][rTo]-pstValue[rook][rFrom];
+		x.material+=pstValue[rook][rTo]-pstValue[rook][rFrom];
 
 		//npm+=nonPawnValue[rook][rTo]-nonPawnValue[rook][rFrom];
 
@@ -737,13 +725,13 @@ void Position::doMove(Move & m){
 			assert(captureSquare<squareNumber);
 			x.pawnKey ^= HashKeys::keys[captureSquare][capture];
 		}
-		npm-=nonPawnValue[capture]/*[captureSquare]*/;
+		x.nonPawnMaterial-=nonPawnValue[capture]/*[captureSquare]*/;
 
 
 		// remove piece
 		removePiece(capture,captureSquare);
 		// update material
-		mv-=pstValue[capture][captureSquare];
+		x.material-=pstValue[capture][captureSquare];
 
 		// update keys
 		x.key ^= HashKeys::keys[captureSquare][capture];
@@ -758,7 +746,7 @@ void Position::doMove(Move & m){
 	x.key^= HashKeys::keys[from][piece]^HashKeys::keys[to][piece];
 	movePiece(piece,from,to);
 
-	mv+=pstValue[piece][to]-pstValue[piece][from];
+	x.material+=pstValue[piece][to]-pstValue[piece][from];
 	//npm+=nonPawnValue[piece][to]-nonPawnValue[piece][from];
 	// update non pawn material
 
@@ -793,8 +781,8 @@ void Position::doMove(Move & m){
 			removePiece(piece,to);
 			putPiece(promotedPiece,to);
 
-			mv+=pstValue[promotedPiece][to]-pstValue[piece][to];
-			npm+=nonPawnValue[promotedPiece]/*[to]*/;
+			x.material+=pstValue[promotedPiece][to]-pstValue[piece][to];
+			x.nonPawnMaterial+=nonPawnValue[promotedPiece]/*[to]*/;
 
 
 			x.key ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
@@ -808,9 +796,6 @@ void Position::doMove(Move & m){
 	__builtin_prefetch (TT.findCluster(x.key));
 #endif
 
-
-	mv.store_partial(2,x.material);
-	npm.store(x.nonPawnMaterial);
 
 	x.capturedPiece=capture;
 
@@ -1064,8 +1049,8 @@ bool Position::checkPosConsistency(int nn){
 		while(1){}
 		return false;
 	}
-	Score score[4];
-	calcNonPawnMaterialValue(score);
+	simdScore score;
+	score =calcNonPawnMaterialValue();
 	if(score[0]!= x.nonPawnMaterial[0] ||
 		score[1]!= x.nonPawnMaterial[1] ||
 		score[2]!= x.nonPawnMaterial[2] ||
