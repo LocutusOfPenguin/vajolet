@@ -19,6 +19,7 @@
 #include <ctime>
 #include <chrono>
 #include <vector>
+#include <thread>
 #include <algorithm>    // std::copy
 #include <iterator>     // std::back_inserter
 #include "search.h"
@@ -29,6 +30,8 @@
 #include "history.h"
 #include "book.h"
 #include "thread.h"
+
+template Score search::alphaBeta<search::nodeType::ROOT_NODE>(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV,bool verbose=false);
 
 inline signed int razorMargin(unsigned int depth){
 	return 20000+depth*78;
@@ -74,17 +77,22 @@ Score search::futilityMargin[7]={0,10000,20000,30000,40000,50000,60000};
 Score search::FutilityMoveCounts[11]={5,10,17,26,37,50,66,85,105,130,151};
 Score search::PVreduction[32*ONE_PLY][64];
 Score search::nonPVreduction[32*ONE_PLY][64];
+unsigned int search::threadNumber=1;
 unsigned int search::multiPVLines=1;
 unsigned int search::limitStrength=0;
 unsigned int search::eloStrenght=3000;
 bool search::useOwnBook=true;
 bool search::bestMoveBook=false;
 bool search::showCurrentLine=false;
+std::vector<rootMove> search::rootMoves;
+volatile tSignal search::signals;
+std::vector<Position> search::posVect;
 
 void search::startThinking(Position & p,searchLimits & l){
+	posVect.clear();
 	signals.stop=false;
 	TT.newSearch();
-	History::instance().clear();
+	history.clear();
 
 	limits=l;
 	rootMoves.clear();
@@ -94,7 +102,7 @@ void search::startThinking(Position & p,searchLimits & l){
 	if(limits.searchMoves.size()==0){
 		Move m;
 		m=0;
-		Movegen mg(p,m);
+		Movegen mg(p,history,m);
 		while ((m=mg.getNextMove()).packed){
 			rootMove rm;
 			rm.previousScore=-SCORE_INFINITE;
@@ -140,7 +148,7 @@ void search::startThinking(Position & p,searchLimits & l){
 	Move m,oldBestMove;
 	m=0;
 	oldBestMove=0;
-	Movegen mg(p,m);
+	Movegen mg(p,history,m);
 
 	Move lastLegalMove;
 	unsigned int legalMoves=0;
@@ -247,7 +255,12 @@ void search::startThinking(Position & p,searchLimits & l){
 				newPV.clear();
 				p.cleanStateInfo();
 				//sync_cout<<"search line "<<PVIdx<<sync_endl;
-				res=alphaBeta<search::nodeType::ROOT_NODE>(0,p,(depth-reduction)*ONE_PLY,alpha,beta,newPV);
+
+				// start all he thread
+
+				//launchHelperSearch(p,depth-reduction,alpha,beta);
+				res=alphaBeta<search::nodeType::ROOT_NODE>(0,p,(depth-reduction)*ONE_PLY,alpha,beta,newPV,true);
+				//stopHelperSearch();
 
 				/*sync_cout<<"FINISHED SEARCH"<<sync_endl;
 				sync_cout<<"res="<<res<<sync_endl;
@@ -398,7 +411,7 @@ void search::startThinking(Position & p,searchLimits & l){
 
 }
 
-template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Position & pos,int depth,Score alpha,Score beta,std::vector<Move>& PV){
+template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Position & pos,int depth,Score alpha,Score beta,std::vector<Move>& PV,bool verbose){
 
 #ifdef PRINT_STATISTICS
 	Score originalAlpha=alpha;
@@ -416,8 +429,9 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	Move threatMove;
 	threatMove=0;
 
-	if( showLine && depth <=ONE_PLY){
+	if(verbose && showLine && depth <=ONE_PLY){
 		showLine=false;
+
 		sync_cout<<"info currline";
 		for (int i =1; i<= pos.getStateIndex()/2;i++){ // show only half of
 			std::cout<<" "<<pos.displayUci(pos.getState(i).currentMove);
@@ -727,7 +741,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		Score s;
 		Score rBeta=beta+8000;
 		int rDepth=depth -ONE_PLY- 3*ONE_PLY;
-		Movegen mg(pos,ttMove);
+		Movegen mg(pos,history,ttMove);
 		mg.setupProbCutSearch(actualState.capturedPiece);
 
 		Move m;
@@ -778,7 +792,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	Move bestMove;
 	bestMove=0;
 	Move m;
-	Movegen mg(pos,ttMove);
+	Movegen mg(pos,history,ttMove);
 	unsigned int moveNumber=0;
 	unsigned int quietMoveCount =0;
 	Move quietMoveList[64];
@@ -894,7 +908,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 		}
 
-		if(type==ROOT_NODE){
+		if(type==ROOT_NODE && verbose){
 			unsigned long elapsed=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count()-startTime;
 			if(
 #ifndef DISABLE_TIME_DIPENDENT_OUTPUT
@@ -1122,12 +1136,12 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		// todo controllare se fare +=depth^2 e -=(depth^2)/(numero di mosse quiet) per avere media nulla
 		// todo controllare se usare depth o qualche depth scalata
 		Score bonus = Score(depth * depth);
-		History::instance().update(pos.squares[bestMove.from],(tSquare) bestMove.to, bonus);
+		history.update(pos.squares[bestMove.from],(tSquare) bestMove.to, bonus);
 		if(quietMoveCount>1){
 			for (int i = 0; i < quietMoveCount - 1; i++){
 				Move m;
 				m= quietMoveList[i];
-				History::instance().update(pos.squares[m.from],(tSquare) m.to, -bonus);
+				history.update(pos.squares[m.from],(tSquare) m.to, -bonus);
 			}
 		}
 	}
@@ -1243,7 +1257,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 	ttEntry* tte = TT.probe(posKey);
 	Move ttMove;
 	ttMove=tte ? tte->getPackedMove() : 0;
-	Movegen mg(pos,ttMove);
+	Movegen mg(pos,history,ttMove);
 	int TTdepth=mg.setupQuiescentSearch(actualState.checkers,depth);
 	Score ttValue = tte ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 

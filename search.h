@@ -21,7 +21,9 @@
 #include "position.h"
 #include "move.h"
 #include "eval.h"
+#include "history.h"
 #include <vector>
+#include <thread>
 #include <list>
 #include <cmath>
 
@@ -29,6 +31,7 @@ class searchLimits{
 public:
 	volatile bool ponder,infinite;
 	unsigned int wtime,btime,winc,binc,movesToGo,depth,nodes,mate,moveTime;
+
 
 	std::list<Move> searchMoves;
 	searchLimits(){
@@ -70,6 +73,9 @@ inline Score matedIn(int ply) {
   return SCORE_MATED + ply;
 }
 
+typedef struct sSignal{
+	volatile bool stop=false;
+}tSignal;
 
 class search{
 
@@ -88,7 +94,9 @@ class search{
 	void printAllPV(Position & p,unsigned int count);
 	void printPV(Score res,unsigned int depth,unsigned int seldepth,Score alpha, Score beta, Position & p, unsigned long time,unsigned int count,std::vector<Move>& PV,unsigned long long nods);
 public:
-	std::vector<rootMove> rootMoves;
+	History history;
+	static std::vector<rootMove> rootMoves;
+	static unsigned int threadNumber;
 	static unsigned int multiPVLines;
 	static unsigned int limitStrength;
 	static unsigned int eloStrenght;
@@ -106,9 +114,8 @@ public:
 				nonPVreduction[d][mc]=(Score)(nonPVRed >= 1.0 ? floor(nonPVRed * int(ONE_PLY)) : 0);
 			}
 	};
-	volatile struct sSignal{
-		volatile bool stop=false;
-	}signals;
+
+	volatile static tSignal signals;
 
 	typedef enum eNodeType{
 		ROOT_NODE,
@@ -120,12 +127,44 @@ public:
 	unsigned long long getVisitedNodes(){
 		return visitedNodes;
 	}
+	static std::vector<Position> posVect;
 private:
-	template<nodeType type>Score alphaBeta(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV);
+	template<nodeType type>Score alphaBeta(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV,bool verbose=false);
 	template<nodeType type>Score qsearch(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV);
 	unsigned long long visitedNodes;
 	unsigned int selDepth;
-	bool stop;
+
+
+	 void threadSearch(Position * pos,int depth,Score alpha, Score beta){
+		std::vector<Move> newPV;
+		alphaBeta<search::nodeType::ROOT_NODE>(0,*pos,(depth)*ONE_PLY,alpha,beta,newPV);
+	};
+	/*void launchHelperSearch(Position & pos,unsigned int depth, Score alpha, Score beta){
+		for(unsigned int i=0;i<threadNumber-1;i++){
+			posVect[i].clear();
+			posVect[i].positionCopyFrom(pos);
+			Position * p=&posVect[i];
+
+			threadVect.push_back(std::thread(&search::threadSearch,this ,p ,depth,alpha ,beta ));
+
+		}
+	};
+
+	void stopHelperSearch(){
+		for(unsigned int i=0;i<threadNumber-1;i++){
+			threadVect[i].join();
+			//posVect[i]->clear();
+			//free(posVect[i]);
+			//posVect.pop_back();
+
+		}
+		threadVect.clear();
+
+	};
+*/
+
 };
+
+
 
 #endif /* SEARCH_H_ */

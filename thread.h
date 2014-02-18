@@ -63,6 +63,7 @@ class my_thread{
 	static void timerThread();
 	static void searchThread();
 public :
+
 	unsigned long long getVisitedNodes(){
 		return src.getVisitedNodes();
 	}

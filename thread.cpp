@@ -15,6 +15,7 @@
     along with Vajolet.  If not, see <http://www.gnu.org/licenses/>
 */
 
+#include <vector>
 #include "thread.h"
 #include "io.h"
 #include "search.h"
@@ -141,16 +142,19 @@ void my_thread::timerThread() {
 
 void my_thread::searchThread() {
 
+	Position p;
 	while (!quit)
 	{
 		std::mutex mutex;
 		std::unique_lock<std::mutex> lk(mutex);
 		searchCond.wait(lk,[&]{return startThink||quit;});
 		if(!quit){
-			timeManagerInit(*pos, limits,timeMan);
+
+			p.positionCopyFrom(*pos);
+			timeManagerInit(p, limits,timeMan);
 			startTime=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
 			timerCond.notify_one();
-			src.startThinking(*pos,limits);
+			src.startThinking(p,limits);
 			//sync_cout<<"startThink=false"<<sync_endl;
 			startThink=false;
 			//sync_cout<<startThink<<sync_endl;
@@ -175,6 +179,7 @@ void my_thread::quitThreads(){
 	timerCond.notify_one();
 	timer.join();
 	searcher.join();
+
 
 }
 

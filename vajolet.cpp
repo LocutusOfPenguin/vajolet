@@ -66,9 +66,12 @@ int main()
 	Movegen::initMovegenConstant();
 	search::initLMRreduction();
 	TT.setSize(1);
-	History::instance().clear();
 	initMaterialKeys();
 	initMobilityBonus();
+
+	for(int i=0;i<MAX_THREADS;i++){
+		search::posVect.push_back(Position());
+	}
 
 
 

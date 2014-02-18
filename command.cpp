@@ -66,6 +66,7 @@ void static printUciInfo(void){
 	std::cout<<"option name UCI_ShowCurrLine type check default false"<<sync_endl;
 	std::cout<<"option name UCI_LimitStrength type check default false"<<sync_endl;
 	std::cout<<"option name UCI_Elo type spin default 3000 min 1000 max 3000"<<sync_endl;
+	std::cout<<"option name Threads type spin default 1 min 1 max "<<MAX_THREADS <<sync_endl;
 	std::cout<<"uciok"<<sync_endl;
 }
 
@@ -80,7 +81,8 @@ Move moveFromUci(Position& pos, std::string& str) {
 	// idea from stockfish, we generate all the legal moves and return the legal moves with the same UCI string
 	Move m;
 	m=0;
-	Movegen mg(pos,m);
+	History h;
+	Movegen mg(pos,h,m);
 
 	while( (m=mg.getNextMove()).packed){
 		if(str==pos.displayUci(m)){
@@ -224,9 +226,16 @@ void setoption(std::istringstream& is) {
 		}
 	}
 	else if(name =="UCI_Elo"){
-			int i=stoi(value);
-			search::eloStrenght=i<3000?(i>1000?i:1000):3000;
+		int i=stoi(value);
+		search::eloStrenght=i<3000?(i>1000?i:1000):3000;
+	}
+	else if(name =="Threads"){
+		int th=stoi(value);
+		if(th>MAX_THREADS){
+			th=MAX_THREADS;
 		}
+		search::threadNumber=stoi(value);
+	}
 	else{
 		sync_cout << "No such option: " << name << sync_endl;
 	}

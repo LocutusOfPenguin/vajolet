@@ -309,6 +309,7 @@ void Position::clear() {
 			pieceList[i][n] = square0;
 		}
 	}
+	stateInfo.clear();
 	stateIndex=0;
 	actualState=nullptr;
 	//stateInfo.clear();
@@ -321,7 +322,7 @@ void Position::clear() {
 	\date 22/10/2013
 */
 void Position::display()const {
-	displayFen();
+	sync_cout<<displayFen()<<sync_endl;
 
 	int rank, file;
 	state& st =getActualState();
@@ -373,9 +374,9 @@ void Position::display()const {
 	\version 1.0
 	\date 22/10/2013
 */
-void Position::displayFen() const {
+std::string  Position::displayFen() const {
 
-	sync_cout;
+	std::string s;
 
 	int file,rank;
 	int emptyFiles=0;
@@ -387,54 +388,57 @@ void Position::displayFen() const {
 		{
 			if(squares[BOARDINDEX[file][rank]]!=0){
 				if(emptyFiles!=0){
-					std::cout<<emptyFiles;
+					s+=std::to_string(emptyFiles);
 				}
 				emptyFiles=0;
-				std::cout << PIECE_NAMES_FEN[squares[BOARDINDEX[file][rank]]];
+				s+=PIECE_NAMES_FEN[squares[BOARDINDEX[file][rank]]];
 			}else{
 				emptyFiles++;
 			}
 		}
 		if(emptyFiles!=0){
-			std::cout<<emptyFiles;
+			s+=std::to_string(emptyFiles);
 		}
 		if(rank!=0){
-			std::cout<<'/';
+			s+='/';
 		}
 	}
-	std::cout<<' ';
+	s+=' ';
 	if(st.nextMove){
-		std::cout<<'b';
+		s+='b';
 	}else{
-		std::cout<<'w';
+		s+='w';
 	}
-	std::cout<<' ';
+	s+=' ';
 
 	if(st.castleRights&wCastleOO){
-		std::cout<<"K";
+		s+="K";
 	}
 	if(st.castleRights&wCastleOOO){
-		std::cout<<"Q";
+		s+="Q";
 	}
 	if(st.castleRights&bCastleOO){
-		std::cout<<"k";
+		s+="k";
 	}
 	if(st.castleRights&bCastleOOO){
-		std::cout<<"q";
+		s+="q";
 	}
 	if(st.castleRights==0){
-		std::cout<<"-";
+		s+="-";
 	}
-	std::cout<<' ';
+	s+=' ';
 	if(st.epSquare!=squareNone){
-		std::cout<<char('a'+FILES[st.epSquare]);
-		std::cout<<char('1'+RANKS[st.epSquare]);
+		s+=char('a'+FILES[st.epSquare]);
+		s+=char('1'+RANKS[st.epSquare]);
 	}else{
-		std::cout<<'-';
+		s+='-';
 	}
-	std::cout<<' ';
-	std::cout<<st.fiftyMoveCnt;
-	std::cout<<" "<<1 + (st.ply - int(st.nextMove == blackTurn)) / 2<<sync_endl;
+	s+=' ';
+	s+=std::to_string(st.fiftyMoveCnt);
+	s+=" "+std::to_string(1 + (st.ply - int(st.nextMove == blackTurn)) / 2);
+
+
+	return s;
 }
 
 
@@ -1107,7 +1111,8 @@ unsigned long long Position::perft(unsigned int depth){
 	unsigned long long tot = 0;
 	Move m;
 	m=0;
-	Movegen mg(*this,m);
+	History h;
+	Movegen mg(*this,h,m);
 #ifdef FAST_PERFT
 	if(depth==1){
 		mg.generateMoves<Movegen::allMg>();
@@ -1133,7 +1138,8 @@ unsigned long long Position::divide(unsigned int depth){
 
 	Move m;
 	m=0;
-	Movegen mg(*this,m);
+	History h;
+	Movegen mg(*this,h,m);
 	unsigned long long tot = 0;
 	unsigned int mn=0;
 	while ((m=mg.getNextMove()).packed) {
@@ -1327,7 +1333,8 @@ bool Position::isDraw() const {
 		}
 		Move m;
 		m=0;
-		Movegen mg(*this,m);
+		History h;
+		Movegen mg(*this,h,m);
 		mg.generateMoves<Movegen::genType::allMg>();
 		if(mg.getGeneratedMoveNumber()){
 			return true;
