@@ -33,6 +33,7 @@
 simdScore Position::pieceValue[lastBitboard];
 simdScore Position::pstValue[lastBitboard][squareNumber];
 simdScore Position::nonPawnValue[lastBitboard];
+char Position::PIECE_NAMES_FEN[lastBitboard]={' ','K','Q','R','B','N','P',' ',' ','k','q','r','b','n','p',' '};
 int Position::castleRightsMask[squareNumber];
 
 /*! \brief setup a position from a fen string
@@ -651,8 +652,7 @@ void Position::doNullMove(void){
 
 	std::swap(Us,Them);
 
-	assert(Us==getActualState().Us);
-	assert(Them==getActualState().Them);
+
 
 	calcCheckingSquares();
 	assert(pieceList[(bitboardIndex)(blackKing-x.nextMove)][0]!=squareNone);
@@ -672,6 +672,7 @@ void Position::doNullMove(void){
 	\date 27/10/2013
 */
 void Position::doMove(Move & m){
+	//sync_cout<<"do move "<<displayUci(m)<<sync_endl;
 	assert(m.packed);
 	state n=getActualState();
 	bool moveIsCheck=moveGivesCheck(m);
@@ -832,11 +833,7 @@ void Position::doMove(Move & m){
 	//x.Them=&bitBoard[(blackTurn-x.nextMove)];
 
 	std::swap(Us,Them);
-	assert(x.Us);
-	assert(x.Them);
 
-	assert(Us==getActualState().Us);
-	assert(Them==getActualState().Them);
 
 	x.checkers=0;
 	if(moveIsCheck){
@@ -882,6 +879,7 @@ void Position::doMove(Move & m){
 */
 void Position::undoMove(Move & m){
 
+	//sync_cout<<"undo move"<<sync_endl;
 	assert(m.packed);
 	state x=getActualState();
 
@@ -929,8 +927,7 @@ void Position::undoMove(Move & m){
 	removeState();
 
 	std::swap(Us,Them);
-	assert(Us==getActualState().Us);
-	assert(Them==getActualState().Them);
+
 
 #ifdef	ENABLE_CHECK_CONSISTENCY
 	checkPosConsistency(0);

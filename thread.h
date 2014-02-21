@@ -43,11 +43,12 @@ typedef struct timeManagement{
 class my_thread{
 
 	my_thread(){
+
 		initThreads();
+		setNumThread(1);
 	};
 
 	static my_thread * pInstance;
-
 
 	volatile static bool quit;
 	volatile static bool startThink;
@@ -56,8 +57,8 @@ class my_thread{
 	std::mutex searchMutex;
 	std::condition_variable searchCond;
 	std::condition_variable timerCond;
-	Position *pos;
-	search src;
+
+
 	searchLimits limits;
 
 	static unsigned long startTime;
@@ -68,7 +69,20 @@ class my_thread{
 	void timerThread();
 	void searchThread();
 public :
+	search src;
+	search * helperSearchers;
+	std::vector<std::thread> threadHelpers;
 
+	unsigned int threadNumber;
+
+	void setNumThread(int n){
+		delete[] helperSearchers;
+		threadNumber=n;
+		if(n>1){
+
+			helperSearchers = new search[n];
+		}
+	}
 	static std::mutex  _mutex;
 
 	static my_thread* getInstance()
@@ -93,9 +107,14 @@ public :
 	~my_thread(){
 		quitThreads();
 	}
-	void startTinking(Position * p,searchLimits& l){
+	void startTinking(searchLimits& l){
 
 		src.signals.stop=true;
+		if(threadNumber>1){
+			for(unsigned int i=0;i<threadNumber-1;i++){
+				helperSearchers[i].signals.stop=true;
+			}
+		}
 		lastHasfullMessage=0;
 
 
@@ -108,7 +127,6 @@ public :
 		if(!startThink){
 			std::lock_guard<std::mutex> lk(searchMutex);
 			limits=l;
-			pos=p;
 			startThink=true;
 			searchCond.notify_one();
 
@@ -119,6 +137,11 @@ public :
 	void stopThinking(){
 		//sync_cout<<"received stop"<<sync_endl;
 		src.signals.stop=true;
+		if(threadNumber>1){
+			for(unsigned int i=0;i<threadNumber-1;i++){
+				helperSearchers[i].signals.stop=true;
+			}
+		}
 	}
 
 	void ponderHit(){

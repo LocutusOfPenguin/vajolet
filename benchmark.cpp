@@ -59,12 +59,13 @@ void benchmark(void) {
 	unsigned long elapsed = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
 	for (unsigned int i = 0; i < positions.size(); i++)
 	{
-		 Position pos;
+
 		 search src;
-		 pos.setupFromFen(positions[i]);
+		 src.pos.setupFromFen(positions[i]);
+
 
 		 sync_cout << "\nPosition: " << i + 1 << '/' << positions.size() << sync_endl;
-		 src.startThinking(pos,limits);
+		 src.startThinking(limits);
 		 nodes+=src.getVisitedNodes();
 	}
 

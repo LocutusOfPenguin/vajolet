@@ -23,6 +23,7 @@
 #include "history.h"
 #include "eval.h"
 #include <vector>
+#include <thread>
 #include <list>
 #include <cmath>
 
@@ -74,6 +75,7 @@ inline Score matedIn(int ply) {
 
 class search{
 
+
 	History history;
 	static Score futility[5];
 	static Score futilityMargin[7];
@@ -87,9 +89,10 @@ class search{
 	searchLimits limits;
 
 	unsigned int PVIdx;
-	void printAllPV(Position & p,unsigned int count);
-	void printPV(Score res,unsigned int depth,unsigned int seldepth,Score alpha, Score beta, Position & p, unsigned long time,unsigned int count,std::vector<Move>& PV,unsigned long long nods);
+	void printAllPV(unsigned int count);
+	void printPV(Score res,unsigned int depth,unsigned int seldepth,Score alpha, Score beta, unsigned long time,unsigned int count,std::vector<Move>& PV,unsigned long long nods);
 public:
+	Position pos;
 	std::vector<rootMove> rootMoves;
 	static unsigned int multiPVLines;
 	static unsigned int limitStrength;
@@ -97,7 +100,9 @@ public:
 	static bool useOwnBook;
 	static bool bestMoveBook;
 	static bool showCurrentLine;
+
 	volatile bool showLine;
+
 	static void initLMRreduction(void){
 		for (int d = 1; d < 32*ONE_PLY; d++)
 			for (int mc = 1; mc < 64; mc++)
@@ -118,16 +123,19 @@ public:
 		ALL_NODE,
 		CUT_NODE
 	} nodeType;
-	void startThinking(Position & p,searchLimits & limits);
+	void startThinking(searchLimits & limits);
 	unsigned long long getVisitedNodes(){
 		return visitedNodes;
 	}
 private:
-	template<nodeType type>Score alphaBeta(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV);
-	template<nodeType type>Score qsearch(unsigned int ply,Position & p,int depth,Score alpha,Score beta,std::vector<Move> & PV);
+	template<nodeType type>Score alphaBeta(unsigned int ply,int depth,Score alpha,Score beta,std::vector<Move> & PV,bool verbose=false);
+	template<nodeType type>Score qsearch(unsigned int ply,int depth,Score alpha,Score beta,std::vector<Move> & PV);
 	unsigned long long visitedNodes;
 	unsigned int selDepth;
-	bool stop;
+
+	void threadSearch(int depth,Score alpha, Score beta);
+	void launchHelperSearch(int depth,Score alpha,Score beta);
+	void stopHelperSearch();
 };
 
 #endif /* SEARCH_H_ */

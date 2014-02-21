@@ -20,6 +20,7 @@
 #include "vajolet.h"
 #include <stdlib.h>
 #include <cstring>
+#include <mutex>
 
 
 
@@ -82,6 +83,7 @@ class transpositionTable{
 	unsigned int elements;
 	unsigned int usedElements;
 	unsigned char generation;
+	std::mutex TT_mutex;
 public:
 	transpositionTable(){
 		generation=0;
@@ -101,7 +103,9 @@ public:
 		return table + (((unsigned int)key) % elements);
 	}
 
+
 	inline void refresh(const ttEntry* tte) {
+		std::lock_guard<std::mutex> guard(TT_mutex);
 		assert(tte!=nullptr);
 		if(const_cast<ttEntry*>(tte)->getSearchId()!=generation){
 			usedElements++;
@@ -110,7 +114,7 @@ public:
 
 	}
 
-	ttEntry* probe(const U64 key) const;
+	ttEntry* probe(const U64 key);
 	void store(const U64 key, Score v, unsigned char b, signed short int d, unsigned short m, Score statV);
 
 	unsigned int getFullness(void){

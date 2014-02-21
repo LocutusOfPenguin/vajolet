@@ -39,10 +39,15 @@
 
 class Position{
 	public:
-	Position(const Position& other)
-	    : stateIndex(other.stateIndex), // calls the copy constructor of the age
-		stateInfo(other.stateInfo)
+
+
+	void copyFrom(const Position& other)
 	{
+		clear();
+		//setupFromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+		stateInfo.reserve(other.stateInfo.size());
+		std::copy(other.stateInfo.begin(),other.stateInfo.end(),back_inserter(stateInfo));
+		stateIndex=other.stateIndex;
 		for(int i=0;i<squareNumber;i++){
 			squares[i]=other.squares[i];
 			index[i]=other.index[i];
@@ -54,14 +59,6 @@ class Position{
 				pieceList[i][n] =other.pieceList[i][n];
 			}
 		}
-
-		/*if(stateIndex!=0){
-			actualState= &stateInfo[stateIndex-1];
-		}
-		else{
-			actualState=nullptr;
-		}*/
-
 
 		Us=&bitBoard[getActualState().nextMove];
 		Them=&bitBoard[(blackTurn-getActualState().nextMove)];
@@ -204,7 +201,7 @@ private:
 		\version 1.0
 		\date 27/10/2013
 	*/
-	const char PIECE_NAMES_FEN[lastBitboard]={' ','K','Q','R','B','N','P',' ',' ','k','q','r','b','n','p',' '};
+	static char PIECE_NAMES_FEN[lastBitboard];//={' ','K','Q','R','B','N','P',' ',' ','k','q','r','b','n','p',' '};
 
 	/*! \brief piece values used to calculate scores
 		\author Marco Belli
@@ -313,8 +310,7 @@ public:
 	inline void undoNullMove(void){
 		removeState();
 		std::swap(Us,Them);
-		assert(Us==getActualState().Us);
-		assert(Them==getActualState().Them);
+
 
 #ifdef ENABLE_CHECK_CONSISTENCY
 		checkPosConsistency(0);
@@ -328,7 +324,6 @@ public:
 	*/
 	inline state& getActualState(void)const {
 		assert(stateIndex>=1);
-		assert(actualState);
 		assert(stateIndex-1<stateInfo.size());
 		return (state&) stateInfo[stateIndex-1];
 		//return (state&) *actualState;
@@ -389,7 +384,7 @@ public:
 		\version 1.0
 		\date 08/11/2013
 	*/
-	std::string displayUci(Move & m) const{
+	static std::string displayUci(Move & m){
 
 
 		std::string s;
@@ -533,6 +528,7 @@ public:
 
 
 
+	bool checkPosConsistency(int nn);
 
 
 
@@ -543,7 +539,7 @@ private:
 	U64 calcMaterialKey(void) const;
 	simdScore calcMaterialValue(void) const;
 	void calcNonPawnMaterialValue(Score* s);
-	bool checkPosConsistency(int nn);
+
 	void clear();
 	inline void calcCheckingSquares(void);
 	bitMap getHiddenCheckers(tSquare kingSquare,eNextMove next);

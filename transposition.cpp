@@ -15,11 +15,14 @@
     along with Vajolet.  If not, see <http://www.gnu.org/licenses/>
 */
 
+#include <thread>
+#include <mutex>
 #include "transposition.h"
 #include "io.h"
 
 
 transpositionTable TT;
+
 
 void transpositionTable::setSize(unsigned int mbSize){
 	unsigned int size =  (mbSize << 20) / sizeof(ttCluster);
@@ -39,9 +42,9 @@ void transpositionTable::clear(){
 	std::memset(table, 0, elements * sizeof(ttCluster));
 }
 
-ttEntry* transpositionTable::probe(const U64 key) const {
+ttEntry* transpositionTable::probe(const U64 key){
 
-
+	std::lock_guard<std::mutex> guard(TT_mutex);
 	ttCluster * ttc=findCluster(key);
 	assert(ttc!=nullptr);
 	unsigned int keyH = key >> 32;
@@ -56,7 +59,7 @@ ttEntry* transpositionTable::probe(const U64 key) const {
 }
 
 void transpositionTable::store(const U64 key, Score v, unsigned char b, signed short int d, unsigned short m, Score statV) {
-
+	std::lock_guard<std::mutex> guard(TT_mutex);
 	int c1, c2, c3;
 	ttEntry *tte, *replace;
 	unsigned int key32 = key >> 32; // Use the high 32 bits as key inside the cluster

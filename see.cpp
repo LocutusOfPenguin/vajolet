@@ -43,7 +43,7 @@ Score Position::see(Move m) const {
 #ifdef DEBUG_SEE
 	sync_cout<<"--------------------------------------------"<<sync_endl;
 	display();
-	sync_cout<<displayUci(m)<<sync_endl;
+	sync_cout<<position::displayUci(m)<<sync_endl;
 #endif
 
 	tSquare from=(tSquare)m.from, to=(tSquare)m.to;

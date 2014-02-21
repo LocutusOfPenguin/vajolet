@@ -77,6 +77,8 @@ unsigned long my_thread::startTime;
 unsigned long my_thread::lastHasfullMessage;
 
 
+
+
 my_thread * my_thread::pInstance;
 std::mutex  my_thread::_mutex;
 
@@ -101,6 +103,11 @@ void my_thread::timerThread() {
 					sync_cout<<"STOPPPPE"<<sync_endl;
 				}*/
 				src.signals.stop=true;
+				if(threadNumber>1){
+					for(unsigned int i=0;i<threadNumber-1;i++){
+						helperSearchers[i].signals.stop=true;
+					}
+				}
 			}
 #ifndef DISABLE_TIME_DIPENDENT_OUTPUT
 			if(time - lastHasfullMessage>1000){
@@ -108,26 +115,52 @@ void my_thread::timerThread() {
 				sync_cout<<"info hashfull "<<TT.getFullness()<<sync_endl;
 				if(src.showCurrentLine){
 					src.showLine=true;
+					if(threadNumber>1){
+						for(unsigned int i=0;i<threadNumber-1;i++){
+							helperSearchers[i].signals.stop=true;
+						}
+					}
+
 				}
 			}
 #endif
 
 			if(timeMan.idLoopIterationFinished && time>=timeMan.allocatedTime*0.8 && !(limits.infinite || limits.ponder)){
 				src.signals.stop=true;
+				if(threadNumber>1){
+					for(unsigned int i=0;i<threadNumber-1;i++){
+						helperSearchers[i].signals.stop=true;
+					}
+				}
 			}
 
 			if(timeMan.idLoopIterationFinished && time>=timeMan.minSearchTime && !(limits.infinite || limits.ponder)){
 				if(timeMan.singularRootMoveCount >=1){
 					src.signals.stop=true;
+					if(threadNumber>1){
+						for(unsigned int i=0;i<threadNumber-1;i++){
+							helperSearchers[i].signals.stop=true;
+						}
+					}
 				}
 			}
 
 
 			if(limits.nodes && src.getVisitedNodes()>limits.nodes){
 				src.signals.stop=true;
+				if(threadNumber>1){
+					for(unsigned int i=0;i<threadNumber-1;i++){
+						helperSearchers[i].signals.stop=true;
+					}
+				}
 			}
 			if(limits.moveTime && time>=limits.moveTime){
 				src.signals.stop=true;
+				if(threadNumber>1){
+					for(unsigned int i=0;i<threadNumber-1;i++){
+						helperSearchers[i].signals.stop=true;
+					}
+				}
 			}
 			timeMan.idLoopIterationFinished=false;
 
@@ -146,10 +179,10 @@ void my_thread::searchThread() {
 		std::unique_lock<std::mutex> lk(mutex);
 		searchCond.wait(lk,[&]{return startThink||quit;});
 		if(!quit){
-			timeManagerInit(*pos, limits,timeMan);
+			timeManagerInit(src.pos, limits,timeMan);
 			startTime=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
 			timerCond.notify_one();
-			src.startThinking(*pos,limits);
+			src.startThinking(limits);
 			//sync_cout<<"startThink=false"<<sync_endl;
 			startThink=false;
 			//sync_cout<<startThink<<sync_endl;
@@ -166,6 +199,11 @@ void my_thread::initThreads(){
 	timer=std::thread(&my_thread::timerThread,this);
 	searcher=std::thread(&my_thread::searchThread,this);
 	src.signals.stop=true;
+	if(threadNumber>1){
+		for(unsigned int i=0;i<threadNumber-1;i++){
+			helperSearchers[i].signals.stop=true;
+		}
+	}
 }
 
 void my_thread::quitThreads(){

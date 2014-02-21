@@ -66,6 +66,7 @@ void static printUciInfo(void){
 	std::cout<<"option name UCI_ShowCurrLine type check default false"<<sync_endl;
 	std::cout<<"option name UCI_LimitStrength type check default false"<<sync_endl;
 	std::cout<<"option name UCI_Elo type spin default 3000 min 1000 max 3000"<<sync_endl;
+	std::cout<<"option name Threads type spin default 1 min 1 max "<<MAX_THREADS <<sync_endl;
 	std::cout<<"uciok"<<sync_endl;
 }
 
@@ -84,7 +85,7 @@ Move moveFromUci(Position& pos, std::string& str) {
 	Movegen mg(pos,h,m);
 
 	while( (m=mg.getNextMove()).packed){
-		if(str==pos.displayUci(m)){
+		if(str==Position::displayUci(m)){
 			return m;
 		}
 	}
@@ -127,7 +128,7 @@ void static position(std::istringstream& is, Position & pos){
 	\version 1.0
 	\date 08/11/2013
 */
-void static doPerft(unsigned int n, Position & pos){
+void doPerft(unsigned int n, Position & pos){
 	std::string token;
 	unsigned long elapsed = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
 	unsigned long long res=pos.perft(n);
@@ -137,7 +138,7 @@ void static doPerft(unsigned int n, Position & pos){
 }
 
 
-void static go(std::istringstream& is, Position & pos, my_thread * thr) {
+void static go(std::istringstream& is, my_thread * thr) {
 	searchLimits limits;
 	std::string token;
 
@@ -147,9 +148,9 @@ void static go(std::istringstream& is, Position & pos, my_thread * thr) {
         if (token == "searchmoves")
             while (is >> token){
             	Move m;
-            	m=moveFromUci(pos,token);
+            	m=moveFromUci(thr->src.pos,token);
             	if(m.packed){
-            		limits.searchMoves.push_back(moveFromUci(pos,token));
+            		limits.searchMoves.push_back(moveFromUci(thr->src.pos,token));
             	}
             }
         else if (token == "wtime")     is >> limits.wtime;
@@ -165,7 +166,7 @@ void static go(std::istringstream& is, Position & pos, my_thread * thr) {
         else if (token == "ponder")    limits.ponder = true;
     }
 
-    thr->startTinking(&pos,limits);
+    thr->startTinking(limits);
 }
 
 
@@ -228,6 +229,16 @@ void setoption(std::istringstream& is) {
 		int i=stoi(value);
 		search::eloStrenght=i<3000?(i>1000?i:1000):3000;
 	}
+	else if(name =="Threads"){
+		int th=stoi(value);
+		if(th>MAX_THREADS ){
+			th=MAX_THREADS;
+		}
+		if(th<=1 ){
+			th=1;
+		}
+		my_thread::getInstance()->setNumThread(th);
+	}
 	else{
 		sync_cout << "No such option: " << name << sync_endl;
 	}
@@ -289,8 +300,7 @@ void setvalue(std::istringstream& is) {
 */
 void uciLoop(){
 	my_thread *thr= my_thread::getInstance();
-	Position pos;
-	pos.setupFromFen(StartFEN);
+	thr->src.pos.setupFromFen(StartFEN);
 	std::string token, cmd;
 
 	do{
@@ -311,10 +321,10 @@ void uciLoop(){
 		else if (token =="ucinewgame"){
 		}
 		else if (token =="d"){
-			pos.display();
+			thr->src.pos.display();
 		}
 		else if (token =="position"){
-			position(is,pos);
+			position(is,thr->src.pos);
 		}
 		else if(token=="setoption"){
 			setoption(is);
@@ -325,12 +335,12 @@ void uciLoop(){
 		else if (token =="eval"){
 			pawnTable pawnHashTable;
 			evalTable evalHashTable;
-			sync_cout<<"Eval:" <<pos.eval<true>(pawnHashTable,evalHashTable)/10000.0<<sync_endl;
-			sync_cout<<"gamePhase:" <<pos.getGamePhase()/65536.0*100<<"%"<<sync_endl;
+			sync_cout<<"Eval:" <<thr->src.pos.eval<true>(pawnHashTable,evalHashTable)/10000.0<<sync_endl;
+			sync_cout<<"gamePhase:" <<thr->src.pos.getGamePhase()/65536.0*100<<"%"<<sync_endl;
 #ifdef DEBUG_EVAL_SIMMETRY
 
 			Position ppp;
-			ppp.setupFromFen(pos.getSymmetricFen());
+			ppp.setupFromFen(thr->src.pos.getSymmetricFen());
 			sync_cout<<"Eval:" <<ppp.eval<true>(pawnHashTable,evalHashTable)/10000.0<<sync_endl;
 			sync_cout<<"gamePhase:" <<ppp.getGamePhase()/65536.0*100<<"%"<<sync_endl;
 
@@ -341,14 +351,15 @@ void uciLoop(){
 			sync_cout<<"readyok"<<sync_endl;
 		}
 		else if (token =="perft" && (is>>token)){
-			doPerft(stoi(token), pos);
+			doPerft(stoi(token), thr->src.pos);
+
 		}
 		else if (token =="divide" && (is>>token)){
-			unsigned long res=pos.divide(stoi(token));
+			unsigned long res=thr->src.pos.divide(stoi(token));
 			sync_cout<<"divide Res="<<res<<sync_endl;
 		}
 		else if (token =="go"){
-			go(is,pos,thr);
+			go(is,thr);
 		}
 		else if (token =="bench"){
 			benchmark();
