@@ -312,21 +312,23 @@ void Tuner::createEpd(void){
 					std::string fen=fenstr;
 
 					std::string clearFen=fen.substr(0,fen.find("bm")-1);
-					if(line2-startLine>=0 && (draw || line-line2>=0)){
-						Position pos;
-						pos.setupFromFen(clearFen);
-						Score searchRes;
+					if(line2-startLine>=20 && (draw || line-line2>=10)){
+						//Position pos;
+						//pos.setupFromFen(clearFen);
+						//Score searchRes;
 						if(result==0){
-							searchRes=searcher.startThinking(pos,sl);
-							searchRes-=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							//searchRes=searcher.startThinking(pos,sl);
+							//searchRes-=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							searchRes=-500000;
 						}
 						else if (result==1)
 						{
-							searchRes=searcher.startThinking(pos,sl);
-							searchRes+=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							//searchRes=searcher.startThinking(pos,sl);
+							//searchRes+=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							searchRes=500000;
 						}
 						else{
-							searchRes=0.5;
+							searchRes=0.0;
 						}
 
 						double sigmoid=1.0/(1+std::pow(2.71828182846,-searchRes/scaling));
@@ -379,7 +381,7 @@ void Tuner::tuneParameters(void){
 	}state;
 	std::vector<parameterStruct> parameters;
 
-	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
+/*	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
 	parameters.push_back(parameterStruct("queen endgame value",&initialPieceValue[Position::whiteQueens],1,1000));
 	parameters.push_back(parameterStruct("rook opening value",&initialPieceValue[Position::whiteRooks],0,1000));
 	parameters.push_back(parameterStruct("rook endgame value",&initialPieceValue[Position::whiteRooks],1,1000));
@@ -387,35 +389,35 @@ void Tuner::tuneParameters(void){
 	parameters.push_back(parameterStruct("bishop endgame value",&initialPieceValue[Position::whiteBishops],1,100));
 	parameters.push_back(parameterStruct("knight opening value",&initialPieceValue[Position::whiteKnights],0,100));
 	parameters.push_back(parameterStruct("knight endgame value",&initialPieceValue[Position::whiteKnights],1,100));
-	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));
-/*
-	parameters.push_back(parameterStruct("PawnD3 opening bonus",&PawnD3,0,10));
-//	parameters.push_back(parameterStruct("PawnD3 endgame bonus",&PawnD3,1,10));
-	parameters.push_back(parameterStruct("PawnD4 opening bonus",&PawnD4,0,10));
-//	parameters.push_back(parameterStruct("PawnD4 endgame bonus",&PawnD4,1,10));
-	parameters.push_back(parameterStruct("PawnD5 opening bonus",&PawnD5,0,10));
-//	parameters.push_back(parameterStruct("PawnD5 endgame bonus",&PawnD5,1,10));
-	parameters.push_back(parameterStruct("PawnE3 opening bonus",&PawnE3,0,10));
-//	parameters.push_back(parameterStruct("PawnE3 endgame bonus",&PawnE3,1,10));
-	parameters.push_back(parameterStruct("PawnE4 opening bonus",&PawnE4,0,10));
-//	parameters.push_back(parameterStruct("PawnE4 endgame bonus",&PawnE4,1,10));
-	parameters.push_back(parameterStruct("PawnE5 opening bonus",&PawnE5,0,10));
-//	parameters.push_back(parameterStruct("PawnE5 endgame bonus",&PawnE5,1,10));
-	parameters.push_back(parameterStruct("PawnCentering opening bonus",&PawnCentering,0,10));
-	parameters.push_back(parameterStruct("PawnCentering endgame bonus",&PawnCentering,1,10));
-	parameters.push_back(parameterStruct("PawnRank opening bonus",&PawnRankBonus,0,10));
-	parameters.push_back(parameterStruct("PawnRank endgame bonus",&PawnRankBonus,1,10));
-	parameters.push_back(parameterStruct("KnightPST opening bonus",&KnightPST,0,10));
-	parameters.push_back(parameterStruct("KnightPST endgame bonus",&KnightPST,1,10));
-	parameters.push_back(parameterStruct("BishopPST opening bonus",&BishopPST,0,10));
-	parameters.push_back(parameterStruct("BishopPST endgame bonus",&BishopPST,1,10));
-	parameters.push_back(parameterStruct("RookPST opening bonus",&RookPST,0,10));
-	parameters.push_back(parameterStruct("RookPST endgame bonus",&RookPST,1,10));
-	parameters.push_back(parameterStruct("QueenPST opening bonus",&QueenPST,0,10));
-	parameters.push_back(parameterStruct("QueenPST endgame bonus",&QueenPST,1,10));
-	parameters.push_back(parameterStruct("KingPST opening bonus",&KingPST,0,10));
-	parameters.push_back(parameterStruct("KingPST endgame bonus",&KingPST,1,10));*/
-	/*
+	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));*/
+
+	parameters.push_back(parameterStruct("PawnD3 opening bonus",&PawnD3,0,100));
+	parameters.push_back(parameterStruct("PawnD3 endgame bonus",&PawnD3,1,100));
+	parameters.push_back(parameterStruct("PawnD4 opening bonus",&PawnD4,0,100));
+	parameters.push_back(parameterStruct("PawnD4 endgame bonus",&PawnD4,1,100));
+	parameters.push_back(parameterStruct("PawnD5 opening bonus",&PawnD5,0,100));
+	parameters.push_back(parameterStruct("PawnD5 endgame bonus",&PawnD5,1,100));
+	parameters.push_back(parameterStruct("PawnE3 opening bonus",&PawnE3,0,100));
+	parameters.push_back(parameterStruct("PawnE3 endgame bonus",&PawnE3,1,100));
+	parameters.push_back(parameterStruct("PawnE4 opening bonus",&PawnE4,0,100));
+	parameters.push_back(parameterStruct("PawnE4 endgame bonus",&PawnE4,1,100));
+	parameters.push_back(parameterStruct("PawnE5 opening bonus",&PawnE5,0,100));
+	parameters.push_back(parameterStruct("PawnE5 endgame bonus",&PawnE5,1,100));
+	parameters.push_back(parameterStruct("PawnCentering opening bonus",&PawnCentering,0,100));
+	parameters.push_back(parameterStruct("PawnCentering endgame bonus",&PawnCentering,1,100));
+	parameters.push_back(parameterStruct("PawnRank opening bonus",&PawnRankBonus,0,100));
+	parameters.push_back(parameterStruct("PawnRank endgame bonus",&PawnRankBonus,1,100));
+	parameters.push_back(parameterStruct("KnightPST opening bonus",&KnightPST,0,100));
+	parameters.push_back(parameterStruct("KnightPST endgame bonus",&KnightPST,1,100));
+	parameters.push_back(parameterStruct("BishopPST opening bonus",&BishopPST,0,100));
+	parameters.push_back(parameterStruct("BishopPST endgame bonus",&BishopPST,1,100));
+	parameters.push_back(parameterStruct("RookPST opening bonus",&RookPST,0,100));
+	parameters.push_back(parameterStruct("RookPST endgame bonus",&RookPST,1,100));
+	parameters.push_back(parameterStruct("QueenPST opening bonus",&QueenPST,0,100));
+	parameters.push_back(parameterStruct("QueenPST endgame bonus",&QueenPST,1,100));
+	parameters.push_back(parameterStruct("KingPST opening bonus",&KingPST,0,100));
+	parameters.push_back(parameterStruct("KingPST endgame bonus",&KingPST,1,100));
+
 	parameters.push_back(parameterStruct("BishopBackRankOpening opening penalty",&BishopBackRankOpening,0,100));
 	parameters.push_back(parameterStruct("BishopBackRankOpening endgame penalty",&BishopBackRankOpening,1,100));
 	parameters.push_back(parameterStruct("KnightBackRankOpening opening penalty",&KnightBackRankOpening,0,100));
@@ -426,7 +428,7 @@ void Tuner::tuneParameters(void){
 	parameters.push_back(parameterStruct("QueenBackRankOpening endgame penalty",&QueenBackRankOpening,1,100));
 	parameters.push_back(parameterStruct("BishopOnBigDiagonals opening bonus",&BishopOnBigDiagonals,0,100));
 	parameters.push_back(parameterStruct("BishopOnBigDiagonals endgame bonus",&BishopOnBigDiagonals,1,100));
-
+/*
 	//-------------------------------------------------------------------------------------------------------------
 
 	parameters.push_back(parameterStruct("tempo opening bonus",&tempo,0,10));

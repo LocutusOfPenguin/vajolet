@@ -54,12 +54,12 @@ simdScore initialPieceValue[Position::lastBitboard]={
 		simdScore(0,0,0,0)
 };
 
-simdScore PawnD3=simdScore(1755,0,0,0);
-simdScore PawnD4=simdScore(2100,0,0,0);
-simdScore PawnD5=simdScore(85,0,0,0);
-simdScore PawnE3=simdScore(185,0,0,0);
-simdScore PawnE4=simdScore(620,0,0,0);
-simdScore PawnE5=simdScore(-5,0,0,0);
+simdScore PawnD3=simdScore(1000,0,0,0);
+simdScore PawnD4=simdScore(2000,0,0,0);
+simdScore PawnD5=simdScore(1500,0,0,0);
+simdScore PawnE3=simdScore(1000,0,0,0);
+simdScore PawnE4=simdScore(2000,0,0,0);
+simdScore PawnE5=simdScore(1500,0,0,0);
 simdScore PawnCentering=simdScore(141,-119,0,0);
 simdScore PawnRankBonus=simdScore(450,30,0,0);
 simdScore KnightPST=simdScore(545,462,0,0);
@@ -75,11 +75,11 @@ simdScore QueenBackRankOpening=simdScore(200,3900,0,0);
 simdScore BishopOnBigDiagonals=simdScore(1400,600,0,0);
 
 
-
 /* PST data */
 const int Center[8]	= { -3, -1, +0, +1, +1, +0, -1, -3};
 const int KFile[8]	= { +3, +4, +2, +0, +0, +2, +4, +3};
 const int KRank[8]	= { +1, +0, -2, -3, -4, -5, -6, -7};
+const int advance[8] =  { 0, 0, 0,  0, +1, +2, +1,  0};
 
 simdScore Position::pieceValue[lastBitboard];
 simdScore Position::pstValue[lastBitboard][squareNumber];
@@ -122,7 +122,7 @@ void Position::initPstValues(void){
 					pstValue[piece][s]+=Center[file]*PawnCentering;
 				}
 				if(piece== Knights){
-					pstValue[piece][s]=KnightPST*(Center[file]+Center[rank]);
+					pstValue[piece][s]=KnightPST*(Center[file]+Center[rank]+advance[rank]);
 					if(rank==0){
 						pstValue[piece][s]-=KnightBackRankOpening;
 					}

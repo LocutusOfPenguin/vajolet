@@ -28,6 +28,7 @@
 #include "search.h"
 #include "eval.h"
 #include "tune.h"
+#include "testEpd.h"
 
 /*!	\brief	print the startup information
 	\author Marco Belli
@@ -81,6 +82,7 @@ int main()
 	//t.createEpd();
 	//t.drawSigmoid();
 	//t.drawAverageEvolution();
+	//testEpd("arasan17.epd");
 
 
 
