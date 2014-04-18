@@ -153,6 +153,7 @@ class Position{
 		bool skipNullMove;
 		Move excludedMove;
 		Move currentMove;
+		Score staticEval;
 
 		/*state(){}
 		state(const state& other){
@@ -314,8 +315,7 @@ public:
 	inline void undoNullMove(void){
 		removeState();
 		std::swap(Us,Them);
-		assert(Us==getActualState().Us);
-		assert(Them==getActualState().Them);
+
 
 #ifdef ENABLE_CHECK_CONSISTENCY
 		checkPosConsistency(0);
@@ -329,11 +329,17 @@ public:
 	*/
 	inline state& getActualState(void)const {
 		assert(stateIndex>=1);
-		assert(actualState);
 		assert(stateIndex-1<stateInfo.size());
 		return (state&) stateInfo[stateIndex-1];
 		//return (state&) *actualState;
 	}
+
+	inline state& getPreviousState(void)const {
+			assert(stateIndex>=2);
+			assert(stateIndex-2<stateInfo.size());
+			return (state&) stateInfo[stateIndex-2];
+			//return (state&) *actualState;
+		}
 
 	inline state& getState(unsigned int n)const {
 			assert(stateIndex>=1);

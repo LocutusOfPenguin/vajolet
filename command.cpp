@@ -116,9 +116,14 @@ void static position(std::istringstream& is, Position & pos){
 
 	Move m;
 	// Parse move list (if any)
+	pawnTable pawnHashTable;
+	evalTable evalHashTable;
 	while (is >> token && ((m = moveFromUci(pos, token)).packed != 0))
 	{
 		pos.doMove(m);
+
+		Score staticEval=pos.eval<false>(pawnHashTable, evalHashTable);
+		pos.getActualState().staticEval=staticEval;
 	}
 }
 

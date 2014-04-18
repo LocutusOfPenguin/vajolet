@@ -30,15 +30,23 @@ void Statistics::printNodeTypeStat(){
 
 	sync_cout<<"PV type %error : "<<(signed long long)(testedNodeTypePv-resultNodeTypePv)/float(resultNodeTypePv)*100.0<<sync_endl;
 	sync_cout<<"Cut type %error : "<<(signed long long)(testedNodeTypeCut-resultNodeTypeCut)/float(resultNodeTypeCut)*100.0<<sync_endl;
-	sync_cout<<"All type %error : "<<(signed long long)(testedNodeTypeAll-resultNodeTypeAll)/float(resultNodeTypeAll)*100.0<<sync_endl;
+	sync_cout<<"All type %error : "<<(signed long long)(testedNodeTypeAll-resultNodeTypeAll)/float(resultNodeTypeAll)*100.0<<std::endl<<sync_endl;
 
-	sync_cout<<"tested All razoring: "<<testedAllPruning<<sync_endl;
-	sync_cout<<"correct All razoring: "<<correctAllPruning<<sync_endl;
-	sync_cout<<"% correct All pruning: "<<(signed long long)(correctAllPruning)/float(testedAllPruning)*100.0<<std::endl<<sync_endl;
+	sync_cout<<"ALL"<<sync_endl;
+	for(int i=0;i<16*ONE_PLY;i++){
+		sync_cout<<i<<" ";
+		std::cout<<testedAllPruning[i]<<" ";
+		std::cout<<correctAllPruning[i]<<" ";
+		std::cout<<(signed long long)(correctAllPruning[i])/float(testedAllPruning[i])*100.0<<sync_endl;
+	}
+	sync_cout<<"CUT"<<sync_endl;
+	for(int i=0;i<16*ONE_PLY;i++){
+			sync_cout<<i<<" ";
+			std::cout<<testedAllPruning[i]<<" ";
+			std::cout<<correctAllPruning[i]<<" ";
+			std::cout<<(signed long long)(correctAllPruning[i])/float(testedAllPruning[i])*100.0<<sync_endl;
+		}
 
-	sync_cout<<"tested Cut razoring: "<<testedCutPruning<<sync_endl;
-	sync_cout<<"correct Cut razoring: "<<correctCutPruning<<sync_endl;
-	sync_cout<<"% correct Cut pruning: "<<(signed long long)(correctCutPruning)/float(testedCutPruning)*100.0<<std::endl<<sync_endl;
 
 	sync_cout<<"Cut node ordering performance: "<<(signed long long)(cutNodeOrderingSum)/float(cutNodeOrderingCounter)<<" "<<cutNodeOrderingCounter<<sync_endl;
 	sync_cout<<"worst move ordering: "<<worstCutNodeOrdering<<std::endl<<sync_endl;
@@ -46,7 +54,7 @@ void Statistics::printNodeTypeStat(){
 	sync_cout<<"pv node ordering performance: "<<(signed long long)(pvNodeOrderingSum)/float(pvNodeOrderingCounter)<<std::endl<<sync_endl;
 
 	for(int i=0;i<200;i++){
-		sync_cout<<"["<< i<<"]: "<<cutNodeOrderingArray[i]<<sync_endl;
+		sync_cout<< i<<" "<<cutNodeOrderingArray[i]<<sync_endl;
 	}
 
 
@@ -95,13 +103,16 @@ void Statistics::initNodeTypeStat(){
 	resultNodeTypeAll=0;
 	resultNodeTypePv=0;
 
-	testedAll=0;
-	testedAllPruning=0;
-	correctAllPruning=0;
+	for(int i=0;i<4*ONE_PLY;i++){
+		testedAll=0;
 
-	testedCut=0;
-	testedCutPruning=0;
-	correctCutPruning=0;
+		testedAllPruning[i]=0;
+		correctAllPruning[i]=0;
+
+		testedCut=0;
+		testedCutPruning[i]=0;
+		correctCutPruning[i]=0;
+	}
 
 	cutNodeOrderingSum=0;
 	cutNodeOrderingCounter=0;

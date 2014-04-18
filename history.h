@@ -29,7 +29,8 @@
 class History{
 public :
 
-	void clear() { std::memset(table, 0, sizeof(table)); }
+	void clear() {
+		std::memset(table, 0, sizeof(table)); }
 
 
 	inline void update(Position::bitboardIndex p, tSquare to, Score v){
@@ -54,6 +55,38 @@ public :
 	}
 
 	History(){}
+private:
+
+
+	static const Score Max = Score(500000);
+	Score table[Position::lastBitboard][squareNumber];
+};
+
+
+class Gains{
+	//double avg;
+public :
+
+	void clear() { std::memset(table, 0, sizeof(table)); }
+
+
+	inline void update(Position::bitboardIndex p, tSquare to, Score v){
+		assert(p<Position::lastBitboard);
+		assert(to<squareNumber);
+		table[p][to] = std::max(v, table[p][to] - 100);
+
+	}
+	inline Score getValue(Position::bitboardIndex p, tSquare to)  {
+		assert(p<Position::lastBitboard);
+		assert(to<squareNumber);
+		//avg+=0.001*(table[p][to]-avg);
+		//sync_cout<<avg<<sync_endl;
+		return table[p][to];
+	}
+
+	Gains(){
+		//avg=0;
+	}
 private:
 
 

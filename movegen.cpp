@@ -531,7 +531,7 @@ void Movegen::generateMoves(){
 	}else if(type== Movegen::quietMg){
 		target= ~pos.bitBoard[Position::occupiedSquares];
 		kingTarget= ~ pos.bitBoard[Position::occupiedSquares];
-	}else if(type== Movegen::quietChecksMg){
+	}else if(type== Movegen::quietChecksAndPromotionMg){
 		target= ~pos.bitBoard[Position::occupiedSquares];
 		kingTarget= ~ pos.bitBoard[Position::occupiedSquares];
 	}
@@ -554,7 +554,7 @@ void Movegen::generateMoves(){
 			m.to=firstOne(moves);
 			if(!(pos.getAttackersTo((tSquare)m.to , pos.bitBoard[Position::occupiedSquares] & ~pos.Us[Position::King]) & pos.Them[Position::Pieces]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -588,7 +588,7 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet(from)) ||
 					squaresAligned(from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -616,7 +616,7 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet(from)) ||
 					squaresAligned(from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -645,7 +645,7 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet(from)) ||
 				squaresAligned(from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -669,7 +669,7 @@ void Movegen::generateMoves(){
 			moves = attackFromKnight(from)& target;
 			while (moves){
 				m.to=firstOne(moves);
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -700,7 +700,7 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet((tSquare)m.from)) ||
 				squaresAligned((tSquare)m.from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -717,7 +717,7 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet((tSquare)m.from)) ||
 				squaresAligned((tSquare)m.from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+				if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 					//moveList.push_back(m);
 					assert(moveListSize<MAX_MOVE_PER_POSITION);
 					moveList[moveListSize++].m=m;
@@ -728,7 +728,7 @@ void Movegen::generateMoves(){
 	}
 
 	int delta;
-	if(type!= Movegen::quietMg && type!=Movegen::quietChecksMg){
+	if(type!= Movegen::quietMg && type!=Movegen::quietChecksAndPromotionMg){
 		//left capture
 		delta=s.nextMove?-9:7;
 		moves = (s.nextMove?(pawns&(~FILEMASK[A1]))>>9:(pawns&(~FILEMASK[A1]))<<7)&enemy& target;
@@ -777,9 +777,14 @@ void Movegen::generateMoves(){
 			if(!(s.pinnedPieces & bitSet((tSquare)m.from)) ||
 				squaresAligned((tSquare)m.from,(tSquare)m.to,pos.pieceList[Position::whiteKing+s.nextMove][0]))
 			{
-				for(Move::epromotion prom=Move::promQueen;prom<= Move::promKnight; prom=(Move::epromotion)(prom+1)){
+				Move::epromotion pp =Move::promKnight;
+				if(type==Movegen::quietChecksAndPromotionMg){
+					 pp =Move::promQueen;
+				}
+				for(Move::epromotion prom=Move::promQueen;prom<= pp; prom=(Move::epromotion)(prom+1)){
 					m.promotion=prom;
-					if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+					//if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
+					{
 						//moveList.push_back(m);
 						assert(moveListSize<MAX_MOVE_PER_POSITION);
 						moveList[moveListSize++].m=m;
@@ -791,7 +796,7 @@ void Movegen::generateMoves(){
 	}
 
 	int color = s.nextMove?1:0;
-	if(type!= Movegen::quietMg && type!= Movegen::quietChecksMg){
+	if(type!= Movegen::quietMg && type!= Movegen::quietChecksAndPromotionMg){
 		//left capture
 		delta=s.nextMove?-9:7;
 		moves = (s.nextMove?(promotionPawns&(~FILEMASK[A1]))>>9:(promotionPawns&(~FILEMASK[A1]))<<7)&enemy& target;
@@ -889,7 +894,7 @@ void Movegen::generateMoves(){
 					m.flags=Move::fcastle;
 					m.from=kingSquare;
 					m.to=kingSquare+2;
-					if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+					if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 						//moveList.push_back(m);
 						assert(moveListSize<MAX_MOVE_PER_POSITION);
 						moveList[moveListSize++].m=m;
@@ -913,7 +918,7 @@ void Movegen::generateMoves(){
 					m.flags=Move::fcastle;
 					m.from=kingSquare;
 					m.to=kingSquare-2;
-					if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m)){
+					if(type !=Movegen::quietChecksAndPromotionMg || pos.moveGivesCheck(m)){
 						//moveList.push_back(m);
 						assert(moveListSize<MAX_MOVE_PER_POSITION);
 						moveList[moveListSize++].m=m;
@@ -929,7 +934,7 @@ void Movegen::generateMoves(){
 }
 template void Movegen::generateMoves<Movegen::captureMg>();
 template void Movegen::generateMoves<Movegen::quietMg>();
-template void Movegen::generateMoves<Movegen::quietChecksMg>();
+template void Movegen::generateMoves<Movegen::quietChecksAndPromotionMg>();
 
 
 
@@ -1296,7 +1301,7 @@ Move  Movegen::getNextMove(){
 			stagedGeneratorState=(eStagedGeneratorState)(stagedGeneratorState+1);
 			break;
 		case generateQuietCheks:
-			generateMoves<Movegen::quietChecksMg>();
+			generateMoves<Movegen::quietChecksAndPromotionMg>();
 			for(unsigned int i=moveListPosition;i<moveListSize;i++){
 				moveList[i].score=h.getValue(pos.squares[moveList[i].m.from],(tSquare)moveList[i].m.to);
 			}

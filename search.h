@@ -91,6 +91,7 @@ class search{
 	void printPV(Score res,unsigned int depth,unsigned int seldepth,Score alpha, Score beta, Position & p, unsigned long time,unsigned int count,std::vector<Move>& PV,unsigned long long nods);
 public:
 	History history;
+	Gains gains;
 	std::vector<rootMove> rootMoves;
 	static unsigned int multiPVLines;
 	static unsigned int limitStrength;

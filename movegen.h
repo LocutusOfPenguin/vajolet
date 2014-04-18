@@ -34,7 +34,7 @@ public:
 	enum genType{
 		captureMg,			// generate capture moves
 		quietMg,			// generate quiet moves
-		quietChecksMg,		// generate quiet moves giving check
+		quietChecksAndPromotionMg,		// generate quiet moves giving check
 		allNonEvasionMg,	// generate all moves while not in check
 		allEvasionMg,		// generate all moves while in check
 		allMg				// general generate all move

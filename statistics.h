@@ -32,12 +32,12 @@ public :
 	}
 
 	bool testedAll;
-	unsigned long long testedAllPruning;
-	unsigned long long correctAllPruning;
+	unsigned long long testedAllPruning[1000];
+	unsigned long long correctAllPruning[1000];
 
 	bool testedCut;
-	unsigned long long testedCutPruning;
-	unsigned long long correctCutPruning;
+	unsigned long long testedCutPruning[1000];
+	unsigned long long correctCutPruning[1000];
 
 	unsigned long long testedNodeTypeCut;
 	unsigned long long testedNodeTypeAll;
