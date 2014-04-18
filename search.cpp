@@ -88,6 +88,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 	TT.newSearch();
 	history.clear();
 
+	visitedNodes=0;
 	limits=l;
 	rootMoves.clear();
 	//--------------------------------
@@ -180,7 +181,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 
 
 	unsigned int selDepthBase=p.getActualState().ply;
-	visitedNodes=0;
+
 	startTime = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
 	std::vector<Move> newPV;
 	unsigned int depth=1;
@@ -901,8 +902,8 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				}
 			}
 
-			if(newDepth < 4 * ONE_PLY
-				&& pos.seeSign(m) < 0)
+			if(/*newDepth < 4 * ONE_PLY &&*/
+				pos.seeSign(m) < 0)
 			{
 				continue;
 			}
