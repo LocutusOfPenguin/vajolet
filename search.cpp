@@ -593,7 +593,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		Score ralpha = alpha - razorMargin(depth);
 		assert(ralpha>=-SCORE_INFINITE);
 		std::vector<Move> childPV;
-		Score v = qsearch<childNodesType>(ply,pos,0, ralpha, ralpha+1, childPV);
+		Score v = qsearch<CUT_NODE>(ply,pos,0, ralpha, ralpha+1, childPV);
 		if (v <= ralpha)
 		{
 #ifdef PRINT_STATISTICS
@@ -1172,7 +1172,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	}
 #ifdef PRINT_STATISTICS
 
-	if(type==ALL_NODE && bestScore>=beta){
+	/*if(type==ALL_NODE && bestScore>=beta){
 		sync_cout<<"------------------------------------------------------------"<<sync_endl;
 		pos.display();
 		sync_cout<<"depth: "<<float(depth)/ONE_PLY<<sync_endl;
@@ -1184,9 +1184,9 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 
-	}
+	}*/
 	if(bestScore>=beta){
-		if( moveNumber>50){
+		/*if( moveNumber>50){
 			sync_cout<<"------------------------------------------------------------"<<sync_endl;
 			pos.display();
 			sync_cout<<"depth: "<<float(depth)/ONE_PLY<<sync_endl;
@@ -1196,7 +1196,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			sync_cout<<"bestMove: "<<pos.displayUci(bestMove)<<sync_endl;
 			sync_cout<<"moveNumber: "<<moveNumber<<sync_endl;
 
-		}
+		}*/
 		Statistics::instance().cutNodeOrderingArray[moveNumber]++;
 		Statistics::instance().cutNodeOrderingSum+=moveNumber;
 		Statistics::instance().cutNodeOrderingCounter++;
@@ -1204,11 +1204,11 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			Statistics::instance().worstCutNodeOrdering=moveNumber;
 		}
 	}else if(PVnode && bestMove.packed){
-		Statistics::instance().allNodeOrderingSum+=moveNumber;
-		Statistics::instance().allNodeOrderingCounter++;
-	}else{
 		Statistics::instance().pvNodeOrderingSum+=moveNumber;
 		Statistics::instance().pvNodeOrderingCounter++;
+	}else{
+		Statistics::instance().allNodeOrderingSum+=moveNumber;
+		Statistics::instance().allNodeOrderingCounter++;
 	}
 
 
@@ -1502,7 +1502,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 			TTdepth, bestMove.packed, staticEval);
 	}
 #ifdef PRINT_STATISTICS
-	if(type==ALL_NODE && bestScore>=beta){
+	/*if(type==ALL_NODE && bestScore>=beta){
 		sync_cout<<"------------------------------------------------------------"<<sync_endl;
 		pos.display();
 		sync_cout<<"depth: "<<float(depth)/ONE_PLY<<sync_endl;
@@ -1514,7 +1514,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 
 
-	}
+	}*/
 	if(bestScore>=beta){
 		Statistics::instance().cutNodeOrderingArray[moveNumber]++;
 		if(moveNumber){
@@ -1526,11 +1526,11 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 			}
 		}
 	}else if(PVnode && bestMove.packed){
-		Statistics::instance().allNodeOrderingSum+=moveNumber;
-		Statistics::instance().allNodeOrderingCounter++;
-	}else{
 		Statistics::instance().pvNodeOrderingSum+=moveNumber;
 		Statistics::instance().pvNodeOrderingCounter++;
+	}else{
+		Statistics::instance().allNodeOrderingSum+=moveNumber;
+		Statistics::instance().allNodeOrderingCounter++;
 	}
 
 	if(bestScore>beta){
