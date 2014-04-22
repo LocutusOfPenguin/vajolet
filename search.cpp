@@ -282,6 +282,8 @@ Score search::startThinking(Position & p,searchLimits & l){
 					//sync_cout<<"res<=alpha "<<sync_endl;
 
 					//my_thread::timeMan.idLoopRequestToExtend=true;
+					newPV.push_back(rootMoves[PVIdx].PV[0]);
+
 					printPV(res,depth-reduction,selDepth-selDepthBase,alpha,beta, p, now-startTime,PVIdx,newPV,visitedNodes);
 					alpha = std::max((signed long long int)(res) - delta,(signed long long int)-SCORE_INFINITE);
 
@@ -902,7 +904,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				}
 			}
 
-			if(/*newDepth < 4 * ONE_PLY &&*/
+			if(newDepth < 4 * ONE_PLY &&
 				pos.seeSign(m) < 0)
 			{
 				continue;
@@ -1287,7 +1289,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 	Move ttMove;
 	ttMove=tte ? tte->getPackedMove() : 0;
 	Movegen mg(pos,history,ttMove);
-	int TTdepth=mg.setupQuiescentSearch(pos.getActualState().checkers,depth);
+	int TTdepth=mg.setupQuiescentSearch(inCheck,depth);
 	Score ttValue = tte ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 
 	if (tte
@@ -1389,6 +1391,9 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 		assert(m.packed);
 
+		if(!inCheck && m.flags==Move::fpromotion && m.promotion!= Move::promQueen){
+			continue;
+		}
 		if(depth<-7*ONE_PLY && !inCheck){
 			if(pos.getActualState().currentMove.to!= m.to){
 				continue;
