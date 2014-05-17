@@ -57,7 +57,7 @@ class my_thread{
 	std::condition_variable searchCond;
 	std::condition_variable timerCond;
 	Position *pos;
-	search src;
+	globalSearch src;
 	searchLimits limits;
 
 	static unsigned long startTime;

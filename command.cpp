@@ -190,43 +190,43 @@ void setoption(std::istringstream& is) {
 	}
 	else if(name =="MultiPV"){
 		int i=stoi(value);
-		search::multiPVLines=i<500?(i>0?i:1):500;
+		globalSearch::multiPVLines=i<500?(i>0?i:1):500;
 	}
 	else if(name =="OwnBook"){
 		if(value=="true"){
-			search::useOwnBook=true;
+			globalSearch::useOwnBook=true;
 		}
 		else{
-			search::useOwnBook=false;
+			globalSearch::useOwnBook=false;
 		}
 	}
 	else if(name =="BestMoveBook"){
 		if(value=="true"){
-			search::bestMoveBook=true;
+			globalSearch::bestMoveBook=true;
 		}
 		else{
-			search::bestMoveBook=false;
+			globalSearch::bestMoveBook=false;
 		}
 	}
 	else if(name =="UCI_ShowCurrLine"){
 		if(value=="true"){
-			search::showCurrentLine=true;
+			globalSearch::showCurrentLine=true;
 		}
 		else{
-			search::showCurrentLine=false;
+			globalSearch::showCurrentLine=false;
 		}
 	}
 	else if(name =="UCI_LimitStrength"){
 		if(value=="true"){
-			search::limitStrength=1;
+			globalSearch::limitStrength=1;
 		}
 		else{
-			search::limitStrength=0;
+			globalSearch::limitStrength=0;
 		}
 	}
 	else if(name =="UCI_Elo"){
 		int i=stoi(value);
-		search::eloStrenght=i<3000?(i>1000?i:1000):3000;
+		globalSearch::eloStrenght=i<3000?(i>1000?i:1000):3000;
 	}
 	else{
 		sync_cout << "No such option: " << name << sync_endl;
@@ -289,6 +289,7 @@ void setvalue(std::istringstream& is) {
 */
 void uciLoop(){
 	my_thread *thr= my_thread::getInstance();
+
 	Position pos;
 	pos.setupFromFen(StartFEN);
 	std::string token, cmd;
@@ -360,4 +361,5 @@ void uciLoop(){
 			sync_cout<<"unknown command"<<sync_endl;
 		}
 	}while(token!="quit");
+
 }

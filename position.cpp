@@ -181,7 +181,7 @@ void Position::initPstValues(void){
 	}
 
 	/*for(tSquare s=(tSquare)(squareNumber-1);s>=0;s--){
-		std::cout<<pstValue[whiteBishops][s][0]/10000.0<<" ";
+		std::cout<<pstValue[whitePawns][s][0]/10000.0<<" ";
 		if(s%8==0)std::cout<<std::endl;
 	}*/
 }

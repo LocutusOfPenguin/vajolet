@@ -57,7 +57,7 @@ public :
 	unsigned long long pvNodeOrderingCounter;
 	unsigned long long pvNodeOrderingSum;
 
-	void gatherNodeTypeStat(search::nodeType expectedNodeType,search::nodeType resultNodeType);
+	void gatherNodeTypeStat(globalSearch::nodeType expectedNodeType,globalSearch::nodeType resultNodeType);
 	void printNodeTypeStat();
 	void initNodeTypeStat();
 private:

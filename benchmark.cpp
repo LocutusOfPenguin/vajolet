@@ -60,7 +60,7 @@ void benchmark(void) {
 	for (unsigned int i = 0; i < positions.size(); i++)
 	{
 		 Position pos;
-		 search src;
+		 globalSearch src;
 		 pos.setupFromFen(positions[i]);
 
 		 sync_cout << "\nPosition: " << i + 1 << '/' << positions.size() << sync_endl;

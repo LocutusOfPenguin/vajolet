@@ -65,7 +65,7 @@ int main()
 	Position::initScoreValues();
 	Position::initCastleRightsMask();
 	Movegen::initMovegenConstant();
-	search::initLMRreduction();
+	globalSearch::initLMRreduction();
 	TT.setSize(1);
 	initMaterialKeys();
 	initMobilityBonus();

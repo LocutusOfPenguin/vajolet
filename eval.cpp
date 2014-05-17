@@ -955,7 +955,6 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 		res+=bitCnt(defendedPieces)*pieceCoordination;
 
 		unsigned int mobility= (bitCnt(attack&~(threatenSquares|ourPieces))+ bitCnt(attack&~(ourPieces)))/2;
-		//sync_cout<<mobility<<sync_endl;
 		res+=mobilityBonus[piece%Position::separationBitmap][mobility];
 		if(!(attack&~(threatenSquares|ourPieces)) && (threatenSquares&bitSet(sq))){ // zero mobility && attacked by pawn
 			res-=(Position::pieceValue[piece%Position::separationBitmap]/4);
@@ -1057,7 +1056,6 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 				if(enemyHoles &BITSET[sq]){
 					res += knightOnHole;
 				}
-
 			}
 			break;
 		default:

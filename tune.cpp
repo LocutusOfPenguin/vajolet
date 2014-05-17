@@ -41,7 +41,7 @@ double Tuner::parseEpd(bool save=false){
 
 	std::string newGameString("new game");
 	Position pos;
-	search searcher;
+	globalSearch searcher;
 	searcher.history.clear();
 	double sum=0;
 	unsigned long positions=0;
@@ -60,7 +60,7 @@ double Tuner::parseEpd(bool save=false){
 
 				pos.setupFromFen(clearFen);
 				std::vector<Move> childPV;
-				Score score=searcher.qsearch<search::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
+				Score score=searcher.qsearch<globalSearch::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
 
 				double error=std::pow(scoreRes-(1.0/(1+std::pow(2.71828182846,-score/scaling))),2);
 				if(save && std::abs(error)>1.1){
@@ -103,7 +103,7 @@ void Tuner::drawSigmoid(void){
 	evalTable evalHashTable;
 	std::string newGameString("new game");
 	Position pos;
-	search searcher;
+	globalSearch searcher;
 	//unsigned long positions=0;
 	do{
 		ifs.getline(fenstr,256);
@@ -119,7 +119,7 @@ void Tuner::drawSigmoid(void){
 
 				pos.setupFromFen(clearFen);
 				std::vector<Move> childPV;
-				Score score=searcher.qsearch<search::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
+				Score score=searcher.qsearch<globalSearch::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
 				unsigned int index=0;
 
 				//sync_cout<<"fen "<<clearFen<<" result "<<scoreRes<< " score "<< score<<sync_endl;
@@ -175,7 +175,7 @@ void Tuner::drawAverageEvolution(void){
 	evalTable evalHashTable;
 	std::string newGameString("new game");
 	Position pos;
-	search searcher;
+	globalSearch searcher;
 	unsigned long positions=0;
 	do{
 		ifs.getline(fenstr,256);
@@ -191,7 +191,7 @@ void Tuner::drawAverageEvolution(void){
 
 				pos.setupFromFen(clearFen);
 				std::vector<Move> childPV;
-				Score score=searcher.qsearch<search::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
+				Score score=searcher.qsearch<globalSearch::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,childPV);
 				if(scoreRes!=0.5){
 					double error=std::abs(scoreRes-(1.0/(1+std::pow(2.71828182846,-score/scaling))));
 					unsigned int index=std::min(positions,(unsigned long int)199);
@@ -224,7 +224,7 @@ void Tuner::drawAverageEvolution(void){
 void Tuner::createEpd(void){
 	searchLimits sl;
 
-	search searcher;
+	globalSearch searcher;
 	sync_cout<<"start parsing epd"<<sync_endl;
 	std::ifstream ifs ("out.epd", std::ifstream::in);
 	std::ifstream ifs2 ("out.epd", std::ifstream::in);

@@ -52,18 +52,18 @@ void Statistics::printNodeTypeStat(){
 
 }
 
-void Statistics::gatherNodeTypeStat(search::nodeType expectedNodeType,search::nodeType resultNodeType){
+void Statistics::gatherNodeTypeStat(globalSearch::nodeType expectedNodeType,globalSearch::nodeType resultNodeType){
 	switch(expectedNodeType){
-	case search::nodeType::ROOT_NODE:
+	case globalSearch::nodeType::ROOT_NODE:
 		testedNodeTypePv++;
 		break;
-	case search::nodeType::PV_NODE:
+	case globalSearch::nodeType::PV_NODE:
 		testedNodeTypePv++;
 		break;
-	case search::nodeType::CUT_NODE:
+	case globalSearch::nodeType::CUT_NODE:
 		testedNodeTypeCut++;
 		break;
-	case search::nodeType::ALL_NODE:
+	case globalSearch::nodeType::ALL_NODE:
 		testedNodeTypeAll++;
 		break;
 
@@ -71,16 +71,16 @@ void Statistics::gatherNodeTypeStat(search::nodeType expectedNodeType,search::no
 
 
 	switch(resultNodeType){
-	case search::nodeType::ROOT_NODE:
+	case globalSearch::nodeType::ROOT_NODE:
 		resultNodeTypePv++;
 		break;
-	case search::nodeType::PV_NODE:
+	case globalSearch::nodeType::PV_NODE:
 		resultNodeTypePv++;
 		break;
-	case search::nodeType::CUT_NODE:
+	case globalSearch::nodeType::CUT_NODE:
 		resultNodeTypeCut++;
 		break;
-	case search::nodeType::ALL_NODE:
+	case globalSearch::nodeType::ALL_NODE:
 		resultNodeTypeAll++;
 		break;
 

@@ -72,7 +72,7 @@ inline Score matedIn(int ply) {
 }
 
 
-class search{
+class globalSearch{
 
 
 	static Score futility[5];
