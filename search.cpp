@@ -216,7 +216,7 @@ Score globalSearch::startThinking(Position & p,searchLimits & l){
 			// reload the last PV in the transposition table
 			for(unsigned int i =0; i<=PVIdx; i++){
 				int n=0;
-				if(/*nodeType==typeExact && */rootMoves[i].PV.size()>0){
+				if(rootMoves[i].PV.size()>0){
 					for (auto it= rootMoves[i].PV.begin(); it != rootMoves[i].PV.end() && mg.isMoveLegal(*it); ++it){
 							/*if(!mg.isMoveLegal(*it)){
 								p.display();
@@ -263,9 +263,10 @@ Score globalSearch::startThinking(Position & p,searchLimits & l){
 					//sync_cout<<"iterative deepening Stop"<<sync_endl;
 					break;
 				}
+
 				unsigned long now = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
-				if(newPV.size()!=0 && res > alpha && res < beta){
-					std::vector<rootMove>::iterator it=std::find(rootMoves.begin(),rootMoves.end(),newPV[0]);
+				if(newPV.size()!=0 && res > alpha /*&& res < beta*/){
+					std::vector<rootMove>::iterator it=std::find(rootMoves.begin()+PVIdx,rootMoves.end(),newPV[0]);
 					if(it->firstMove==newPV[0]){
 						it->PV=newPV;
 						it->score=res;
@@ -274,9 +275,13 @@ Score globalSearch::startThinking(Position & p,searchLimits & l){
 						it->depth=depth-reduction;
 						it->nodes=visitedNodes;
 						it->time= now-startTime;
+						std::iter_swap( it, rootMoves.begin()+PVIdx);
+						std::stable_sort(rootMoves.begin() + PVIdx+1, rootMoves.end());
 					}
-					std::stable_sort(rootMoves.begin() + PVIdx, rootMoves.end());
+
 					//sync_cout<<"stableSort OK "<<sync_endl;
+
+
 
 				}
 
@@ -420,7 +425,7 @@ template<globalSearch::nodeType type> Score globalSearch::alphaBeta(unsigned int
 	assert(PV.size()==0);
 
 	std::vector<Move> childPV;
-	/*if(visitedNodes>709000 && visitedNodes<710000){
+	/*if(visitedNodes>64270 && visitedNodes<64280){
 		sync_cout<<visitedNodes<<" AB "<<"ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 	}*/
 	//sync_cout<<"AB "<<"ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
@@ -1271,8 +1276,14 @@ template<globalSearch::nodeType type> Score globalSearch::qsearch(unsigned int p
 	std::vector<Move> childPV;
 
 
-	/*if(visitedNodes>599000 && visitedNodes<800000){
+	/*if(visitedNodes>64270 && visitedNodes<64280){
+		print=true;
 		sync_cout<<"Q ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
+		sync_cout;
+		for(int i=0; i<pos.getStateIndex();i++){
+			std::cout<<pos.displayUci(pos.getState(i).currentMove)<< " ";
+		}
+		std::cout<<sync_endl;
 	}*/
 	//sync_cout<<"Q ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 
@@ -1284,6 +1295,7 @@ template<globalSearch::nodeType type> Score globalSearch::qsearch(unsigned int p
 
 	selDepth=std::max(st.ply,selDepth);
 	visitedNodes++;
+
 
 	if(pos.isDraw(PVnode) || signals.stop){
 #ifdef PRINT_STATISTICS
@@ -1443,7 +1455,6 @@ template<globalSearch::nodeType type> Score globalSearch::qsearch(unsigned int p
 				pos.seeSign(m)<0){
 			continue;
 		}
-
 		pos.doMove(m);
 		Score val;
 
