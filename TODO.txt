@@ -1,0 +1,5 @@
+TODO
+
+limit vajolet output to cp to some lower value to be compatible with SHREDDER GUI
+
+1.46
