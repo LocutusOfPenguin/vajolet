@@ -250,14 +250,17 @@ Score search::startThinking(Position & p,searchLimits & l){
 				//sync_cout<<"FINISHED SEARCH"<<sync_endl;
 				//sync_cout<<"PVsize "<<newPV.lenght<<sync_endl;
 
+				unsigned long now = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
+
 				if(depth!=1 && signals.stop){
 					//sync_cout<<"iterative deepening Stop"<<sync_endl;
+					//sync_cout<<"DEBUG STOP depth "<< depth<<" time "<<now-startTime<<sync_endl;
 					break;
 				}
 				if(newPV.lenght!=0 &&  res <= alpha){
 					sync_cout<<"ERRORE NEWPV"<<sync_endl;
 				}
-				unsigned long now = std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
+
 
 
 
@@ -273,7 +276,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 
 						it->score=res;
 						it->selDepth=selDepth-selDepthBase;
-						it->depth=depth-reduction;
+						it->depth=depth;
 						it->nodes=visitedNodes;
 						it->time= now-startTime;
 						std::iter_swap( it, rootMoves.begin()+indexPV);
@@ -318,6 +321,8 @@ Score search::startThinking(Position & p,searchLimits & l){
 					}
 				}*/
 
+				//sync_cout<<"DEBUG depth "<< depth<<" time "<<now-startTime<< " pv "<<p.displayUci(rootMoves[indexPV].PV.list[0]) <<sync_endl;
+
 
 				if (res <= alpha)
 				{
@@ -326,8 +331,9 @@ Score search::startThinking(Position & p,searchLimits & l){
 					//my_thread::timeMan.idLoopRequestToExtend=true;
 					newPV.lenght=1;
 					newPV.list[0]=(rootMoves[indexPV].PV.list[0]);
-					printPV(res,depth-reduction,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
+					printPV(res,depth,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
 					alpha = std::max((signed long long int)(res) - delta,(signed long long int)-SCORE_INFINITE);
+					reduction = 0;
 
 					//TT.store(p.getActualState().key, transpositionTable::scoreToTT(rootMoves[indexPV].previousScore, 0),typeExact,depth*ONE_PLY, (rootMoves[indexPV].PV[0]).packed, p.eval<false>(pawnHashTable, evalHashTable));
 					//sync_cout<<"new alpha "<<alpha<<sync_endl;
@@ -338,7 +344,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 						//sync_cout<<"estesa ricerca="<<my_thread::timeMan.allocatedTime<<sync_endl;
 					}
 					//sync_cout<<"res>=beta "<<sync_endl;
-					printPV(res,depth-reduction,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
+					printPV(res,depth,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
 					beta = std::min((signed long long int)(res) + delta, (signed long long int)SCORE_INFINITE);
 					if(depth>1){
 						reduction=1;

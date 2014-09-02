@@ -114,7 +114,8 @@ public:
 	void store(const U64 key, Score v, unsigned char b, signed short int d, unsigned short m, Score statV);
 
 	unsigned int getFullness(void){
-		return usedElements*250.0/(elements);
+		unsigned int ret = usedElements*250.0/(elements);
+		return ret;
 	}
 
 	// value_to_tt() adjusts a mate score from "plies to mate from the root" to

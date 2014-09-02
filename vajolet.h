@@ -33,7 +33,7 @@
 //---------------------------------------------
 
 #define PROGRAM_NAME	"Vajolet2"
-#define VERSION			"1.48"
+#define VERSION			"1.49"
 #define PRECALCULATED_BITSET
 #define HW_BITCOUNT
 
