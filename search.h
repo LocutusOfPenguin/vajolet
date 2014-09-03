@@ -130,6 +130,7 @@ public:
 	unsigned long long getVisitedNodes(){
 		return visitedNodes;
 	}
+	unsigned long long searchPVinstability;
 	template<nodeType type>Score qsearch(unsigned int ply,Position & p,int depth,Score alpha,Score beta,PVline * pvLine);
 private:
 	template<nodeType type>Score alphaBeta(unsigned int ply,Position & p,int depth,Score alpha,Score beta,PVline *  pvLine);
@@ -137,6 +138,8 @@ private:
 	unsigned long long visitedNodes;
 	unsigned int selDepth;
 	bool stop;
+
+
 };
 
 #endif /* SEARCH_H_ */

@@ -60,6 +60,7 @@ void timeManagerInit(Position& pos, searchLimits& lim, timeManagementStruct& tim
 	}
 	timeMan.singularRootMoveCount=0;
 	timeMan.idLoopIterationFinished=false;
+	timeMan.idLoopTimeExtended=false;
 
 
 
@@ -104,8 +105,16 @@ void my_thread::timerThread() {
 				}*/
 				src.signals.stop=true;
 			}
+			if(src.searchPVinstability>10000 && !timeMan.idLoopTimeExtended)
+			{
+				timeMan.idLoopTimeExtended= true;
+				timeMan.allocatedTime = std::min((unsigned long int)(timeMan.allocatedTime*1.1),(unsigned long int)timeMan.maxSearchTime);
+				sync_cout<<"extended time!!"<<sync_endl;
+
+			}
 #ifndef DISABLE_TIME_DIPENDENT_OUTPUT
 			if(time - lastHasfullMessage>1000){
+				//sync_cout<<"instability:"<<src.searchPVinstability<<sync_endl;
 				unsigned int fullness = TT.getFullness();
 				lastHasfullMessage=time;
 				if(fullness!=oldFullness){
@@ -135,7 +144,12 @@ void my_thread::timerThread() {
 			if(limits.moveTime && time>=limits.moveTime){
 				src.signals.stop=true;
 			}
+			if(timeMan.idLoopIterationFinished)
+			{
+				timeMan.idLoopTimeExtended=false;
+			}
 			timeMan.idLoopIterationFinished=false;
+
 
 
 

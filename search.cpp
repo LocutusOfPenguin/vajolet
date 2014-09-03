@@ -242,7 +242,9 @@ Score search::startThinking(Position & p,searchLimits & l){
 				newPV.lenght=0;
 				p.cleanStateInfo();
 				//sync_cout<<"search line "<<PVIdx<<sync_endl;
+				searchPVinstability=0;
 				res=alphaBeta<search::nodeType::ROOT_NODE>(0,p,(depth-reduction)*ONE_PLY,alpha,beta,&newPV);
+				//sync_cout<<"instability: "<<searchPVinstability<<sync_endl;
 
 
 
@@ -410,6 +412,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 		//sync_cout<<"nuovo tempo allocato="<<my_thread::timeMan.allocatedTime<<sync_endl;
 
 		my_thread::timeMan.idLoopIterationFinished=true;
+
 
 
 
@@ -1178,9 +1181,12 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				if(type ==search::nodeType::ROOT_NODE|| (PVnode &&!signals.stop)){
 					if(PVnode){
 
+
+
 						pvLine->lenght=std::min(childPV.lenght+1, (unsigned int)(MAX_PV_LENGTH));
 						pvLine->list[0]=bestMove;
 						memcpy(pvLine->list + 1, childPV.list,  std::min(childPV.lenght,(unsigned int)(MAX_PV_LENGTH-1)) * sizeof(Move));
+						searchPVinstability+=pvLine->lenght*pvLine->lenght;
 					}
 				}
 			}

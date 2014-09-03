@@ -36,6 +36,7 @@ typedef struct timeManagement{
 	volatile unsigned int singularRootMoveCount;
 	volatile unsigned int resolution;
 	volatile bool idLoopIterationFinished;
+	volatile bool idLoopTimeExtended;
 } timeManagementStruct;
 
 
