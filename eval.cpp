@@ -90,6 +90,8 @@ simdScore queenOn7Bonus=simdScore(-3200,7000,0,0);
 simdScore queenOnPawns=simdScore(-1000,3000,0,0);
 simdScore rookOnOpen=simdScore(2000,500,0,0);
 simdScore rookOnSemi=simdScore(500,1100,0,0);
+simdScore rookTrapped = simdScore(300,0,0,0);
+simdScore rookTrappedKingWithoutCastlig = simdScore(300,0,0,0);
 
 simdScore knightOnOutpost= simdScore(1900,-280,0,0);
 simdScore knightOnOutpostSupported= simdScore(-2490,1290,0,0);
@@ -1050,6 +1052,41 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 				}else
 				{
 					res+=rookOnSemi;
+				}
+			}
+			//--------------------------------
+			// torre intrappolata
+			//--------------------------------
+			else if(mobility<3)
+			{
+
+				tSquare ksq= (piece<=Position::separationBitmap)? p.pieceList[Position::whiteKing][0]:p.pieceList[Position::blackKing][0];
+				unsigned int relativeRankKing =(piece>Position::separationBitmap)? 7-RANKS[ksq]:RANKS[ksq];
+
+
+				if(
+					((FILES[ksq] < 4) == (FILES[sq] < FILES[ksq])) &&
+					(RANKS[ksq] == RANKS[sq] && relativeRankKing == 0)
+				)
+				{
+
+					res -= rookTrapped*(3-mobility);
+					Position::state & st = p.getActualState();
+					if(piece<=Position::separationBitmap)
+					{
+						if(!(st.castleRights & (Position::wCastleOO| Position::wCastleOOO)) )
+						{
+							res-= rookTrappedKingWithoutCastlig*(3-mobility) ;
+						}
+					}
+					else
+					{
+						if(!(st.castleRights & (Position::bCastleOO| Position::bCastleOOO)) )
+						{
+							res-= rookTrappedKingWithoutCastlig*(3-mobility);
+						}
+
+					}
 				}
 			}
 			break;

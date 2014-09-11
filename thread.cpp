@@ -51,7 +51,7 @@ void timeManagerInit(Position& pos, searchLimits& lim, timeManagementStruct& tim
 			}
 		}
 
-		timeMan.minSearchTime=timeMan.allocatedTime*0.1;
+		timeMan.minSearchTime=timeMan.allocatedTime*0.2;
 		timeMan.resolution=std::min((unsigned long int)100,timeMan.allocatedTime/100);
 	}
 
@@ -109,7 +109,7 @@ void my_thread::timerThread() {
 			{
 				timeMan.idLoopTimeExtended= true;
 				timeMan.allocatedTime = std::min((unsigned long int)(timeMan.allocatedTime*1.1),(unsigned long int)timeMan.maxSearchTime);
-				sync_cout<<"extended time!!"<<sync_endl;
+				//sync_cout<<"extended time!!"<<sync_endl;
 
 			}
 #ifndef DISABLE_TIME_DIPENDENT_OUTPUT
