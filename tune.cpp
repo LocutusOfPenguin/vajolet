@@ -72,11 +72,14 @@ double Tuner::parseEpd(bool save=false){
 			positions=0;
 		}
 
+		if( counter%100==0)
+			sync_cout<<"pos:"<<counter<<sync_endl;
+
 
 	}while(ifs.good());
 	sum/=counter;
 	double goodness=std::sqrt(sum);
-	//sync_cout<<"goodness:"<<goodness<<sync_endl;
+	sync_cout<<"goodness:"<<goodness<<sync_endl;
 	//std::cout<<"feature tested #"<<Position::testPointCounter<<" times"<<std::endl;
 	//Position::testPointCounter=0;
 	return goodness;
@@ -370,7 +373,7 @@ void Tuner::tuneParameters(void){
 	}state;
 	std::vector<parameterStruct> parameters;
 
-	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
+/*	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
 	parameters.push_back(parameterStruct("queen endgame value",&initialPieceValue[Position::whiteQueens],1,1000));
 	parameters.push_back(parameterStruct("rook opening value",&initialPieceValue[Position::whiteRooks],0,1000));
 	parameters.push_back(parameterStruct("rook endgame value",&initialPieceValue[Position::whiteRooks],1,1000));
@@ -378,7 +381,7 @@ void Tuner::tuneParameters(void){
 	parameters.push_back(parameterStruct("bishop endgame value",&initialPieceValue[Position::whiteBishops],1,100));
 	parameters.push_back(parameterStruct("knight opening value",&initialPieceValue[Position::whiteKnights],0,100));
 	parameters.push_back(parameterStruct("knight endgame value",&initialPieceValue[Position::whiteKnights],1,100));
-	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));
+	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));*/
 /*
 	parameters.push_back(parameterStruct("PawnD3 opening bonus",&PawnD3,0,10));
 //	parameters.push_back(parameterStruct("PawnD3 endgame bonus",&PawnD3,1,10));
