@@ -72,14 +72,12 @@ double Tuner::parseEpd(bool save=false){
 			positions=0;
 		}
 
-		if( counter%100==0)
-			sync_cout<<"pos:"<<counter<<sync_endl;
 
 
 	}while(ifs.good());
 	sum/=counter;
 	double goodness=std::sqrt(sum);
-	sync_cout<<"goodness:"<<goodness<<sync_endl;
+	//sync_cout<<"goodness:"<<goodness<<sync_endl;
 	//std::cout<<"feature tested #"<<Position::testPointCounter<<" times"<<std::endl;
 	//Position::testPointCounter=0;
 	return goodness;
@@ -373,6 +371,12 @@ void Tuner::tuneParameters(void){
 	}state;
 	std::vector<parameterStruct> parameters;
 
+	parameters.push_back(parameterStruct("king safety scaling",&kingSafetyScaling,0,100));
+	parameters.push_back(parameterStruct("king safety max att",&KingSafetyMaxAttack,0,2));
+	parameters.push_back(parameterStruct("king safety linear",&KingSafetyLinearCoefficent,0,1));
+	parameters.push_back(parameterStruct("king safety max res",&KingSafetyMaxResult,0,50));
+	parameters.push_back(parameterStruct("king safety bonus op",&kingSafetyBonus,0,1));
+	parameters.push_back(parameterStruct("king safety bonus end",&kingSafetyBonus,1,1));
 /*	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
 	parameters.push_back(parameterStruct("queen endgame value",&initialPieceValue[Position::whiteQueens],1,1000));
 	parameters.push_back(parameterStruct("rook opening value",&initialPieceValue[Position::whiteRooks],0,1000));

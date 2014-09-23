@@ -612,7 +612,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 #ifdef DEBUG_EVAL_SIMMETRY
 		Position ppp;
 		ppp.setupFromFen(pos.getSymmetricFen());
-		Score test=ppp.eval<false>(pawnHashTable,evalHashTable);
+		Score test=ppp.eval<false>();
 		if(test!=eval){
 			pos.display();
 			while(1);
