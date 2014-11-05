@@ -53,6 +53,7 @@ public:
 	void createEpd(void);
 	void tuneParameters(void);
 	void drawAverageEvolution(void);
+	void simulatedAnnealing(void);
 };
 
 

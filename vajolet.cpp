@@ -52,7 +52,7 @@ int main()
 	// todo test for cpu type and capability con le nuove funzioni di gcc
 	//
 	//__builtin_cpu_supports("ssse3");
-	//TODO__builtin_cpu_supports("popcnt")
+	//TODO __builtin_cpu_supports("popcnt")
 	//TODO gcc Function Multiversioning per fare popcnt hw solo se c'è, si può usare con gcc 4.8.2
 	//----------------------------------
 	//	init global data
@@ -75,7 +75,8 @@ int main()
 	//----------------------------------
 	printStartInfo();
 
-	//Tuner t;
+//	Tuner t;
+//	t.simulatedAnnealing();
 	//t.tuneParameters();
 	//t.parseEpd(true);
 	//t.createEpd();

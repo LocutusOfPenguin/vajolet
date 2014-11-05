@@ -18,6 +18,8 @@
 #include <vector>
 #include <iomanip>
 #include <cmath>
+#include <random>
+#include <time.h>
 #include "eval.h"
 #include "position.h"
 #include "search.h"
@@ -57,11 +59,12 @@ double Tuner::parseEpd(bool save=false){
 
 				pos.setupFromFen(clearFen);
 				PVline childPV;
-				Score score=searcher.qsearch<search::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,&childPV);
+				//Score score=searcher.qsearch<search::nodeType::PV_NODE>(0,pos,0,-SCORE_INFINITE,SCORE_INFINITE,&childPV);
+				Score score=pos.eval<false>();
 
 				double error=std::pow(scoreRes-(1.0/(1+std::pow(2.71828182846,-score/scaling))),2);
-				if(save && std::abs(error)>1.1){
-					sync_cout<<pos.displayFen()<<sync_endl;
+				if(save && error>0.7){
+					sync_cout<<pos.displayFen()<<" "<<error <<sync_endl;
 				}
 				sum+=error;
 				++positions;
@@ -250,7 +253,8 @@ void Tuner::createEpd(void){
 				std::string clearTempFen=tempFen.substr(0,tempFen.find("bm")-1);
 				Position pos;
 				pos.setupFromFen(clearTempFen);
-				sl.depth=10;
+				sl.depth=20;
+				sl.moveTime=10000;
 				Score searchRes=searcher.startThinking(pos,sl);
 				unsigned int res=lastFen.find('w');
 
@@ -310,15 +314,15 @@ void Tuner::createEpd(void){
 						Score searchRes;
 						if(result==0){
 							searchRes=searcher.startThinking(pos,sl);
-							searchRes-=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							searchRes-=5000.0+70000.0*(line2-startLine)/(line-startLine);
 						}
 						else if (result==1)
 						{
 							searchRes=searcher.startThinking(pos,sl);
-							searchRes+=5000.0+10000.0*(line2-startLine)/(line-startLine);
+							searchRes+=5000.0+70000.0*(line2-startLine)/(line-startLine);
 						}
 						else{
-							searchRes=0.5;
+							searchRes=0;
 						}
 
 						double sigmoid=1.0/(1+std::pow(2.71828182846,-searchRes/scaling));
@@ -371,13 +375,13 @@ void Tuner::tuneParameters(void){
 	}state;
 	std::vector<parameterStruct> parameters;
 
-	parameters.push_back(parameterStruct("king safety scaling",&kingSafetyScaling,0,100));
+/*	parameters.push_back(parameterStruct("king safety scaling",&kingSafetyScaling,0,100));
 	parameters.push_back(parameterStruct("king safety max att",&KingSafetyMaxAttack,0,2));
 	parameters.push_back(parameterStruct("king safety linear",&KingSafetyLinearCoefficent,0,1));
 	parameters.push_back(parameterStruct("king safety max res",&KingSafetyMaxResult,0,50));
 	parameters.push_back(parameterStruct("king safety bonus op",&kingSafetyBonus,0,1));
 	parameters.push_back(parameterStruct("king safety bonus end",&kingSafetyBonus,1,1));
-/*	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
+*/	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
 	parameters.push_back(parameterStruct("queen endgame value",&initialPieceValue[Position::whiteQueens],1,1000));
 	parameters.push_back(parameterStruct("rook opening value",&initialPieceValue[Position::whiteRooks],0,1000));
 	parameters.push_back(parameterStruct("rook endgame value",&initialPieceValue[Position::whiteRooks],1,1000));
@@ -385,7 +389,7 @@ void Tuner::tuneParameters(void){
 	parameters.push_back(parameterStruct("bishop endgame value",&initialPieceValue[Position::whiteBishops],1,100));
 	parameters.push_back(parameterStruct("knight opening value",&initialPieceValue[Position::whiteKnights],0,100));
 	parameters.push_back(parameterStruct("knight endgame value",&initialPieceValue[Position::whiteKnights],1,100));
-	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));*/
+	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));
 /*
 	parameters.push_back(parameterStruct("PawnD3 opening bonus",&PawnD3,0,10));
 //	parameters.push_back(parameterStruct("PawnD3 endgame bonus",&PawnD3,1,10));
@@ -721,3 +725,132 @@ void Tuner::tuneParameters(void){
 
 
 }
+
+
+
+void Tuner::simulatedAnnealing(void){
+
+	std::vector<parameterStruct> parameters;
+	std::vector<int> bestParameters;
+	std::vector<int> workingParameters;
+	std::vector<int> tempParameters;
+	double bestScore =1e6;
+	double workingScore =1e6;
+
+	parameters.push_back(parameterStruct("queen opening value",&initialPieceValue[Position::whiteQueens],0,1000));
+	parameters.push_back(parameterStruct("queen endgame value",&initialPieceValue[Position::whiteQueens],1,1000));
+	parameters.push_back(parameterStruct("rook opening value",&initialPieceValue[Position::whiteRooks],0,1000));
+	parameters.push_back(parameterStruct("rook endgame value",&initialPieceValue[Position::whiteRooks],1,1000));
+	parameters.push_back(parameterStruct("bishop opening value",&initialPieceValue[Position::whiteBishops],0,100));
+	parameters.push_back(parameterStruct("bishop endgame value",&initialPieceValue[Position::whiteBishops],1,100));
+	parameters.push_back(parameterStruct("knight opening value",&initialPieceValue[Position::whiteKnights],0,100));
+	parameters.push_back(parameterStruct("knight endgame value",&initialPieceValue[Position::whiteKnights],1,100));
+	parameters.push_back(parameterStruct("pawn opening value",&initialPieceValue[Position::whitePawns],0,100));
+
+	unsigned int counter=0;
+
+//	std::random_device rd;
+	std::mt19937 gen(time(0));
+	std::uniform_real_distribution<> dis(0.0,150000.0);
+
+	bestParameters.clear();
+	for(unsigned int index =0 ;index<parameters.size(); index++)
+	{
+		bestParameters.push_back((*parameters[index].parameter)[parameters[index].index]);
+	}
+	workingParameters = bestParameters;
+	tempParameters = bestParameters;
+	double Score=parseEpd();
+	showValues(parameters);
+	sync_cout<<"original result:"<<Score<<sync_endl;
+	sync_cout<<"------------------------"<<sync_endl;
+/*	sync_cout<<"generating random values"<<sync_endl;
+	while(counter<100)
+	{
+		//sync_cout<<"print parameters"<<sync_endl;
+		for(unsigned int index=0; index<parameters.size();index++)
+		{
+			int data;
+			data= (*parameters[index].parameter)[0];
+			data = dis(gen);
+			data=std::max(std::min(data,200000),0);
+			(*parameters[index].parameter).insert(parameters[index].index,data);
+		}
+		double Score=parseEpd();
+
+		sync_cout<<counter<<" result:"<<Score<<sync_endl;
+		if( Score < bestScore)
+		{
+			bestScore = Score;
+			bestParameters = parameters;
+			showValues(parameters);
+		}
+		counter++;
+	}
+*/
+	for(unsigned int index=0; index<parameters.size();index++)
+	{
+		int data;
+
+		data = (*parameters[index].parameter)[parameters[index].index];
+		workingParameters[index]=data;
+	}
+	bestScore = Score;
+	workingScore = Score;
+	sync_cout<<"------------------------"<<sync_endl;
+	sync_cout<<"symulated annealing"<<sync_endl;
+	double Temperature=20;
+	std::uniform_real_distribution<> prob(0.0,1.0);
+
+	while(true)
+	{
+		double MAXdistrib = std::max(std::min(10000.0, Temperature*10),100.0);
+		std::uniform_real_distribution<> dis2(-MAXdistrib,MAXdistrib);
+		sync_cout<<"TEMPERATURE: "<<Temperature<<sync_endl;
+		sync_cout<<"distribuzione: "<<-MAXdistrib<<":"<<MAXdistrib<<sync_endl;
+		counter=0;
+		while(counter<100)
+		{
+			//sync_cout<<"print parameters"<<sync_endl;
+			for(unsigned int index=0; index<parameters.size();index++)
+			{
+				int data;
+				data = workingParameters[index];
+				data += dis2(gen);
+				data=std::max(std::min(data,200000),0);
+				tempParameters[index]= data;
+				(*parameters[index].parameter).insert(parameters[index].index,data);
+			}
+			double Score=parseEpd();
+
+			sync_cout<<counter<<" result:"<<Score<<sync_endl;
+			double probability = std::min(std::pow(2.718281828,-(Score-workingScore)*100000/(Temperature)),1.0);
+			sync_cout<<"probability: "<<probability*100.0<<sync_endl;
+			if( Score<bestScore)
+			{
+				bestScore = Score;
+				bestParameters =tempParameters;
+			}
+			if( probability>=prob(gen))
+			{
+				workingScore = Score;
+				workingParameters = tempParameters;
+				showValues(parameters);
+			}
+
+			counter++;
+		}
+		sync_cout<<"------------------------"<<sync_endl;
+		Temperature *= 0.8;
+		sync_cout<<"-BEST PARAMETERS-"<<sync_endl;
+		for(unsigned int index=0; index<parameters.size();index++)
+		{
+			(*parameters[index].parameter).insert(parameters[index].index,bestParameters[index]);
+		}
+		showValues(parameters);
+		sync_cout<<"BEST SCORE:"<<bestScore<<sync_endl;
+		sync_cout<<"------------------------"<<sync_endl;
+	}
+
+}
+

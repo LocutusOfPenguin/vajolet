@@ -38,8 +38,8 @@ simdScore initialPieceValue[Position::lastBitboard]={
 		simdScore(34500,35400,0,0),//knight
 		simdScore(4100,10000,0,0),//panws*/
 		simdScore(3000000,3000000,0,0),//king
-		simdScore(137000,100000,0,0),//queen
-		simdScore(52000,61000,0,0),//rook
+		simdScore(130000,98000,0,0),//queen
+		simdScore(44000,59000,0,0),//rook
 		simdScore(35300,36100,0,0),//bishop
 		simdScore(34500,34900,0,0),//knight
 		simdScore(5700,10000,0,0),//panws
