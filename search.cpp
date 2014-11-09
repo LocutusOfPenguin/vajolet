@@ -31,6 +31,8 @@
 #include "thread.h"
 
 
+//unsigned long tested[500]={0};
+//unsigned long positiveTest[500]={0};
 inline signed int razorMargin(unsigned int depth){
 	return 20000+depth*78;
 }
@@ -453,6 +455,11 @@ Score search::startThinking(Position & p,searchLimits & l){
 
 	}
 	std::cout<<sync_endl;
+
+	/*for(int i=0; i<500;i++)
+	{
+		sync_cout<<"["<<i<<"] " <<(100.0*positiveTest[i])/tested[i]<<"%"<<sync_endl;
+	}*/
 
 
 
@@ -1152,38 +1159,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 				}
 
-				if( val >=beta
-					&& ext==0
-					&& !inCheck
-					&& !pos.getActualState().skipNullMove
-				)
-				{
-					pos.undoMove(m);
-					pos.doNullMove();
-					Score toBeTested =bestScore-15000;
-					Score nullval;
-					if(newDepth<ONE_PLY)
-					{
-						nullval=-qsearch<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
-					}
-					else{
-						nullval=-alphaBeta<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
-					}
-					pos.undoNullMove();
-					pos.doMove(m);
-					if(nullval<toBeTested)
-					{
-						if(depth<ONE_PLY){
-							val=-qsearch<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
-						}else{
 
-							val=-alphaBeta<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
-						}
-
-
-					}
-
-				}
 
 			}
 		}
@@ -1193,7 +1169,34 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		pos.undoMove(m);
 
 
+		//-----------------------------------------
+		// NULL MOVE EXTENSION
+		//-----------------------------------------
+		if( !PVnode
+			&& val >=beta
+			&& ext==0
+			&& !inCheck
+			&& depth>5*ONE_PLY
+		)
+		{
+			//tested[newDepth]++;
+			pos.doNullMove();
+			Score toBeTested =val-15000;
+			Score nullval=-alphaBeta<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
 
+			pos.undoNullMove();
+			if(nullval<toBeTested)
+			{
+				//positiveTest[newDepth]++;
+				pos.doMove(m);
+				val=-alphaBeta<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
+				pos.undoMove(m);
+
+
+			}
+
+		}
+		//---------------------------------------------------
 
 		if(val>bestScore){
 			bestScore=val;
