@@ -1152,6 +1152,39 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 				}
 
+				if( val >=beta
+					&& ext==0
+					&& !inCheck
+					&& !pos.getActualState().skipNullMove
+				)
+				{
+					pos.undoMove(m);
+					pos.doNullMove();
+					Score toBeTested =bestScore-15000;
+					Score nullval;
+					if(newDepth<ONE_PLY)
+					{
+						nullval=-qsearch<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
+					}
+					else{
+						nullval=-alphaBeta<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
+					}
+					pos.undoNullMove();
+					pos.doMove(m);
+					if(nullval<toBeTested)
+					{
+						if(depth<ONE_PLY){
+							val=-qsearch<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
+						}else{
+
+							val=-alphaBeta<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
+						}
+
+
+					}
+
+				}
+
 			}
 		}
 
