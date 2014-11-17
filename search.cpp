@@ -1174,20 +1174,21 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		//-----------------------------------------
 		if( !PVnode
 			&& val >=beta
+			&& val <beta+15000
 			&& ext==0
 			&& !inCheck
 			&& depth>5*ONE_PLY
 		)
 		{
-			//tested[newDepth]++;
+			//tested[depth]++;
 			pos.doNullMove();
 			Score toBeTested =val-15000;
-			Score nullval=-alphaBeta<childNodesType>(ply+1,pos,newDepth,-toBeTested,-toBeTested+1,NULL);
+			Score nullval=-alphaBeta<childNodesType>(ply+1,pos,newDepth-2*ONE_PLY,-toBeTested,-toBeTested+1,NULL);
 
 			pos.undoNullMove();
 			if(nullval<toBeTested)
 			{
-				//positiveTest[newDepth]++;
+				//positiveTest[depth]++;
 				pos.doMove(m);
 				val=-alphaBeta<search::nodeType::ALL_NODE>(ply+1,pos,depth,-alpha-1,-alpha,NULL);
 				pos.undoMove(m);
