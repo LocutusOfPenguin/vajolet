@@ -970,7 +970,9 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 			case Position::blackQueens:
 			case Position::whiteKnights:
 			case Position::blackKnights:
+
 				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]);
+				break;
 			default:
 				break;
 		}
@@ -991,7 +993,20 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 		// piece coordination
 		res+=bitCnt(defendedPieces)*pieceCoordination;
 
-		unsigned int mobility= (bitCnt(attack&~(threatenSquares|ourPieces))+ bitCnt(attack&~(ourPieces)))/2;
+
+		//unsigned int mobility= (bitCnt(attack&~(threatenSquares|ourPieces))+ bitCnt(attack&~(ourPieces)))/2;
+		unsigned int mobility= bitCnt(attack&~(threatenSquares|ourPieces));
+/*
+		{
+			sync_cout<<"-----------------------"<<sync_endl;
+			sync_cout<<"Cavallo"<<sync_endl;
+			displayBitmap(bitSet(sq));
+			displayBitmap(attack&~(threatenSquares|ourPieces));
+			displayBitmap(attack&~(ourPieces));
+			sync_cout<<"mobilita' "<<mobility<<sync_endl;
+			sync_cout<<"bonus mob "<<mobilityBonus[piece%Position::separationBitmap][mobility][0]<<sync_endl;
+		}
+*/
 		//sync_cout<<mobility<<sync_endl;
 		res+=mobilityBonus[piece%Position::separationBitmap][mobility];
 		if(!(attack&~(threatenSquares|ourPieces)) && (threatenSquares&bitSet(sq))){ // zero mobility && attacked by pawn
@@ -1443,7 +1458,16 @@ Score Position::eval(void) {
 
 
 	}
-
+/*
+	sync_cout<<"weak squares"<<sync_endl;
+	displayBitmap(weakSquares[white]);
+	displayBitmap(weakSquares[black]);
+	sync_cout<<"holes"<<sync_endl;
+	displayBitmap(holes[white]);
+	displayBitmap(holes[black]);
+	sync_cout<<"weakPawns"<<sync_endl;
+	displayBitmap(weakPawns);
+*/
 	res+=pawnResult;
 	//---------------------------------------------
 	// center control
