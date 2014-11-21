@@ -325,8 +325,6 @@ void Position::setupFromFen(const std::string& fenStr){
 	x.pinnedPieces=getHiddenCheckers(pieceList[(bitboardIndex)(whiteKing+x.nextMove)][0],eNextMove(blackTurn-x.nextMove));
 	x.checkers= getAttackersTo(pieceList[(bitboardIndex)(whiteKing+x.nextMove)][0]) & bitBoard[blackPieces-x.nextMove];
 
-
-
 	checkPosConsistency(1);
 }
 
