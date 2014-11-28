@@ -93,10 +93,12 @@ simdScore rookOnSemi=simdScore(500,1100,0,0);
 simdScore rookTrapped = simdScore(300,0,0,0);
 simdScore rookTrappedKingWithoutCastlig = simdScore(300,0,0,0);
 
-simdScore knightOnOutpost= simdScore(380,0,0,0);
-simdScore knightOnOutpostSupported= simdScore(100,1290,0,0);
-simdScore knightOnHole= simdScore(1610,1190,0,0);
+simdScore knightOnOutpost= simdScore(50,50,0,0);
+simdScore knightOnOutpostSupported= simdScore(40,40,0,0);
+simdScore knightOnHole= simdScore(80,70,0,0);
+simdScore knightAttackingHole= simdScore(200,200,0,0);
 simdScore KnightAttackingWeakPawn= simdScore(300,300,0,0);
+simdScore knightWithoutEnemy= simdScore(80,70,0,0);
 
 simdScore bishopOnOutpost= simdScore(-1020,810,0,0);
 simdScore bishopOnOutpostSupported= simdScore(3600,270,0,0);
@@ -941,6 +943,8 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 	simdScore res=0;
 	bitMap tempPieces=p.bitBoard[piece];
 	bitMap enemyKing =(piece>Position::separationBitmap)? p.bitBoard[Position::whiteKing]:p.bitBoard[Position::blackKing];
+	bitMap enemyBishops =(piece>Position::separationBitmap)? p.bitBoard[Position::whiteBishops]:p.bitBoard[Position::blackBishops];
+	bitMap enemyKnights =(piece>Position::separationBitmap)? p.bitBoard[Position::whiteKnights]:p.bitBoard[Position::blackKnights];
 	tSquare enemyKingSquare =(piece>Position::separationBitmap)? p.pieceList[Position::whiteKing][0]:p.pieceList[Position::blackKing][0];
 	bitMap enemyKingRing =(piece>Position::separationBitmap)? kingRing[white]:kingRing[black];
 	unsigned int * pKingAttackersCount=(piece>Position::separationBitmap)?&kingAttackersCount[black]:&kingAttackersCount[white];
@@ -1154,24 +1158,45 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 			break;
 		case Position::whiteKnights:
 		case Position::blackKnights:
-			if(enemyWeakSquares& BITSET[sq])
+		{
+			simdScore locRes=0;
+			if(FILES[sq]!=0 && FILES[sq]!=7)
 			{
-				res+=knightOnOutpost*(5-std::abs(relativeRank-5));
-				if(supportedSquares &BITSET[sq]){
-					res += knightOnOutpostSupported;
-				}
-				if(enemyHoles &BITSET[sq]){
-					res += knightOnHole;
+				if(enemyWeakSquares& BITSET[sq])
+				{
+					locRes+=knightOnOutpost;
+
+					if(supportedSquares &BITSET[sq]){
+						locRes += knightOnOutpostSupported;
+						if(!enemyKnights && !(enemyBishops & BITMAP_COLOR[SQUARE_COLOR[sq]]))
+						{
+							locRes+= knightWithoutEnemy;
+						}
+					}
+					if(enemyHoles &BITSET[sq]){
+						locRes += knightOnHole;
+					}
+
 				}
 
+				res+=locRes*(5-std::abs(relativeRank-5));
 			}
+
+			if(attack & enemyHoles)
 			{
-			bitMap wpa=attack & (weakPawns) & theirPieces;
-				if(wpa)
-				{
-					res += bitCnt(wpa)*KnightAttackingWeakPawn;
-				}
+				res += knightAttackingHole;
 			}
+
+
+			bitMap wpa=attack & (weakPawns) & theirPieces;
+			if(wpa)
+			{
+				res += bitCnt(wpa)*KnightAttackingWeakPawn;
+			}
+
+
+
+		}
 			break;
 		default:
 			break;
