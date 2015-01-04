@@ -149,6 +149,7 @@ void my_thread::searchThread() {
 		if(!quit){
 			timeManagerInit(*pos, limits,timeMan);
 			startTime=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count();
+			src.signals.stop=false;
 			timerCond.notify_one();
 			src.startThinking(*pos,limits);
 			//sync_cout<<"startThink=false"<<sync_endl;
