@@ -948,25 +948,25 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 
 		switch(piece){
 
-		case Position::whiteRooks:
-			attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::whiteRooks]^p.bitBoard[Position::whiteQueens]);
-			break;
-		case Position::blackRooks:
-			attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::blackRooks]^p.bitBoard[Position::blackQueens]);
-			break;
-		case Position::whiteBishops:
-			attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::whiteQueens]);
-			break;
-		case Position::blackBishops:
-			attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::blackQueens]);
-			break;
-		case Position::whiteQueens:
-		case Position::blackQueens:
-		case Position::whiteKnights:
-		case Position::blackKnights:
-			attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]);
-		default:
-			break;
+			case Position::whiteRooks:
+				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::whiteRooks]^p.bitBoard[Position::whiteQueens]);
+				break;
+			case Position::blackRooks:
+				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::blackRooks]^p.bitBoard[Position::blackQueens]);
+				break;
+			case Position::whiteBishops:
+				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::whiteQueens]);
+				break;
+			case Position::blackBishops:
+				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]^p.bitBoard[Position::blackQueens]);
+				break;
+			case Position::whiteQueens:
+			case Position::blackQueens:
+			case Position::whiteKnights:
+			case Position::blackKnights:
+				attack = Movegen::attackFrom(piece,sq,p.bitBoard[Position::occupiedSquares]);
+			default:
+				break;
 		}
 
 		if(attack & enemyKingRing){
@@ -1151,7 +1151,7 @@ Score Position::eval(void) {
 		}
 	}
 
-	traceRes=0;
+	//traceRes=0;
 	if(trace){
 
 		sync_cout <<std::setprecision(3)<< std::setw(21) << "Eval term " << "|     White    |     Black    |      Total     \n"
@@ -1164,11 +1164,11 @@ Score Position::eval(void) {
 	Score mulCoeff=256;
 
 	bitMap attackedSquares[lastBitboard]={0};
-	bitMap weakSquares[2]={0};
-	bitMap holes[2]={0};
-	bitMap kingRing[2]={0};
-	bitMap kingShield[2]={0};
-	bitMap kingFarShield[2]={0};
+	bitMap weakSquares[2]/*={0}*/;
+	bitMap holes[2]/*={0}*/;
+	bitMap kingRing[2]/*={0}*/;
+	bitMap kingShield[2]/*={0}*/;
+	bitMap kingFarShield[2]/*={0}*/;
 	unsigned int kingAttackersCount[2]={0};
 	unsigned int kingAttackersWeight[2]={0};
 	unsigned int kingAdjacentZoneAttacksCount[2]={0};
@@ -1282,16 +1282,16 @@ Score Position::eval(void) {
 			res-=bishopPair;
 		}
 	}
-	if(pieceCount[whiteQueens]-pieceCount[blackQueens]==1
-			&& pieceCount[blackRooks]-pieceCount[whiteRooks]==1
-			&& pieceCount[blackBishops] +pieceCount[blackKnights]-pieceCount[whiteBishops] -pieceCount[whiteKnights]==2)
+	if((int)pieceCount[whiteQueens]-(int)pieceCount[blackQueens]==1
+			&& (int)pieceCount[blackRooks]-(int)pieceCount[whiteRooks]==1
+			&& (int)pieceCount[blackBishops] +(int)pieceCount[blackKnights]-(int)pieceCount[whiteBishops] -(int)pieceCount[whiteKnights]==2)
 	{
 		res -= queenVsRook2MinorsImbalance;
 
 	}
-	else if(pieceCount[whiteQueens]-pieceCount[blackQueens]==-1
-			&& pieceCount[blackRooks]-pieceCount[whiteRooks]==-1
-			&& pieceCount[blackBishops] +pieceCount[blackKnights]-pieceCount[whiteBishops] -pieceCount[whiteKnights]==-2)
+	else if((int)pieceCount[whiteQueens]-(int)pieceCount[blackQueens]==-1
+			&& (int)pieceCount[blackRooks]-(int)pieceCount[whiteRooks]==-1
+			&& (int)pieceCount[blackBishops] +(int)pieceCount[blackKnights]-(int)pieceCount[whiteBishops] -(int)pieceCount[whiteKnights]==-2)
 	{
 		res += queenVsRook2MinorsImbalance;
 
@@ -2002,8 +2002,8 @@ Score Position::eval(void) {
 	}
 
 	//todo scaling
-	if(mulCoeff==256 && (pieceCount[whitePawns]+pieceCount[blackPawns]==0) && abs(st.material[0])<40000 && st.nonPawnMaterial[0]<60000 && st.nonPawnMaterial[2]<60000 ){
-		mulCoeff=102;
+	if(mulCoeff==256 && (pieceCount[whitePawns]+pieceCount[blackPawns]==0) && abs(st.material[0])<40000 && st.nonPawnMaterial[0]<90000 && st.nonPawnMaterial[2]<90000 ){
+		mulCoeff=40;
 	}
 
 
