@@ -26,18 +26,18 @@ Score seeScore[Position::lastBitboard]={
 		0,
 		3000000,//king
 		137000,//queen
-		52000,//rook
-		35300,//bishop
-		34500,//knight
-		5700,//panws
+		50000,//rook
+		35000,//bishop
+		35000,//knight
+		1000,//panws
 		0,
 		0,
-		3000000,
-		137000,
-		52000,
-		35300,
-		34500,
-		5700,
+		3000000,//king
+		137000,//queen
+		50000,//rook
+		35000,//bishop
+		35000,//knight
+		1000,//panws
 		0
 };
 
