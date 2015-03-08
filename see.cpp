@@ -22,11 +22,28 @@
 #include "position.h"
 #include "movegen.h"
 #include "bitops.h"
-
+Score seeScore[Position::lastBitboard]={
+		0,
+		3000000,//king
+		137000,//queen
+		52000,//rook
+		35300,//bishop
+		34500,//knight
+		5700,//panws
+		0,
+		0,
+		3000000,
+		137000,
+		52000,
+		35300,
+		34500,
+		5700,
+		0
+};
 
 Score Position::seeSign(Move m) const {
 	assert(m.packed);
-	if (pieceValue[squares[m.from]%separationBitmap][0] <= pieceValue[squares[m.to]%separationBitmap][0])
+	if (seeScore[squares[m.from]] <= seeScore[squares[m.to]])
 	{
 		return 1;
 	}
@@ -59,12 +76,12 @@ Score Position::see(Move m) const {
 	bitMap colorAttackers;
 	bitboardIndex captured;
 
-	swapList[0] = pieceValue[squares[to]%separationBitmap][0];
+	swapList[0] = seeScore[squares[to]];
 	captured = bitboardIndex(squares[from]%separationBitmap);
 
 	if(m.flags== Move::fenpassant){
 		occupied ^= to- pawnPush(color);
-		swapList[0] = pieceValue[whitePawns][0];
+		swapList[0] = seeScore[whitePawns];
 	}
 	if(m.flags== Move::fcastle){
 		return 0;
@@ -73,7 +90,7 @@ Score Position::see(Move m) const {
 		//display();
 		//sync_cout<<displayUci(m) <<sync_endl;
 		captured=bitboardIndex(whiteQueens+m.promotion);
-		swapList[0] +=pieceValue[whiteQueens+m.promotion][0]-pieceValue[whitePawns][0];
+		swapList[0] +=seeScore[whiteQueens+m.promotion]-seeScore[whitePawns];
 	}
 
 	// Find all attackers to the destination square, with the moving piece
@@ -109,7 +126,7 @@ Score Position::see(Move m) const {
 		assert(slIndex < 64);
 
 		// Add the new entry to the swap list
-		swapList[slIndex] = -swapList[slIndex - 1] + pieceValue[captured][0];
+		swapList[slIndex] = -swapList[slIndex - 1] + seeScore[captured];
 		slIndex++;
 
 		// Locate and remove the next least valuable attacker
@@ -153,7 +170,7 @@ Score Position::see(Move m) const {
 		// Stop before processing a king capture
 		if (captured == King && colorAttackers)
 		{
-			swapList[slIndex++] = pieceValue[whiteKing][0];
+			swapList[slIndex++] = seeScore[whiteKing];
 			break;
 		}
 

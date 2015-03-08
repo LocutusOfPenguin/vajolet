@@ -1386,7 +1386,7 @@ Move  Movegen::getNextMove(){
 					std::swap(moveList[moveListPosition],moveList[bestIndex]);
 				}
 				if(moveList[moveListPosition].m!=ttMove){
-					if(pos.seeSign(moveList[moveListPosition].m)>=0){
+					if(pos.seeSign(moveList[moveListPosition].m)>=0 || pos.moveGivesCheck(moveList[moveListPosition].m)){
 						return moveList[moveListPosition++].m;
 					}
 					else{
