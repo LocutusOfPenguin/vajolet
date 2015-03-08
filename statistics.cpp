@@ -18,103 +18,70 @@
 #include "statistics.h"
 
 void Statistics::printNodeTypeStat(){
-	sync_cout<<"nodetype stats"<<std::endl<<sync_endl;
+	unsigned long long totalCount =0;
+	sync_cout<<"node ordering stats"<<std::endl<<sync_endl;
 
-	sync_cout<<"tested nodetype PV: "<<testedNodeTypePv<<sync_endl;
-	sync_cout<<"tested nodetype Cut: "<<testedNodeTypeCut<<sync_endl;
-	sync_cout<<"tested nodetype All: "<<testedNodeTypeAll<<std::endl<<sync_endl;
 
-	sync_cout<<"result nodetype PV: "<<resultNodeTypePv<<sync_endl;
-	sync_cout<<"result nodetype Cut: "<<resultNodeTypeCut<<sync_endl;
-	sync_cout<<"result nodetype All: "<<resultNodeTypeAll<<std::endl<<sync_endl;
+	for(int x=0;x<30;x++)
+	{
+		int lastValue=0;
+		sync_cout<<"--------depth "<<x<<"-------------------------------------"<<sync_endl;
+		sync_cout<<"PVNodes "<<PVnodeCounter[x]<<sync_endl;
 
-	sync_cout<<"PV type %error : "<<(signed long long)(testedNodeTypePv-resultNodeTypePv)/float(resultNodeTypePv)*100.0<<sync_endl;
-	sync_cout<<"Cut type %error : "<<(signed long long)(testedNodeTypeCut-resultNodeTypeCut)/float(resultNodeTypeCut)*100.0<<sync_endl;
-	sync_cout<<"All type %error : "<<(signed long long)(testedNodeTypeAll-resultNodeTypeAll)/float(resultNodeTypeAll)*100.0<<sync_endl;
-
-	sync_cout<<"tested All razoring: "<<testedAllPruning<<sync_endl;
-	sync_cout<<"correct All razoring: "<<correctAllPruning<<sync_endl;
-	sync_cout<<"% correct All pruning: "<<(signed long long)(correctAllPruning)/float(testedAllPruning)*100.0<<std::endl<<sync_endl;
-
-	sync_cout<<"tested Cut razoring: "<<testedCutPruning<<sync_endl;
-	sync_cout<<"correct Cut razoring: "<<correctCutPruning<<sync_endl;
-	sync_cout<<"% correct Cut pruning: "<<(signed long long)(correctCutPruning)/float(testedCutPruning)*100.0<<std::endl<<sync_endl;
-
-	sync_cout<<"Cut node ordering performance: "<<(signed long long)(cutNodeOrderingSum)/float(cutNodeOrderingCounter)<<" "<<cutNodeOrderingCounter<<sync_endl;
-	sync_cout<<"worst move ordering: "<<worstCutNodeOrdering<<std::endl<<sync_endl;
-	sync_cout<<"all node ordering performance: "<<(signed long long)(allNodeOrderingSum)/float(allNodeOrderingCounter)<<std::endl<<sync_endl;
-	sync_cout<<"pv node ordering performance: "<<(signed long long)(pvNodeOrderingSum)/float(pvNodeOrderingCounter)<<std::endl<<sync_endl;
-
-	for(int i=0;i<200;i++){
-		sync_cout<<"["<< i<<"]: "<<cutNodeOrderingArray[i]<<sync_endl;
+		sync_cout<<"avg "<<double(PVnodeOrderingAcc[x])/PVnodeCounter[x]<<sync_endl;
+		sync_cout<<"TThit "<<PVnodeOrderingTThit[x]<<sync_endl;
+		for(int i=0;i<80;i++){
+			if(PVnodeOrdering[x][i]!=0)
+			{
+				lastValue=i;
+			}
+		}
+		for(int i=0;i<=lastValue;i++)
+		{
+			totalCount+=PVnodeOrdering[x][i];
+			sync_cout<<" "<<i<<" "<<PVnodeOrdering[x][i]<<" "<<double(PVnodeOrdering[x][i])*100.0/PVnodeCounter[x]<<"%"<<sync_endl;
+		}
 	}
+	sync_cout<<"Total "<<totalCount<<sync_endl;
+
+
+	sync_cout<<"QSPVNodes "<<QSPVnodeCounter<<sync_endl;
+	sync_cout<<"QSstandPatNodes "<<double(QSPVnodeOrderingAcc)/QSPVnodeCounter<<sync_endl;
+
+	sync_cout<<"TT "<<QSPVnodeOrderingTThit<<sync_endl;
+	for(int i=0;i<20;i++)
+	{
+		sync_cout<<i<<" "<<QSPVnodeOrdering[i]<<" "<<double(QSPVnodeOrdering[i])*100.0/QSPVnodeCounter<<"%"<<sync_endl;
+	}
+
+
+
 
 
 }
 
-void Statistics::gatherNodeTypeStat(search::nodeType expectedNodeType,search::nodeType resultNodeType){
-	switch(expectedNodeType){
-	case search::nodeType::ROOT_NODE:
-		testedNodeTypePv++;
-		break;
-	case search::nodeType::PV_NODE:
-		testedNodeTypePv++;
-		break;
-	case search::nodeType::CUT_NODE:
-		testedNodeTypeCut++;
-		break;
-	case search::nodeType::ALL_NODE:
-		testedNodeTypeAll++;
-		break;
 
-	}
-
-
-	switch(resultNodeType){
-	case search::nodeType::ROOT_NODE:
-		resultNodeTypePv++;
-		break;
-	case search::nodeType::PV_NODE:
-		resultNodeTypePv++;
-		break;
-	case search::nodeType::CUT_NODE:
-		resultNodeTypeCut++;
-		break;
-	case search::nodeType::ALL_NODE:
-		resultNodeTypeAll++;
-		break;
-
-	}
-}
 
 void Statistics::initNodeTypeStat(){
-	testedNodeTypeCut=0;
-	testedNodeTypeAll=0;
-	testedNodeTypePv=0;
-	resultNodeTypeCut=0;
-	resultNodeTypeAll=0;
-	resultNodeTypePv=0;
 
-	testedAll=0;
-	testedAllPruning=0;
-	correctAllPruning=0;
 
-	testedCut=0;
-	testedCutPruning=0;
-	correctCutPruning=0;
+	for(int x=0;x<30;x++)
+	{
+		PVnodeOrderingTThit[x] =0;
+		PVnodeOrderingAcc[x]=0;
+		PVnodeCounter[x] = 0;
+		for(int i=0;i<80;i++)
+		{
+			PVnodeOrdering[x][i]=0;
+		}
+	}
 
-	cutNodeOrderingSum=0;
-	cutNodeOrderingCounter=0;
-	worstCutNodeOrdering=0;
-
-	allNodeOrderingSum=0;
-	allNodeOrderingCounter=0;
-
-	pvNodeOrderingSum=0;
-	pvNodeOrderingCounter=0;
-
-	for(int i=0;i<200;i++){
-		cutNodeOrderingArray[i]=0;
+	QSPVnodeOrderingTThit =0;
+	QSPVnodeOrderingAcc=0;
+	QSPVnodeCounter = 0;
+	for(int i=0;i<40;i++)
+	{
+		QSPVnodeOrdering[i]=0;
 	}
 }
 

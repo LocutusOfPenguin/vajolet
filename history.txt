@@ -28,7 +28,8 @@ Versione	delta ELO		delta ELO	data		Modifiche
 2.021		+37(vs 2.000)	+32			09/02/2015	modificata ricerca, standpat value in qsearch
 2.022		+40(vs 2.000)				15/02/2015	king safety
 2.023		+52(vs 2.000)				28/02/2015	search enanchement
-2.024		+82(vs 2.000)				28/02/2015	LMR refinement
+2.024		+87(vs 2.000)	+54			28/02/2015	LMR refinement
+2.025		(vs 2.000)					07/03/2015	qearch refine
 
 da fare
 

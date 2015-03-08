@@ -31,33 +31,18 @@ public :
 	  return instance;
 	}
 
-	bool testedAll;
-	unsigned long long testedAllPruning;
-	unsigned long long correctAllPruning;
+	unsigned long long QSPVnodeCounter;
+	unsigned long long QSPVnodeOrderingTThit;
+	unsigned long long QSPVnodeOrderingAcc;
+	unsigned long long QSPVnodeOrdering[40];
 
-	bool testedCut;
-	unsigned long long testedCutPruning;
-	unsigned long long correctCutPruning;
+	unsigned long long PVnodeCounter[30];
+	unsigned long long PVnodeOrderingTThit[30];
+	unsigned long long PVnodeOrderingAcc[30];
+	unsigned long long PVnodeOrdering[30][80];
 
-	unsigned long long testedNodeTypeCut;
-	unsigned long long testedNodeTypeAll;
-	unsigned long long testedNodeTypePv;
-	unsigned long long resultNodeTypeCut;
-	unsigned long long resultNodeTypeAll;
-	unsigned long long resultNodeTypePv;
 
-	unsigned long long cutNodeOrderingSum;
-	unsigned long long cutNodeOrderingCounter;
-	unsigned int worstCutNodeOrdering;
-	unsigned long long cutNodeOrderingArray[200];
 
-	unsigned long long allNodeOrderingSum;
-	unsigned long long allNodeOrderingCounter;
-
-	unsigned long long pvNodeOrderingCounter;
-	unsigned long long pvNodeOrderingSum;
-
-	void gatherNodeTypeStat(search::nodeType expectedNodeType,search::nodeType resultNodeType);
 	void printNodeTypeStat();
 	void initNodeTypeStat();
 private:
