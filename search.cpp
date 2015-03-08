@@ -514,7 +514,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		assert(pvLine);
 		pvLine->lenght=0;
 #ifdef PRINT_STATISTICS
-		Statistics::instance().PVnodeCounter[depth/ONE_PLY]++;
+		Statistics::instance().PVnodeCounter[std::min(depth/ONE_PLY,29)]++;
 #endif
 	}
 
@@ -1229,18 +1229,18 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 #ifdef PRINT_STATISTICS
 	if(PVnode)
 	{
-		if(bestMoveNumber>40 && bestMove.packed!=0)
+		if(bestMoveNumber>30 && bestMove.packed!=0 && genState==6)
 		{
 			pos.display();
 			sync_cout<<"genstate "<<genState<<sync_endl;
-			//sync_cout<<originalAlpha<< " "<<beta<< " "<<bestScore<<sync_endl;
+			sync_cout<<bestMoveNumber<< " "<<moveNumber<<sync_endl;
 			sync_cout<<bestMoveNumber<<" "<<pos.displayUci(bestMove)<<sync_endl;
 		}
-		Statistics::instance().PVnodeOrderingAcc[depth/ONE_PLY]+=bestMoveNumber;
-		Statistics::instance().PVnodeOrdering[depth/ONE_PLY][bestMoveNumber]++;
+		Statistics::instance().PVnodeOrderingAcc[std::min(depth/ONE_PLY,29)]+=bestMoveNumber;
+		Statistics::instance().PVnodeOrdering[std::min(depth/ONE_PLY,29)][std::min(bestMoveNumber,(unsigned)(79))]++;
 		if(bestMoveNumber == 1 && bestMove == ttMove)
 		{
-			Statistics::instance().PVnodeOrderingTThit[depth/ONE_PLY]++;
+			Statistics::instance().PVnodeOrderingTThit[std::min(depth/ONE_PLY,29)]++;
 		}
 	}
 #endif
@@ -1516,7 +1516,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 	if(PVnode)
 	{
 		Statistics::instance().QSPVnodeOrderingAcc+=bestMoveNumber;
-		Statistics::instance().QSPVnodeOrdering[bestMoveNumber]++;
+		Statistics::instance().QSPVnodeOrdering[std::min(bestMoveNumber,unsigned(39))]++;
 		if(bestMoveNumber == 1 && bestMove == ttMove)
 		{
 			Statistics::instance().QSPVnodeOrderingTThit++;

@@ -15,44 +15,55 @@
     along with Vajolet.  If not, see <http://www.gnu.org/licenses/>
 */
 
+#include <fstream>
+#include <iostream>
 #include "statistics.h"
 
 void Statistics::printNodeTypeStat(){
 	unsigned long long totalCount =0;
-	sync_cout<<"node ordering stats"<<std::endl<<sync_endl;
+
+	std::ofstream fs(".\\out.txt",std::ofstream::out | std::ofstream::app);
+	fs<<"node ordering stats"<<std::endl<<sync_endl;
 
 
 	for(int x=0;x<30;x++)
 	{
-		int lastValue=0;
-		sync_cout<<"--------depth "<<x<<"-------------------------------------"<<sync_endl;
-		sync_cout<<"PVNodes "<<PVnodeCounter[x]<<sync_endl;
-
-		sync_cout<<"avg "<<double(PVnodeOrderingAcc[x])/PVnodeCounter[x]<<sync_endl;
-		sync_cout<<"TThit "<<PVnodeOrderingTThit[x]<<sync_endl;
+		int lastValue=-1;
 		for(int i=0;i<80;i++){
 			if(PVnodeOrdering[x][i]!=0)
 			{
 				lastValue=i;
 			}
 		}
-		for(int i=0;i<=lastValue;i++)
+		if(lastValue!=-1)
 		{
-			totalCount+=PVnodeOrdering[x][i];
-			sync_cout<<" "<<i<<" "<<PVnodeOrdering[x][i]<<" "<<double(PVnodeOrdering[x][i])*100.0/PVnodeCounter[x]<<"%"<<sync_endl;
+			fs<<"--------depth "<<x<<"-------------------------------------"<<std::endl;
+			fs<<"PVNodes "<<PVnodeCounter[x]<<std::endl;
+
+			fs<<"avg "<<double(PVnodeOrderingAcc[x])/PVnodeCounter[x]<<std::endl;
+			fs<<"TThit "<<PVnodeOrderingTThit[x]<<std::endl;
+
+
+			for(int i=0;i<=lastValue;i++)
+			{
+				totalCount+=PVnodeOrdering[x][i];
+				fs<<" "<<i<<" "<<PVnodeOrdering[x][i]<<" "<<double(PVnodeOrdering[x][i])*100.0/PVnodeCounter[x]<<"%"<<std::endl;
+			}
 		}
 	}
-	sync_cout<<"Total "<<totalCount<<sync_endl;
+	fs<<"Total "<<totalCount<<std::endl;
 
 
-	sync_cout<<"QSPVNodes "<<QSPVnodeCounter<<sync_endl;
-	sync_cout<<"QSstandPatNodes "<<double(QSPVnodeOrderingAcc)/QSPVnodeCounter<<sync_endl;
+	fs<<"QSPVNodes "<<QSPVnodeCounter<<std::endl;
+	fs<<"QSstandPatNodes "<<double(QSPVnodeOrderingAcc)/QSPVnodeCounter<<std::endl;
 
-	sync_cout<<"TT "<<QSPVnodeOrderingTThit<<sync_endl;
+	fs<<"TThit "<<QSPVnodeOrderingTThit<<std::endl;
 	for(int i=0;i<20;i++)
 	{
-		sync_cout<<i<<" "<<QSPVnodeOrdering[i]<<" "<<double(QSPVnodeOrdering[i])*100.0/QSPVnodeCounter<<"%"<<sync_endl;
+		fs<<i<<" "<<QSPVnodeOrdering[i]<<" "<<double(QSPVnodeOrdering[i])*100.0/QSPVnodeCounter<<"%"<<std::endl;
 	}
+
+	fs.close();
 
 
 
