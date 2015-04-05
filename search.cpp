@@ -35,6 +35,8 @@ inline signed int razorMargin(unsigned int depth){
 	return 20000+depth*78;
 }
 
+std::vector<rootMove> search::rootMoves;
+unsigned long long search::visitedNodes;
 void search::printAllPV(Position & p, unsigned int count){
 
 
@@ -90,6 +92,8 @@ Score search::startThinking(Position & p,searchLimits & l){
 	TT.newSearch();
 	history.clear();
 	visitedNodes=0;
+	search helperSearch[3];
+	Position helperPos[3];
 
 	limits=l;
 	rootMoves.clear();
@@ -275,8 +279,28 @@ Score search::startThinking(Position & p,searchLimits & l){
 				selDepth=selDepthBase;
 				newPV.lenght=0;
 				p.cleanStateInfo();
-				//sync_cout<<"search line "<<PVIdx<<sync_endl;
+				PVline pvl2[3];
+				std::vector<std::thread> helperThread;
+
+				for(int i=0;i<3;i++)
+				{
+					helperSearch[i].signals.stop =false;
+					helperPos[i]=p;
+					helperThread.push_back(std::thread(alphaBeta<search::nodeType::HELPER_ROOT_NODE>,&helperSearch[i],0,std::ref(helperPos[i]),(depth-reduction+((i+1)%2))*ONE_PLY,alpha,beta,&pvl2[i]));
+				}
+
+
+				//std::thread helperThread(&alphaBelli<search::nodeType::ROOT_NODE>,&helperSearch,0,std::ref(pos2),(depth-reduction)*ONE_PLY,alpha,beta,&newPV);
+
 				res=alphaBeta<search::nodeType::ROOT_NODE>(0,p,(depth-reduction)*ONE_PLY,alpha,beta,&newPV);
+				for(int i=0;i<3;i++)
+				{
+					helperSearch[i].signals.stop =true;
+				}
+				for(auto &t : helperThread)
+				{
+					t.join();
+				}
 
 
 
@@ -421,7 +445,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 
 		depth+=1;
 
-	}while(depth<=(limits.depth? limits.depth:100) && !signals.stop);
+	}while(depth<=(limits.depth? limits.depth:LIMIT_DEPTH) && !signals.stop);
 
 	//sync_cout<<"print final bestMove "<<sync_endl;
 
@@ -499,7 +523,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	//if(verbose){sync_cout<<"eccomi"<<sync_endl;}
 	visitedNodes++;
 	//Position::state & actualState=pos.getActualState();
-	const bool PVnode=(type==search::nodeType::PV_NODE || type==search::nodeType::ROOT_NODE);
+	const bool PVnode=(type==search::nodeType::PV_NODE || type==search::nodeType::ROOT_NODE || type==search::nodeType::HELPER_ROOT_NODE);
 	const bool inCheck = pos.getActualState().checkers;
 	Move threatMove;
 	threatMove=0;
@@ -527,8 +551,8 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 					type==search::nodeType::CUT_NODE?search::nodeType::ALL_NODE:
 							search::nodeType::PV_NODE;
 
-	if(type !=search::nodeType::ROOT_NODE){
-		if(pos.isDraw(PVnode) || signals.stop){
+	if(type !=search::nodeType::ROOT_NODE && type !=search::nodeType::HELPER_ROOT_NODE){
+		if(pos.isDraw(PVnode) || signals.stop || ply>=MAX_PV_LENGTH){
 			if(PVnode){
 				pvLine->lenght=0;
 			}
@@ -558,8 +582,8 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	ttMove=tte!=nullptr ? tte->getPackedMove() : 0;
 	Score ttValue = tte!=nullptr ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 
-	if (type!=search::nodeType::ROOT_NODE &&
-			tte!=nullptr
+	if (type!=search::nodeType::ROOT_NODE && type!=search::nodeType::HELPER_ROOT_NODE
+			&& tte!=nullptr
 			&& tte->getDepth() >= depth
 		    && ttValue != SCORE_NONE // Only in case of TT access race
 		    //&& (	PVnode ?  tte->getType() == typeExact
@@ -867,7 +891,6 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 
-
 	Score bestScore=-SCORE_INFINITE;
 
 	Move bestMove;
@@ -880,6 +903,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 	bool singularExtensionNode=
 		type!=search::nodeType::ROOT_NODE
+		&& type!=search::nodeType::HELPER_ROOT_NODE
 		&& depth >= (PVnode ? 6 * ONE_PLY : 8 * ONE_PLY)
 		&& ttMove.packed != 0
 		&& !excludedMove.packed // Recursive singular search is not allowed
@@ -901,7 +925,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 		// search only the moves in the search list
-		if(type==search::nodeType::ROOT_NODE && !std::count(rootMoves.begin()+indexPV,rootMoves.end(),m)){
+		if((type==search::nodeType::ROOT_NODE || type==search::nodeType::HELPER_ROOT_NODE) && !std::count(rootMoves.begin()+indexPV,rootMoves.end(),m)){
 			//sync_cout<<"avoid move "<<pos.displayUci(m)<<sync_endl;
 			continue;
 		}
@@ -1006,6 +1030,22 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 						sync_endl;
 			}
 		}
+
+		/*if(type==HELPER_ROOT_NODE){
+			unsigned long elapsed=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count()-startTime;
+			if(
+#ifndef DISABLE_TIME_DIPENDENT_OUTPUT
+				elapsed>3000 &&
+#endif
+				!signals.stop
+				){
+				sync_cout<<"HELPER info currmovenumber "<<moveNumber<<" currmove "<<pos.displayUci(m)<<" nodes "<<visitedNodes<<
+#ifndef DISABLE_TIME_DIPENDENT_OUTPUT
+						" time "<<elapsed <<
+#endif
+						sync_endl;
+			}
+		}*/
 
 		pos.doMove(m);
 
@@ -1182,7 +1222,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				{
 					alpha =val;
 				}
-				if(type ==search::nodeType::ROOT_NODE|| (PVnode &&!signals.stop)){
+				if(type ==search::nodeType::ROOT_NODE || type ==search::nodeType::HELPER_ROOT_NODE|| (PVnode &&!signals.stop)){
 					if(PVnode){
 
 						pvLine->lenght=std::min(childPV.lenght+1, (unsigned int)(MAX_PV_LENGTH));
@@ -1350,7 +1390,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 	visitedNodes++;
 
 
-	if(pos.isDraw(PVnode) || signals.stop){
+	if(pos.isDraw(PVnode) || signals.stop || ply>=MAX_PV_LENGTH){
 		if(PVnode){
 			pvLine->lenght=0;
 		}

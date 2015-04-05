@@ -98,7 +98,7 @@ class search{
 public:
 	searchLimits limits;
 	History history;
-	std::vector<rootMove> rootMoves;
+	static std::vector<rootMove> rootMoves;
 	static unsigned int multiPVLines;
 	static unsigned int limitStrength;
 	static unsigned int eloStrenght;
@@ -124,7 +124,8 @@ public:
 		ROOT_NODE,
 		PV_NODE,
 		ALL_NODE,
-		CUT_NODE
+		CUT_NODE,
+		HELPER_ROOT_NODE
 	} nodeType;
 	Score startThinking(Position & p,searchLimits & limits);
 	unsigned long long getVisitedNodes(){
@@ -134,7 +135,7 @@ public:
 private:
 	template<nodeType type>Score alphaBeta(unsigned int ply,Position & p,int depth,Score alpha,Score beta,PVline *  pvLine);
 
-	unsigned long long visitedNodes;
+	static unsigned long long visitedNodes;
 	unsigned int selDepth;
 	bool stop;
 };

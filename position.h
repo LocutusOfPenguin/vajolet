@@ -72,6 +72,38 @@ class Position{
 		Them=&bitBoard[(blackTurn-getActualState().nextMove)];
 	};
 
+	Position& operator=(const Position& other)
+
+	{
+		if (this == &other)
+			return *this;
+
+
+		stateIndex = other.stateIndex;
+		for(int i=0;i<STATE_INFO_LENGTH;i++){
+			stateInfo[i]=other.stateInfo[i];
+		}
+		for(int i=0;i<squareNumber;i++){
+			squares[i]=other.squares[i];
+			index[i]=other.index[i];
+		}
+		for(int i=0;i<lastBitboard;i++){
+			bitBoard[i]=other.bitBoard[i];
+			pieceCount[i]=other.pieceCount[i];
+			for(int n=0;n<64;n++){
+				pieceList[i][n] =other.pieceList[i][n];
+			}
+		}
+
+
+
+
+		Us=&bitBoard[getActualState().nextMove];
+		Them=&bitBoard[(blackTurn-getActualState().nextMove)];
+
+		return *this;
+	};
+
 
 	/*! \brief define the index of the bitboards
 		\author Marco Belli
