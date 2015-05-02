@@ -221,13 +221,13 @@ Score search::startThinking(Position & p,searchLimits & l){
 			//sync_cout<<"PVIdx="<<PVIdx<<sync_endl;
 
 
-			if (depth >= 5)
+/*			if (depth >= 5)
 			{
 				delta = 800;
 				alpha = std::max((signed long long int)(rootMoves[indexPV].previousScore) - delta,(signed long long int)-SCORE_INFINITE);
 				beta  = std::min((signed long long int)(rootMoves[indexPV].previousScore) + delta,(signed long long int) SCORE_INFINITE);
 			}
-
+*/
 
 			unsigned int reduction=0;
 
@@ -384,7 +384,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 		//-----------------------
 		//	single good move at root
 		//-----------------------
-		if (depth >= 12
+/*		if (depth >= 12
 			&& !signals.stop
 			&&  PVSize == 1
 			&&  res > SCORE_MATED_IN_MAX_PLY)
@@ -402,7 +402,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 				my_thread::timeMan.singularRootMoveCount++;
 			}
 		}
-
+*/
 		if(oldBestMove.packed && oldBestMove!=newPV.list[0]){
 			my_thread::timeMan.allocatedTime=my_thread::timeMan.maxSearchTime;
 			//sync_cout<<"estesa ricerca="<<my_thread::timeMan.allocatedTime<<sync_endl;
@@ -539,14 +539,14 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		//---------------------------------------
 		//	MATE DISTANCE PRUNING
 		//---------------------------------------
-		alpha = std::max(matedIn(ply), alpha);
+/*		alpha = std::max(matedIn(ply), alpha);
 		beta = std::min(mateIn(ply+1), beta);
 		if (alpha >= beta){
 #ifdef PRINT_STATISTICS
 			Statistics::instance().gatherNodeTypeStat(type,CUT_NODE);
 #endif
 			return alpha;
-		}
+		}*/
 
 	}
 
@@ -558,7 +558,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	ttMove=tte!=nullptr ? tte->getPackedMove() : 0;
 	Score ttValue = tte!=nullptr ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 
-	if (type!=search::nodeType::ROOT_NODE &&
+/*	if (type!=search::nodeType::ROOT_NODE &&
 			tte!=nullptr
 			&& tte->getDepth() >= depth
 		    && ttValue != SCORE_NONE // Only in case of TT access race
@@ -604,7 +604,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		}
 #endif
 		return ttValue;
-	}
+	}*/
 
 	Score staticEval;
 	Score eval;
@@ -664,7 +664,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	//------------------------
 	// at very low deep and with an evaluation well below alpha, if a qsearch don't raise the evaluation then prune the node.
 	//------------------------
-	if (!PVnode
+/*	if (!PVnode
 		&& !inCheck
 		&&  depth < 4 * ONE_PLY
 		&&  eval + razorMargin(depth) <= alpha
@@ -695,13 +695,13 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			return v;
 		}
 	}
-
+*/
 	//---------------------------
 	//	 STATIC NULL MOVE PRUNING
 	//---------------------------
 	//	at very low deep and with an evaluation well above beta, bet that we can found a move with a result above beta
 	//---------------------------
-	if (!PVnode
+/*	if (!PVnode
 		&& !inCheck
 		&& !pos.getActualState().skipNullMove
 		&&  depth < 4 * ONE_PLY
@@ -716,7 +716,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		Statistics::instance().gatherNodeTypeStat(type,CUT_NODE);
 #endif
 		return eval - futility[depth>>ONE_PLY_SHIFT];
-	}
+	}*/
 
 
 	//---------------------------
@@ -726,7 +726,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	// this search let us know about threat move by the opponent.
 	//---------------------------
 
-	if(!PVnode
+/*	if(!PVnode
 		&& !inCheck
 		&& depth>=ONE_PLY
 		&& eval>=beta
@@ -804,14 +804,14 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		}
 
 	}
-
+*/
 	//------------------------
 	//	PROB CUT
 	//------------------------
 	//	at high depth we try the capture moves. if a reduced search of this moves gives us a result above beta we bet we can found with a regular search a move exceeding beta
 	//------------------------
 
-	if(!PVnode &&
+/*	if(!PVnode &&
 		!inCheck &&
 		depth>=5*ONE_PLY &&
 		!pos.getActualState().skipNullMove &&
@@ -840,11 +840,11 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 		}
 	}
-
+*/
 	//------------------------
 	//	IID
 	//------------------------
-	if(depth >= (PVnode ? 5 * ONE_PLY : 8 * ONE_PLY)
+/*	if(depth >= (PVnode ? 5 * ONE_PLY : 8 * ONE_PLY)
 		&& ttMove.packed == 0
 		&& (PVnode || staticEval+10000>= beta))
 	{
@@ -863,7 +863,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 		tte = TT.probe(posKey);
 		ttMove= tte!=nullptr ? tte->getPackedMove():0;
-	}
+	}*/
 
 
 
@@ -918,16 +918,16 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		bool isDangerous=moveGivesCheck || pos.isCastleMove(m) || pos.isPassedPawnMove(m);
 
 		int ext=0;
-		if(PVnode && isDangerous){
+/*		if(PVnode && isDangerous){
 			ext = ONE_PLY;
 		}else if(moveGivesCheck && pos.seeSign(m) >= 0){
 			ext = ONE_PLY / 2;
-		}
+		}*/
 
 		//------------------------------
 		//	SINGULAR EXTENSION NODE
 		//------------------------------
-		if(singularExtensionNode
+/*		if(singularExtensionNode
 			&& !ext
 			&&  m == ttMove
 			&&  abs(ttValue) < SCORE_KNOWN_WIN
@@ -945,7 +945,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			if(temp < rBeta){
 				ext = ONE_PLY;
 		    }
-		}
+		}*/
 
 		int newDepth= depth-ONE_PLY+ext;
 
@@ -953,7 +953,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 		//---------------------------------------
 		//	FUTILITY PRUNING
 		//---------------------------------------
-		if(!PVnode
+/*		if(!PVnode
 			&& !captureOrPromotion
 			&& !inCheck
 			&& m != ttMove
@@ -989,7 +989,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 
-		}
+		}*/
 
 		if(type==ROOT_NODE){
 			unsigned long elapsed=std::chrono::duration_cast<std::chrono::milliseconds >(std::chrono::steady_clock::now().time_since_epoch()).count()-startTime;
@@ -1036,7 +1036,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 				//	LMR
 				//------------------------------
 				bool doFullDepthSearch=true;
-				if(depth>=3*ONE_PLY
+				/*if(depth>=3*ONE_PLY
 					&& !captureOrPromotion
 					&& !isDangerous
 					&&  m != ttMove
@@ -1061,7 +1061,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 						}
 					}
 				}
-
+*/
 
 				if(doFullDepthSearch){
 
@@ -1070,7 +1070,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 						sync_cout<<"OTHER alpha "<<(alpha)/10000.0<<" beta "<<(alpha+1)/10000.0<<sync_endl;
 					}
 #endif
-					if(newDepth<ONE_PLY){
+/*					if(newDepth<ONE_PLY){
 						val=-qsearch<search::nodeType::CUT_NODE>(ply+1,pos,newDepth,-alpha-1,-alpha,NULL);
 					}else{
 						val=-alphaBeta<search::nodeType::CUT_NODE>(ply+1,pos,newDepth,-alpha-1,-alpha,NULL);
@@ -1088,7 +1088,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 							sync_cout<<"RESEARCH alpha "<<alpha/10000.0<<" beta "<<beta/10000.0<<sync_endl;
 						}
 #endif
-						if(newDepth<ONE_PLY){
+*/						if(newDepth<ONE_PLY){
 							val=-qsearch<search::nodeType::PV_NODE>(ply+1,pos,newDepth,-beta,-alpha,&childPV);
 						}
 						else{
@@ -1097,12 +1097,13 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 #ifdef PRINT_PV_CHANGES
 						sync_cout<<"OTHER ply "<<ply<<" alpha "<<alpha/10000.0<<" beta "<<beta/10000.0<<" res "<<val/10000.0<<" "<<pos.displayUci(m)<<sync_endl;
 #endif
-					}
+/*					}*/
 				}
 
 			}
 		}
 		else{
+			sync_cout<<"ERROR"<<sync_endl;
 
 			//------------------------------
 			//	LMR
@@ -1383,10 +1384,10 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 	int TTdepth=mg.setupQuiescentSearch(inCheck,depth);
 	Score ttValue = tte ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 
-	if (tte
+/*	if (tte
 		&& tte->getDepth() >= TTdepth
 	    && ttValue != SCORE_NONE // Only in case of TT access race
-	    && (	PVnode ?  false/*tte->getType() == typeExact*/
+	    && (	PVnode ?  false//tte->getType() == typeExact
 	            : ttValue >= beta ? (tte->getType() ==  typeScoreHigherThanBeta|| tte->getType() == typeExact)
 	                              : (tte->getType() ==  typeScoreLowerThanAlpha|| tte->getType() == typeExact)))
 	{
@@ -1409,10 +1410,10 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 		}
 
 
-		/*if(ttMove.packed && Movegen::isMoveLegal(ttMove)){
-			PV.clear();
-			PV.push_back(ttMove);
-		}*/
+//		if(ttMove.packed && Movegen::isMoveLegal(ttMove)){
+//			PV.clear();
+//			PV.push_back(ttMove);
+//		}
 #ifdef PRINT_STATISTICS
 		if(ttValue>=beta){
 			Statistics::instance().gatherNodeTypeStat(type,CUT_NODE);
@@ -1426,7 +1427,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 #endif
 		return ttValue;
 	}
-
+*/
 	ttType TTtype=typeScoreLowerThanAlpha;
 
 
@@ -1496,16 +1497,16 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 			continue;
 		}
 
-		if(depth<-7*ONE_PLY && !inCheck){
+/*		if(depth<-7*ONE_PLY && !inCheck){
 			if(pos.getActualState().currentMove.to!= m.to){
 				continue;
 			}
 		}
-
+*/
 		//----------------------------
 		//	futility pruning (delta pruning)
 		//----------------------------
-		if(!PVnode &&
+/*		if(!PVnode &&
 			!inCheck &&
 			!pos.moveGivesCheck(m) &&
 			m != ttMove &&
@@ -1530,7 +1531,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 			}
 
 		}
-
+*/
 
 		//----------------------------
 		//	don't check moves with negative see
@@ -1538,14 +1539,14 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 		// TODO controllare se conviene fare o non fare la condizione type != search::nodeType::PV_NODE
 		// TODO testare se aggiungere o no !movegivesCheck() &&
-		if(!PVnode &&
+/*		if(!PVnode &&
 				!inCheck &&
 				m.flags != Move::fpromotion &&
 				m != ttMove &&
 				//!pos.moveGivesCheck(m) && -50ELO
 				pos.seeSign(m)<0){
 			continue;
-		}
+		}*/
 
 		pos.doMove(m);
 		Score val;
