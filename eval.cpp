@@ -98,9 +98,9 @@ simdScore knightOnOutpostSupported= simdScore(100,1290,0,0);
 simdScore knightOnHole= simdScore(1610,1190,0,0);
 simdScore KnightAttackingWeakPawn= simdScore(300,300,0,0);
 
-simdScore bishopOnOutpost= simdScore(200,100,0,0);
-simdScore bishopOnOutpostSupported= simdScore(3600,270,0,0);
-simdScore bishopOnHole= simdScore(590,-730,0,0);
+simdScore bishopOnOutpost= simdScore(580,100,0,0);
+simdScore bishopOnOutpostSupported= simdScore(500,270,0,0);
+simdScore bishopOnHole= simdScore(590,100,0,0);
 simdScore badBishop= simdScore(-200,1530,0,0);
 
 simdScore tempo= simdScore(530,480,0,0);
