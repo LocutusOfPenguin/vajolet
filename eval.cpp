@@ -98,7 +98,7 @@ simdScore knightOnOutpostSupported= simdScore(100,1290,0,0);
 simdScore knightOnHole= simdScore(1610,1190,0,0);
 simdScore KnightAttackingWeakPawn= simdScore(300,300,0,0);
 
-simdScore bishopOnOutpost= simdScore(-1020,810,0,0);
+simdScore bishopOnOutpost= simdScore(200,100,0,0);
 simdScore bishopOnOutpostSupported= simdScore(3600,270,0,0);
 simdScore bishopOnHole= simdScore(590,-730,0,0);
 simdScore badBishop= simdScore(-200,1530,0,0);
@@ -1062,8 +1062,11 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 		//sync_cout<<mobility<<sync_endl;
 		res+=mobilityBonus[piece%Position::separationBitmap][mobility];
 		if(piece!=Position::whiteKnights && piece!=Position::blackKnights)
-		if(!(attack&~(threatenSquares|ourPieces)) && (threatenSquares&bitSet(sq))){ // zero mobility && attacked by pawn
-			res-=(Position::pieceValue[piece%Position::separationBitmap]/4);
+		{
+			if(!(attack&~(threatenSquares|ourPieces)) && (threatenSquares&bitSet(sq))){ // zero mobility && attacked by pawn
+				res-=(Position::pieceValue[piece%Position::separationBitmap]/4);
+				//sync_cout<<"boh:"<<(Position::pieceValue[piece%Position::separationBitmap]/4)[1]<<sync_endl;
+			}
 		}
 		/////////////////////////////////////////
 		// center control
@@ -1165,9 +1168,9 @@ simdScore evalPieces(const Position & p, const bitMap * const weakSquares,  bitM
 		}
 		case Position::whiteBishops:
 		case Position::blackBishops:
-			if(relativeRank>=4 && (enemyWeakSquares& BITSET[sq]))
+			if(enemyWeakSquares& BITSET[sq])
 			{
-				res+=bishopOnOutpost;
+				res+=bishopOnOutpost*(5-std::abs(relativeRank-5));
 				if(supportedSquares &BITSET[sq]){
 					res += bishopOnOutpostSupported;
 				}
