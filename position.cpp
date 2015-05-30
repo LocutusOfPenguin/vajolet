@@ -315,7 +315,7 @@ void Position::setupFromFen(const std::string& fenStr){
 	calcNonPawnMaterialValue(x.nonPawnMaterial);
 	calcMaterialValue().store_partial(2,x.material);
 
-	keyHistory[stateIndex]=calcKey();
+	keyHistory[keyHistoryIndex]=calcKey();
 	x.pawnKey=calcPawnKey();
 	x.materialKey=calcMaterialKey();
 
@@ -380,6 +380,7 @@ void Position::clear() {
 		}
 	}
 	stateIndex=0;
+	keyHistoryIndex=0;
 	//actualState=nullptr;
 }
 
@@ -695,14 +696,15 @@ void Position::calcNonPawnMaterialValue(Score* s){
 void Position::doNullMove(void){
 	state n=getActualState();
 	insertState(n);
+	insertKeyHistoryState();
 	state &x=getActualState();
 	x.currentMove=0;
 	if(x.epSquare!=squareNone){
 		assert(x.epSquare<squareNumber);
-		keyHistory[stateIndex]^=HashKeys::ep[x.epSquare];
+		keyHistory[keyHistoryIndex]^=HashKeys::ep[x.epSquare];
 		x.epSquare=squareNone;
 	}
-	keyHistory[stateIndex]^=HashKeys::side;
+	keyHistory[keyHistoryIndex]^=HashKeys::side;
 
 #ifndef DISABLE_PREFETCH
 	__builtin_prefetch (TT.findCluster(x.key));
@@ -737,13 +739,17 @@ void Position::doNullMove(void){
 	\version 1.0
 	\date 27/10/2013
 */
-void Position::doMove(Move & m){
+template<bool updateState> void Position::doMove(Move & m){
 	//sync_cout<<displayUci(m)<<sync_endl;
 	assert(m.packed);
 
 	state n=getActualState();
 	bool moveIsCheck=moveGivesCheck(m);
-	insertState(n);
+	if(updateState)
+	{
+		insertState(n);
+	}
+	insertKeyHistoryState();
 	state &x=getActualState();
 	x.currentMove=m;
 
@@ -770,7 +776,7 @@ void Position::doMove(Move & m){
 	npm.load(x.nonPawnMaterial);
 
 	// change side
-	keyHistory[stateIndex]^=HashKeys::side;
+	keyHistory[keyHistoryIndex]^=HashKeys::side;
 	x.ply++;
 
 	// update counter
@@ -782,7 +788,7 @@ void Position::doMove(Move & m){
 	// reset ep square
 	if(x.epSquare!=squareNone){
 		assert(x.epSquare<squareNumber);
-		keyHistory[stateIndex]^=HashKeys::ep[x.epSquare];
+		keyHistory[keyHistoryIndex]^=HashKeys::ep[x.epSquare];
 		x.epSquare=squareNone;
 	}
 
@@ -801,8 +807,8 @@ void Position::doMove(Move & m){
 
 		//npm+=nonPawnValue[rook][rTo]-nonPawnValue[rook][rFrom];
 
-		keyHistory[stateIndex] ^=HashKeys::keys[rFrom][rook];
-		keyHistory[stateIndex] ^=HashKeys::keys[rTo][rook];
+		keyHistory[keyHistoryIndex] ^=HashKeys::keys[rFrom][rook];
+		keyHistory[keyHistoryIndex] ^=HashKeys::keys[rTo][rook];
 
 	}
 
@@ -826,7 +832,7 @@ void Position::doMove(Move & m){
 		mv-=pstValue[capture][captureSquare];
 
 		// update keys
-		keyHistory[stateIndex] ^= HashKeys::keys[captureSquare][capture];
+		keyHistory[keyHistoryIndex] ^= HashKeys::keys[captureSquare][capture];
 		assert(pieceCount[capture]<30);
 		x.materialKey ^= HashKeys::keys[capture][pieceCount[capture]]; // ->after removing the piece
 
@@ -835,7 +841,7 @@ void Position::doMove(Move & m){
 	}
 
 	// update hashKey
-	keyHistory[stateIndex]^= HashKeys::keys[from][piece]^HashKeys::keys[to][piece];
+	keyHistory[keyHistoryIndex]^= HashKeys::keys[from][piece]^HashKeys::keys[to][piece];
 	movePiece(piece,from,to);
 
 	mv+=pstValue[piece][to]-pstValue[piece][from];
@@ -850,7 +856,7 @@ void Position::doMove(Move & m){
 	{
 		int cr = castleRightsMask[from] | castleRightsMask[to];
 		assert((x.castleRights & cr)<16);
-		keyHistory[stateIndex] ^= HashKeys::castlingRight[x.castleRights & cr];
+		keyHistory[keyHistoryIndex] ^= HashKeys::castlingRight[x.castleRights & cr];
 		x.castleRights = (eCastle)(x.castleRights &(~cr));
 	}
 
@@ -865,7 +871,7 @@ void Position::doMove(Move & m){
 		){
 			x.epSquare=(tSquare)((from+to)>>1);
 			assert(x.epSquare<squareNumber);
-			keyHistory[stateIndex] ^=HashKeys::ep[x.epSquare];
+			keyHistory[keyHistoryIndex] ^=HashKeys::ep[x.epSquare];
 		}
 		if(m.flags ==Move::fpromotion){
 			bitboardIndex promotedPiece=(bitboardIndex)(whiteQueens+x.nextMove+m.promotion);
@@ -877,7 +883,7 @@ void Position::doMove(Move & m){
 			npm+=nonPawnValue[promotedPiece]/*[to]*/;
 
 
-			keyHistory[stateIndex] ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
+			keyHistory[keyHistoryIndex] ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
 			x.pawnKey ^= HashKeys::keys[to][piece];
 			x.materialKey ^= HashKeys::keys[promotedPiece][pieceCount[promotedPiece]-1]^HashKeys::keys[piece][pieceCount[piece]];
 		}
@@ -991,6 +997,7 @@ void Position::undoMove(Move & m){
 		putPiece(x.capturedPiece,capSq);
 	}
 	removeState();
+	removeKeyHistoryState();
 
 	std::swap(Us,Them);
 
@@ -1115,7 +1122,7 @@ bool Position::checkPosConsistency(int nn){
 		return false;
 
 	}
-	if(keyHistory[stateIndex] != calcKey()){
+	if(keyHistory[keyHistoryIndex] != calcKey()){
 		display();
 		sync_cout<<"hashKey error"<<sync_endl;
 		sync_cout<<(nn?"DO error":"undoError") <<sync_endl;
@@ -1201,7 +1208,7 @@ unsigned long long Position::perft(unsigned int depth){
 #endif
 
 	while ((m=mg.getNextMove()).packed) {
-		doMove(m);
+		doMove<true>(m);
 		tot += perft(depth - 1);
 		undoMove(m);
 	}
@@ -1224,7 +1231,7 @@ unsigned long long Position::divide(unsigned int depth){
 	unsigned int mn=0;
 	while ((m=mg.getNextMove()).packed) {
 		mn++;
-		doMove(m);
+		doMove<true>(m);
 		unsigned long long n= perft(depth - 1);
 		tot+=n;
 		undoMove(m);
@@ -1459,12 +1466,12 @@ bool Position::isDraw(bool isPVline) const {
 	// Draw by repetition?
 	unsigned int counter=1;
 	for(int i = 4, e = std::min(getActualState().fiftyMoveCnt, getActualState().pliesFromNull);	i<=e;i+=2){
-		unsigned int stateIndexPointer=stateIndex-i;
+		unsigned int stateIndexPointer=keyHistoryIndex-i;
 		assert(stateIndex>=i);
-		assert(stateIndexPointer<STATE_INFO_LENGTH);
+		assert(stateIndexPointer<KEY_HISTORY_LENGHT);
 		//const state* stp=&stateInfo[stateIndexPointer];
 		assert(stp);
-		if(keyHistory[stateIndexPointer]==keyHistory[stateIndex]){
+		if(keyHistory[stateIndexPointer]==keyHistory[keyHistoryIndex]){
 			counter++;
 			if(!isPVline || counter>=3){
 				return true;
@@ -1473,3 +1480,7 @@ bool Position::isDraw(bool isPVline) const {
 	}
 	return false;
 }
+
+
+template void Position::doMove<true>(Move & m);
+template void Position::doMove<false>(Move & m);

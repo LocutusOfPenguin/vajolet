@@ -118,7 +118,7 @@ void static position(std::istringstream& is, Position & pos){
 	// Parse move list (if any)
 	while (is >> token && ((m = moveFromUci(pos, token)).packed != 0))
 	{
-		pos.doMove(m);
+		pos.doMove<false>(m);
 	}
 }
 

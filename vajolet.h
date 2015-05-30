@@ -56,7 +56,8 @@
 #define ONE_PLY		(16)
 #define ONE_PLY_SHIFT (4)
 #define MAX_PV_LENGTH	(200)
-#define STATE_INFO_LENGTH (600)
+#define STATE_INFO_LENGTH (200)
+#define KEY_HISTORY_LENGHT (1000)
 
 //---------------------------------------------
 //SCORE DEFINITION

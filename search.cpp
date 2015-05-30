@@ -163,7 +163,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 		sync_cout<<"bestmove "<<p.displayUci(lastLegalMove);
 
 
-		p.doMove(lastLegalMove);
+		p.doMove<true>(lastLegalMove);
 		U64 posKey=p.getKey();
 		ttEntry* tte = TT.probe(posKey);
 		p.undoMove(lastLegalMove);
@@ -254,7 +254,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 						}
 
 						//sync_cout<<"insert in TT "<<p.displayUci(*it)<<sync_endl;
-						p.doMove(rootMoves[i].PV.list[z]);
+						p.doMove<true>(rootMoves[i].PV.list[z]);
 						n++;
 
 					}
@@ -450,7 +450,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 		std::cout<<" ponder "<<p.displayUci(rootMoves[bestMoveLine].PV.list[1]);
 	}
 	else{
-		p.doMove(rootMoves[bestMoveLine].PV.list[0]);
+		p.doMove<true>(rootMoves[bestMoveLine].PV.list[0]);
 		U64 posKey=p.getKey();
 		ttEntry* tte = TT.probe(posKey);
 		p.undoMove(rootMoves[bestMoveLine].PV.list[0]);
@@ -827,7 +827,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 		Move m;
 		while((m=mg.getNextMove()).packed){
-			pos.doMove(m);
+			pos.doMove<true>(m);
 			assert(rDepth>=ONE_PLY);
 			s=-alphaBeta<childNodesType>(ply+1,pos,rDepth,-rBeta,-rBeta+1,NULL);
 			pos.undoMove(m);
@@ -1007,7 +1007,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			}
 		}
 
-		pos.doMove(m);
+		pos.doMove<true>(m);
 
 		Score val;
 		PVline childPV;
@@ -1546,7 +1546,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 			continue;
 		}
 
-		pos.doMove(m);
+		pos.doMove<true>(m);
 		Score val;
 
 

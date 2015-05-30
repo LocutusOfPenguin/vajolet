@@ -42,11 +42,14 @@ class Position{
 	public:
 	//static unsigned long testPointCounter;
 	Position(const Position& other)
-	    : stateIndex(other.stateIndex) // calls the copy constructor of the age
+	    : stateIndex(other.stateIndex),keyHistoryIndex(other.keyHistoryIndex) // calls the copy constructor of the age
 
 	{
 		for(int i=0;i<STATE_INFO_LENGTH;i++){
 			stateInfo[i]=other.stateInfo[i];
+		}
+		for(int i=0; i<KEY_HISTORY_LENGHT;i++){
+			keyHistory[i]=other.keyHistory[i];
 		}
 		for(int i=0;i<squareNumber;i++){
 			squares[i]=other.squares[i];
@@ -230,7 +233,7 @@ public:
 	std::string displayFen(void) const;
 	std::string getSymmetricFen() const;
 	void doNullMove(void);
-	void doMove(Move &m);
+	template<bool updateState> void doMove(Move &m);
 	void undoMove(Move &m);
 	static void initCastleRightsMask(void);
 	void setupFromFen(const std::string& fenStr);
@@ -251,7 +254,8 @@ public:
 	*/
 	Position()
 	{
-		stateIndex=0;
+		stateIndex = 0;
+		keyHistoryIndex = 0;
 	}
 
 	/*! \brief tell if the piece is a pawn
@@ -306,7 +310,7 @@ public:
 
 	U64 getKey(void){
 		//return getActualState().key;
-		return keyHistory[stateIndex];
+		return keyHistory[keyHistoryIndex];
 	}
 
 	U64 getExclusionKey(void){
@@ -320,6 +324,7 @@ public:
 	*/
 	inline void undoNullMove(void){
 		removeState();
+		removeKeyHistoryState();
 		std::swap(Us,Them);
 
 #ifdef ENABLE_CHECK_CONSISTENCY
@@ -356,14 +361,17 @@ public:
 
 		stateIndex++;
 		assert(stateIndex<STATE_INFO_LENGHT);
-		//Move killer0;
-		//Move killer1;
-		//killer0=stateInfo[stateIndex].killers[0];
-		//killer1=stateInfo[stateIndex].killers[1];
 		stateInfo[stateIndex]=s;
-		//stateInfo[stateIndex].killers[0]=killer0;
-		//stateInfo[stateIndex].killers[1]=killer1;
-		keyHistory[stateIndex]=keyHistory[stateIndex-1];
+
+
+
+
+		//actualState= &stateInfo[stateIndex];
+	}
+	inline void insertKeyHistoryState(void){
+		keyHistoryIndex++;
+		assert(keyHistoryIndex<KEY_HISTORY_LENGHT);
+		keyHistory[keyHistoryIndex]=keyHistory[keyHistoryIndex-1];
 
 
 
@@ -377,11 +385,17 @@ public:
 		\date 21/11/2013
 	*/
 	inline void removeState(){
-		//assert(stateIndex>=0);
+
 
 		stateIndex--;
 		assert(stateIndex<STATE_INFO_LENGHT);
 		//actualState= &stateInfo[stateIndex];
+	}
+
+	inline void removeKeyHistoryState(){
+
+		keyHistoryIndex--;
+
 	}
 
 
@@ -573,7 +587,9 @@ private:
 		\date 27/10/2013
 	*/
 	state stateInfo[STATE_INFO_LENGTH];
-	U64 keyHistory[STATE_INFO_LENGTH];
+	U64 keyHistory[KEY_HISTORY_LENGHT];
+	unsigned int keyHistoryIndex;
+
 
 	Move killers[STATE_INFO_LENGTH][2];
 
