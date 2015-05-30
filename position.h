@@ -135,7 +135,7 @@ class Position{
 		\date 27/10/2013
 	*/
 	struct state{
-		U64 key,		/*!<  hashkey identifying the position*/
+		U64 //key,		/*!<  hashkey identifying the position*/
 			pawnKey,	/*!<  hashkey identifying the pawn formation*/
 			materialKey;/*!<  hashkey identifying the material signature*/
 		Score nonPawnMaterial[4]; /*!< four score used for white/black opening/endgame non pawn material sum*/
@@ -305,11 +305,12 @@ public:
 
 
 	U64 getKey(void){
-		return getActualState().key;
+		//return getActualState().key;
+		return keyHistory[stateIndex];
 	}
 
 	U64 getExclusionKey(void){
-		return getActualState().key^HashKeys::exclusion;
+		return getKey()^HashKeys::exclusion;
 	}
 
 	/*! \brief undo a null move
@@ -362,6 +363,7 @@ public:
 		stateInfo[stateIndex]=s;
 		//stateInfo[stateIndex].killers[0]=killer0;
 		//stateInfo[stateIndex].killers[1]=killer1;
+		keyHistory[stateIndex]=keyHistory[stateIndex-1];
 
 
 
@@ -571,6 +573,7 @@ private:
 		\date 27/10/2013
 	*/
 	state stateInfo[STATE_INFO_LENGTH];
+	U64 keyHistory[STATE_INFO_LENGTH];
 
 	Move killers[STATE_INFO_LENGTH][2];
 

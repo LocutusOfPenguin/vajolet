@@ -245,12 +245,12 @@ Score search::startThinking(Position & p,searchLimits & l){
 							//sync_cout<<"ERRORE ILLLEGAL MOVE IN PV"<<sync_endl;
 							break;
 						}
-						tte = TT.probe(p.getActualState().key);
+						tte = TT.probe(p.getKey());
 
 						if (!tte || tte->getPackedMove() != (rootMoves[i].PV.list[z]).packed){// Don't overwrite correct entries
 							//sync_cout<<"WARNING MOSSA MANCANTE "<<z<<" "<<p.displayUci(rootMoves[i].PV.list[z])<<sync_endl;
-							//TT.store(p.getActualState().key, transpositionTable::scoreToTT((n%2)?-rootMoves[i].score:rootMoves[i].score, n),typeExact,depth-n*ONE_PLY, (rootMoves[i].PV.list[z]).packed, p.eval<false>());
-							TT.store(p.getActualState().key, SCORE_NONE,typeExact,-1000, (rootMoves[i].PV.list[z]).packed, p.eval<false>());
+							//TT.store(p.getKey(), transpositionTable::scoreToTT((n%2)?-rootMoves[i].score:rootMoves[i].score, n),typeExact,depth-n*ONE_PLY, (rootMoves[i].PV.list[z]).packed, p.eval<false>());
+							TT.store(p.getKey(), SCORE_NONE,typeExact,-1000, (rootMoves[i].PV.list[z]).packed, p.eval<false>());
 						}
 
 						//sync_cout<<"insert in TT "<<p.displayUci(*it)<<sync_endl;
@@ -513,8 +513,8 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 	if( showLine && depth <=ONE_PLY){
 		showLine=false;
 		sync_cout<<"info currline";
-		for (unsigned int i =1; i<= pos.getStateIndex()/2;i++){ // show only half of
-			std::cout<<" "<<pos.displayUci(pos.getState(i).currentMove);
+		for (unsigned int i =1; i<= ply/2;i++){ // show only half of
+			std::cout<<" "<<pos.displayUci(pos.getState(pos.getStateIndex()-ply+i).currentMove);
 
 		}
 		std::cout<<sync_endl;
@@ -742,7 +742,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 			red += ONE_PLY;
 		}
 		pos.doNullMove();
-		U64 nullKey= pos.getActualState().key;
+		U64 nullKey= pos.getKey();
 
 
 		Score nullVal;
@@ -1375,8 +1375,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 
 
-	U64 posKey=pos.getActualState().key;
-	ttEntry* tte = TT.probe(posKey);
+	ttEntry* tte = TT.probe(pos.getKey());
 	Move ttMove;
 	ttMove=tte ? tte->getPackedMove() : 0;
 	Movegen mg(pos,history,ttMove);
@@ -1603,7 +1602,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 
 	if(!signals.stop){
-		TT.store(posKey, transpositionTable::scoreToTT(bestScore, ply),
+		TT.store(pos.getKey(), transpositionTable::scoreToTT(bestScore, ply),
 			bestScore >= beta ? typeScoreHigherThanBeta : TTtype,
 			TTdepth, bestMove.packed, staticEval);
 	}

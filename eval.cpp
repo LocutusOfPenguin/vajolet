@@ -1256,7 +1256,7 @@ Score Position::eval(void) {
 
 
 	state &st =getActualState();
-	evalEntry* probeEval= evalHashTable.probe(st.key);
+	evalEntry* probeEval= evalHashTable.probe(getKey());
 	if(probeEval!=nullptr){
 		if(st.nextMove)
 		{

@@ -315,7 +315,7 @@ void Position::setupFromFen(const std::string& fenStr){
 	calcNonPawnMaterialValue(x.nonPawnMaterial);
 	calcMaterialValue().store_partial(2,x.material);
 
-	x.key=calcKey();
+	keyHistory[stateIndex]=calcKey();
 	x.pawnKey=calcPawnKey();
 	x.materialKey=calcMaterialKey();
 
@@ -699,10 +699,10 @@ void Position::doNullMove(void){
 	x.currentMove=0;
 	if(x.epSquare!=squareNone){
 		assert(x.epSquare<squareNumber);
-		x.key^=HashKeys::ep[x.epSquare];
+		keyHistory[stateIndex]^=HashKeys::ep[x.epSquare];
 		x.epSquare=squareNone;
 	}
-	x.key^=HashKeys::side;
+	keyHistory[stateIndex]^=HashKeys::side;
 
 #ifndef DISABLE_PREFETCH
 	__builtin_prefetch (TT.findCluster(x.key));
@@ -770,7 +770,7 @@ void Position::doMove(Move & m){
 	npm.load(x.nonPawnMaterial);
 
 	// change side
-	x.key^=HashKeys::side;
+	keyHistory[stateIndex]^=HashKeys::side;
 	x.ply++;
 
 	// update counter
@@ -782,7 +782,7 @@ void Position::doMove(Move & m){
 	// reset ep square
 	if(x.epSquare!=squareNone){
 		assert(x.epSquare<squareNumber);
-		x.key^=HashKeys::ep[x.epSquare];
+		keyHistory[stateIndex]^=HashKeys::ep[x.epSquare];
 		x.epSquare=squareNone;
 	}
 
@@ -801,8 +801,8 @@ void Position::doMove(Move & m){
 
 		//npm+=nonPawnValue[rook][rTo]-nonPawnValue[rook][rFrom];
 
-		x.key ^=HashKeys::keys[rFrom][rook];
-		x.key ^=HashKeys::keys[rTo][rook];
+		keyHistory[stateIndex] ^=HashKeys::keys[rFrom][rook];
+		keyHistory[stateIndex] ^=HashKeys::keys[rTo][rook];
 
 	}
 
@@ -826,7 +826,7 @@ void Position::doMove(Move & m){
 		mv-=pstValue[capture][captureSquare];
 
 		// update keys
-		x.key ^= HashKeys::keys[captureSquare][capture];
+		keyHistory[stateIndex] ^= HashKeys::keys[captureSquare][capture];
 		assert(pieceCount[capture]<30);
 		x.materialKey ^= HashKeys::keys[capture][pieceCount[capture]]; // ->after removing the piece
 
@@ -835,7 +835,7 @@ void Position::doMove(Move & m){
 	}
 
 	// update hashKey
-	x.key^= HashKeys::keys[from][piece]^HashKeys::keys[to][piece];
+	keyHistory[stateIndex]^= HashKeys::keys[from][piece]^HashKeys::keys[to][piece];
 	movePiece(piece,from,to);
 
 	mv+=pstValue[piece][to]-pstValue[piece][from];
@@ -850,7 +850,7 @@ void Position::doMove(Move & m){
 	{
 		int cr = castleRightsMask[from] | castleRightsMask[to];
 		assert((x.castleRights & cr)<16);
-		x.key ^= HashKeys::castlingRight[x.castleRights & cr];
+		keyHistory[stateIndex] ^= HashKeys::castlingRight[x.castleRights & cr];
 		x.castleRights = (eCastle)(x.castleRights &(~cr));
 	}
 
@@ -865,7 +865,7 @@ void Position::doMove(Move & m){
 		){
 			x.epSquare=(tSquare)((from+to)>>1);
 			assert(x.epSquare<squareNumber);
-			x.key ^=HashKeys::ep[x.epSquare];
+			keyHistory[stateIndex] ^=HashKeys::ep[x.epSquare];
 		}
 		if(m.flags ==Move::fpromotion){
 			bitboardIndex promotedPiece=(bitboardIndex)(whiteQueens+x.nextMove+m.promotion);
@@ -877,7 +877,7 @@ void Position::doMove(Move & m){
 			npm+=nonPawnValue[promotedPiece]/*[to]*/;
 
 
-			x.key ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
+			keyHistory[stateIndex] ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
 			x.pawnKey ^= HashKeys::keys[to][piece];
 			x.materialKey ^= HashKeys::keys[promotedPiece][pieceCount[promotedPiece]-1]^HashKeys::keys[piece][pieceCount[piece]];
 		}
@@ -1115,7 +1115,7 @@ bool Position::checkPosConsistency(int nn){
 		return false;
 
 	}
-	if(x.key != calcKey()){
+	if(keyHistory[stateIndex] != calcKey()){
 		display();
 		sync_cout<<"hashKey error"<<sync_endl;
 		sync_cout<<(nn?"DO error":"undoError") <<sync_endl;
@@ -1462,9 +1462,9 @@ bool Position::isDraw(bool isPVline) const {
 		unsigned int stateIndexPointer=stateIndex-i;
 		assert(stateIndex>=i);
 		assert(stateIndexPointer<STATE_INFO_LENGTH);
-		const state* stp=&stateInfo[stateIndexPointer];
+		//const state* stp=&stateInfo[stateIndexPointer];
 		assert(stp);
-		if(stp->key==getActualState().key){
+		if(keyHistory[stateIndexPointer]==keyHistory[stateIndex]){
 			counter++;
 			if(!isPVline || counter>=3){
 				return true;
