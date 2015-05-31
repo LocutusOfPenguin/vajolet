@@ -339,14 +339,14 @@ public:
 	*/
 	inline state& getActualState(void)const {
 		//assert(stateIndex>=0);
-		assert(stateIndex<STATE_INFO_LENGHT);
+		assert(stateIndex<STATE_INFO_LENGTH);
 		return (state&) stateInfo[stateIndex];
 		//return (state&) *actualState;
 	}
 
 	inline state& getState(unsigned int n)const {
 			//assert(stateIndex>=0);
-			assert(stateIndex<STATE_INFO_LENGHT);
+			assert(stateIndex<STATE_INFO_LENGTH);
 			return (state&) stateInfo[n];
 		}
 
@@ -360,7 +360,7 @@ public:
 
 
 		stateIndex++;
-		assert(stateIndex<STATE_INFO_LENGHT);
+		assert(stateIndex<STATE_INFO_LENGTH);
 		stateInfo[stateIndex]=s;
 
 
@@ -388,7 +388,7 @@ public:
 
 
 		stateIndex--;
-		assert(stateIndex<STATE_INFO_LENGHT);
+		assert(stateIndex<STATE_INFO_LENGTH);
 		//actualState= &stateInfo[stateIndex];
 	}
 

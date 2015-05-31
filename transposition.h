@@ -18,6 +18,7 @@
 #define TRANSPOSITION_H_
 
 #include "vajolet.h"
+#include "io.h"
 #include <stdlib.h>
 #include <cstring>
 
@@ -43,7 +44,8 @@ private :
 								/*  144 bits total =18 bytes*/
 public:
 	void save(unsigned int k,Score val,unsigned char t,signed short int d,unsigned short m,Score sv){
-		assert(val<SCORE_INFINITE);
+
+		assert(val<SCORE_INFINITE || val==SCORE_NONE);
 		assert(val>-SCORE_INFINITE);
 		assert(sv<SCORE_INFINITE);
 		assert(sv>-SCORE_INFINITE);
@@ -139,12 +141,11 @@ public:
 	// from current position) to "plies to mate/be mated from the root".
 
 	static Score scoreFromTT(Score v, int ply){
-		assert(v!=SCORE_NONE);
 		assert(ply>=0);
 		assert(v-ply<SCORE_MATE);
 		assert(v+ply>SCORE_MATED);
 		assert(v>=SCORE_MATED);
-		assert(v<=SCORE_MATE);
+		assert(v<=SCORE_MATE || v== SCORE_NONE);
 		return  v == SCORE_NONE ? SCORE_NONE
 				: v >= SCORE_MATE_IN_MAX_PLY  ? v - ply
 				: v <= SCORE_MATED_IN_MAX_PLY ? v + ply : v;
