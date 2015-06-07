@@ -333,6 +333,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 					//sync_cout<<"res<=alpha "<<sync_endl;
 
 					//my_thread::timeMan.idLoopRequestToExtend=true;
+					//my_thread::timeMan.allocatedTime=my_thread::timeMan.maxSearchTime;
 					newPV.lenght=1;
 					newPV.list[0]=(rootMoves[indexPV].PV.list[0]);
 					printPV(res,depth,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
@@ -349,7 +350,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 						//sync_cout<<"estesa ricerca="<<my_thread::timeMan.allocatedTime<<sync_endl;
 					}
 					//sync_cout<<"res>=beta "<<sync_endl;
-					printPV(res,depth-reduction,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
+					printPV(res,depth,selDepth-selDepthBase,alpha,beta, p, now-startTime,indexPV,&newPV,visitedNodes);
 					beta = std::min((signed long long int)(res) + delta, (signed long long int)SCORE_INFINITE);
 					if(depth>1){
 						reduction=1;
