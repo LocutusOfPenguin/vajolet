@@ -593,6 +593,7 @@ private:
 
 	Move killers[STATE_INFO_LENGTH][2];
 
+
 	/*! \brief put a piece on the board
 		\author STOCKFISH
 		\version 1.0
@@ -669,6 +670,13 @@ private:
 
 
 public:
+	void prepareKillerForANewSearch(){
+		for(int i =0; i<STATE_INFO_LENGTH-2;i++)
+		{
+			killers[i][0]=killers[i+2][0];
+			killers[i][1]=killers[i+2][1];
+		}
+	}
 
 	/*! \brief board rapresentation
 		\author Marco Belli

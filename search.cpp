@@ -90,6 +90,7 @@ Score search::startThinking(Position & p,searchLimits & l){
 	TT.newSearch();
 	history.clear();
 	visitedNodes=0;
+	p.prepareKillerForANewSearch();
 
 	limits=l;
 	rootMoves.clear();
@@ -489,7 +490,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,Positio
 
 
 	//if(visitedNodes>709000 && visitedNodes<710000){
-		sync_cout<<visitedNodes<<" AB "<<"ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
+	//	sync_cout<<visitedNodes<<" AB "<<"ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 	//}
 	//sync_cout<<"AB "<<"ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 	/*if(pos.displayFen()=="rn1qkb1r/ppp2ppp/4bn2/1B6/8/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 5"){
@@ -1332,7 +1333,7 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,Position 
 
 
 	//if(visitedNodes>599000 && visitedNodes<800000){
-		sync_cout<<"Q ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
+	//	sync_cout<<"Q ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 	//}
 	//sync_cout<<"Q ply:"<<ply<<" depth: "<<depth<<" alpha:"<<alpha<<" beta:"<<beta<<" "<<pos.displayFen()<<sync_endl;
 
