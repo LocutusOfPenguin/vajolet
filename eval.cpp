@@ -1643,8 +1643,10 @@ Score Position::eval(void) {
 	// white passed pawns
 	bitMap pp=passedPawns&bitBoard[whitePawns];
 
+	unsigned int passedPawnNumber=0;
 	wScore=0;
 	while(pp){
+		passedPawnNumber++;
 		simdScore passedPawnsBonus;
 		tSquare ppSq=firstOne(pp);
 
@@ -1663,8 +1665,8 @@ Score Position::eval(void) {
 			// bonus for king proximity to blocking square
 			passedPawnsBonus+=ownKingNearPassedPawn*(SQUARE_DISTANCE[blockingSquare][pieceList[blackKing][0]]*rr);
 			passedPawnsBonus-=enemyKingNearPassedPawn*(SQUARE_DISTANCE[blockingSquare][pieceList[whiteKing][0]]*rr);
-
 			if(squares[blockingSquare]==empty){
+
 				bitMap forwardSquares=SQUARES_IN_FRONT_OF[0][ppSq];
 				bitMap defendedSquares = forwardSquares & attackedSquares[whitePieces];
 
@@ -1708,10 +1710,42 @@ Score Position::eval(void) {
 		wScore+=passedPawnsBonus;
 
 	}
+
+	if(passedPawnNumber>1)
+	{
+		if(st.nonPawnMaterial[2]<=initialPieceValue[whiteBishops][0])
+		{
+			if(st.nonPawnMaterial[2]==initialPieceValue[whiteBishops][0])
+			{
+				pp=passedPawns&bitBoard[whitePawns];
+				pp|= pp<<8;
+				pp|= pp<<16;
+				pp|= pp<<32;
+
+				if(
+						bitCnt(Movegen::getBishopPseudoAttack(this->pieceList[blackBishops][0]) && pp)==passedPawnNumber
+				){
+					wScore=wScore*204/256;
+				}
+				else{
+					wScore=wScore*307/256;
+				}
+
+
+			}else
+			{
+
+			}
+		}
+
+	}
 	pp=passedPawns&bitBoard[blackPawns];
 
+	passedPawnNumber=0;
 	bScore=0;
 	while(pp){
+
+		passedPawnNumber++;
 		simdScore passedPawnsBonus;
 		tSquare ppSq=firstOne(pp);
 		pp &= pp-1;
@@ -1772,6 +1806,34 @@ Score Position::eval(void) {
 		}
 
 		bScore+=passedPawnsBonus;
+
+	}
+	if(passedPawnNumber>1)
+	{
+		if(st.nonPawnMaterial[0]<=initialPieceValue[whiteBishops][0])
+		{
+			if(st.nonPawnMaterial[0]==initialPieceValue[whiteBishops][0])
+			{
+				pp=passedPawns&bitBoard[blackPawns];
+				pp|= pp>>8;
+				pp|= pp>>16;
+				pp|= pp>>32;
+
+				if(
+						bitCnt(Movegen::getBishopPseudoAttack(this->pieceList[whiteBishops][0]) && pp)==passedPawnNumber
+				){
+					bScore=bScore*204/256;
+				}
+				else{
+					bScore=bScore*307/256;
+				}
+
+
+			}else
+			{
+
+			}
+		}
 
 	}
 	res+=wScore-bScore;
