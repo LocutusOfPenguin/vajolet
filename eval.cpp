@@ -1725,10 +1725,10 @@ Score Position::eval(void) {
 				if(
 						bitCnt(Movegen::getBishopPseudoAttack(this->pieceList[blackBishops][0]) && pp)==passedPawnNumber
 				){
-					wScore=wScore*204/256;
+					wScore=wScore*230/256;
 				}
 				else{
-					wScore=wScore*307/256;
+					wScore=wScore*407/256;
 				}
 
 
@@ -1822,10 +1822,10 @@ Score Position::eval(void) {
 				if(
 						bitCnt(Movegen::getBishopPseudoAttack(this->pieceList[whiteBishops][0]) && pp)==passedPawnNumber
 				){
-					bScore=bScore*204/256;
+					bScore=bScore*230/256;
 				}
 				else{
-					bScore=bScore*307/256;
+					bScore=bScore*407/256;
 				}
 
 
