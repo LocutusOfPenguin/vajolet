@@ -35,6 +35,10 @@
 	Position ppp;
 #endif
 
+std::list<Move> PVtoBeverified;
+std::list<Move> followedPv;
+bool followingPV = false;
+
 std::vector<rootMove> search::rootMoves;
 std::atomic<unsigned long long> search::visitedNodes;
 
@@ -104,6 +108,7 @@ Score search::startThinking(searchLimits & l){
 	history.clear();
 	visitedNodes=0;
 	std::vector<search> helperSearch(threads-1);
+	PVtoBeverified.clear();
 
 	limits=l;
 	rootMoves.clear();
@@ -272,12 +277,14 @@ Score search::startThinking(searchLimits & l){
 						}
 						tte = TT.probe(pos.getKey());
 
+						bool stored = false;
 						if (!tte || tte->getPackedMove() != (*it).packed)
 						{// Don't overwrite correct entries
+							stored = true;
 							TT.store(pos.getKey(), SCORE_NONE,typeExact,-1000, (*it).packed, pos.eval<false>());
 						}
 
-						//sync_cout<<"insert in TT "<<p.displayUci(*it)<<sync_endl;
+						sync_cout<<"insert in TT "<<pos.displayUci(*it)<<" "<<stored<<" "<<pos.getKey()<<sync_endl;
 						pos.doMove(*it);
 
 					}
@@ -321,6 +328,33 @@ Score search::startThinking(searchLimits & l){
 				{
 					t.join();
 				}
+
+
+				sync_cout<<"PV FOLLOWED"<<sync_endl;
+				printPV(res,depth,selDepth-selDepthBase,alpha,beta, 1,indexPV,followedPv,visitedNodes);
+				int pos = 0;
+				if(!signals.stop)
+				{
+					for( auto it = begin(PVtoBeverified); it != end(PVtoBeverified);++it)
+					{
+						auto it2 = begin(followedPv);
+						std::advance(it2, pos);
+						if(*it!= *it2)
+						{
+							sync_cout<<"ERRORE"<<sync_endl;
+						}
+						pos++;
+					}
+				}
+				sync_cout<<"-----------------"<<sync_endl;
+
+				sync_cout<<"PV TO BE VERIFIED"<<sync_endl;
+				PVtoBeverified = newPV;
+				printPV(res,depth,selDepth-selDepthBase,alpha,beta, 1,indexPV,PVtoBeverified,visitedNodes);
+				followingPV = true;
+				followedPv.clear();
+
+
 
 
 
@@ -1000,11 +1034,17 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,int dep
 			}
 		}
 
+		U64 key = pos.getKey();
 		pos.doMove(m);
 
 		Score val;
 		std::list<Move> childPV;
-		if(PVnode){
+		if(PVnode)
+		{
+			if(followingPV)
+			{
+				sync_cout<<"moveMumber:"<<moveNumber<<" "<<  (m == ttMove)<<" "<<pos.displayUci(ttMove)<<" "<<key<<sync_endl;
+			}
 			if(moveNumber==1){
 #ifdef DEBUG1
 				if(type==search::nodeType::ROOT_NODE){
@@ -1012,6 +1052,11 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,int dep
 				}
 #endif
 
+
+				if(followingPV)
+				{
+					followedPv.push_back(m);
+				}
 				childPV.clear();
 				if(newDepth<ONE_PLY){
 					val=-qsearch<search::nodeType::PV_NODE>(ply+1,newDepth,-beta,-alpha,childPV);
@@ -1023,6 +1068,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply,int dep
 #endif
 			}
 			else{
+				followingPV = false;
 
 				//------------------------------
 				//	LMR
@@ -1455,7 +1501,24 @@ template<search::nodeType type> Score search::qsearch(unsigned int ply,int depth
 		Score val;
 
 
-		if(PVnode){
+		if(PVnode)
+		{
+			if(followingPV)
+			{
+				sync_cout<<"q moveMumber:"<<moveNumber<<" "<<  (m == ttMove)<<" "<<pos.displayUci(ttMove)<<sync_endl;
+			}
+
+			if( moveNumber == 1)
+			{
+				if(followingPV)
+				{
+					followedPv.push_back(m);
+				}
+			}
+			else
+			{
+				followingPV = false;
+			}
 			childPV.clear();
 			val=-qsearch<childNodesType>(ply+1,depth-ONE_PLY,-beta,-alpha,childPV);
 		}
