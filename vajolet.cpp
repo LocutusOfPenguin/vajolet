@@ -26,6 +26,7 @@
 #include "transposition.h"
 #include "search.h"
 #include "eval.h"
+#include "tune.h"
 
 
 /*!	\brief	print the startup information
@@ -60,9 +61,15 @@ int main()
 	Position::initMaterialKeys();
 	initMobilityBonus();
 
+	/*Tuner tuner;
+	tuner.tuneParameters();
+	//tuner.parseEpd();
+	return 0;*/
+
 	//----------------------------------
 	//	main loop
 	//----------------------------------
 	printStartInfo();
 	uciLoop();
+	return 0;
 }

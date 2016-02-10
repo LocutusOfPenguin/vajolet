@@ -125,7 +125,7 @@ private:
 
 	signed int razorMargin(unsigned int depth) const { return 20000+depth*78; }
 
-
+public:
 	enum nodeType
 	{
 		ROOT_NODE,
@@ -135,7 +135,9 @@ private:
 		CUT_NODE
 	} ;
 
+public:
 	template<nodeType type>Score qsearch(unsigned int ply,int depth,Score alpha,Score beta,std::list<Move>& PV);
+private:
 	template<nodeType type>Score alphaBeta(unsigned int ply,int depth,Score alpha,Score beta,std::list<Move>& PV);
 
 	static std::atomic<unsigned long long> visitedNodes;
