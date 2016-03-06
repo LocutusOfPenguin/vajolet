@@ -153,6 +153,7 @@ private:
 	void reloadPv(unsigned int i);
 
 public:
+	bool verbose = true;
 	static std::vector<rootMove> rootMoves;
 	searchLimits limits;
 	Position pos;

@@ -279,7 +279,10 @@ startThinkResult search::startThinking(unsigned int depth, Score alpha, Score be
 					newPV.clear();
 					newPV.push_back( rootMoves[indexPV].PV.front() );
 
-					printPV(res, depth, maxPlyReached, alpha, beta, elapsedTime, indexPV, newPV, visitedNodes);
+					if(verbose)
+					{
+						printPV(res, depth, maxPlyReached, alpha, beta, elapsedTime, indexPV, newPV, visitedNodes);
+					}
 
 					alpha = (Score) std::max((signed long long int)(res) - delta, (signed long long int)-SCORE_INFINITE);
 
@@ -293,7 +296,10 @@ startThinkResult search::startThinking(unsigned int depth, Score alpha, Score be
 						my_thread::timeMan.allocatedTime=my_thread::timeMan.maxSearchTime;
 					}*/
 
-					printPV(res, depth, maxPlyReached, alpha, beta, elapsedTime, indexPV, newPV, visitedNodes);
+					if(verbose)
+					{
+						printPV(res, depth, maxPlyReached, alpha, beta, elapsedTime, indexPV, newPV, visitedNodes);
+					}
 
 					beta = (Score) std::min((signed long long int)(res) + delta, (signed long long int)SCORE_INFINITE);
 					if(depth > 1)
@@ -318,7 +324,11 @@ startThinkResult search::startThinking(unsigned int depth, Score alpha, Score be
 
 				// Sort the PV lines searched so far and update the GUI
 				std::stable_sort(rootMoves.begin(), rootMoves.begin() + indexPV + 1);
-				printPVs( indexPV + 1 );
+				if(verbose)
+				{
+					printPVs( indexPV + 1 );
+				}
+
 			}
 		}
 
@@ -415,7 +425,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply, int de
 	//--------------------------------------
 	// show current line if needed
 	//--------------------------------------
-	if( showLine && depth <= ONE_PLY)
+	if( verbose && showLine && depth <= ONE_PLY)
 	{
 		showLine = false;
 		showCurrLine(pos,ply);
@@ -868,7 +878,7 @@ template<search::nodeType type> Score search::alphaBeta(unsigned int ply, int de
 
 		}
 
-		if(type == ROOT_NODE)
+		if(type == ROOT_NODE && verbose)
 		{
 			long long int elapsed = getElapsedTime();
 			if(

@@ -188,6 +188,41 @@ void static go(std::istringstream& is, Position & pos, my_thread * thr)
     thr->startThinking(&pos,limits);
 }
 
+void static autogame(std::istringstream& is, Position & pos, my_thread * thr)
+{
+	searchLimits limits;
+	std::string token;
+	bool searchMovesCommand = false;
+
+
+	while (is >> token)
+	{
+		if (token == "searchmoves")		{searchMovesCommand = true;}
+		else if (token == "wtime")		{is >> limits.wtime;searchMovesCommand = false;}
+		else if (token == "btime")		{is >> limits.btime;searchMovesCommand = false;}
+		else if (token == "winc")		{is >> limits.winc;searchMovesCommand = false;}
+		else if (token == "binc")		{is >> limits.binc;searchMovesCommand = false;}
+		else if (token == "movestogo")	{is >> limits.movesToGo;searchMovesCommand = false;}
+		else if (token == "depth")		{is >> limits.depth;searchMovesCommand = false;}
+		else if (token == "nodes")		{is >> limits.nodes;searchMovesCommand = false;}
+		else if (token == "movetime")	{is >> limits.moveTime;searchMovesCommand = false;}
+		else if (token == "mate")		{is >> limits.mate;searchMovesCommand = false;}
+		else if (token == "infinite")	{limits.infinite = true;searchMovesCommand = false;}
+		else if (token == "ponder")		{limits.ponder = true;searchMovesCommand = false;}
+		else if (searchMovesCommand == true)
+		{
+			Move m = moveFromUci(pos, token);
+			if(m.packed)
+			{
+				sync_cout << "mossa " << token << sync_endl;
+				limits.searchMoves.push_back( moveFromUci(pos, token) );
+			}
+		}
+	}
+
+    thr->startThinking(&pos,limits,true);
+}
+
 
 
 
@@ -383,6 +418,10 @@ void uciLoop()
 		else if(token == "setoption")
 		{
 			setoption(is);
+		}
+		else if(token == "autogame")
+		{
+			autogame(is, pos, thr);
 		}
 		/*else if(token == "setvalue")
 		{

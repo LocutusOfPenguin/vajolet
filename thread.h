@@ -160,6 +160,7 @@ public:
 class my_thread
 {
 
+	bool mcts = false;
 	my_thread()
 	{
 		initThreads();
@@ -186,6 +187,7 @@ class my_thread
 	void timerThread();
 	void searchThread();
 	void manageNewSearch();
+	void autoGame();
 public :
 	void quitThreads();
 
@@ -213,8 +215,9 @@ public :
 	{
 		quitThreads();
 	}
-	void startThinking(Position * p, searchLimits& l)
+	void startThinking(Position * p, searchLimits& l,bool montecarlo = false)
 	{
+
 		src.stop = true;
 		lastHasfullMessage = 0;
 
@@ -222,6 +225,7 @@ public :
 
 		if(!startThink)
 		{
+			mcts = montecarlo;
 			std::lock_guard<std::mutex> lk(searchMutex);
 			src.limits = l;
 			src.pos = *p;

@@ -180,128 +180,135 @@ void my_thread::searchThread()
 void my_thread::manageNewSearch()
 {
 
-	/*************************************************
-	 *	first of all check the number of legal moves
-	 *	if there is only 1 moves do it
-	 *	if there is 0 legal moves return null move
-	 *************************************************/
-
-	if( game.isNewGame(src.pos))
+	if(mcts)
 	{
-		game.CreateNewGame();
-
-	}
-	game.insertNewMoves(src.pos);
-
-
-	Movegen mg(src.pos);
-	unsigned int legalMoves = mg.getNumberOfLegalMoves();
-
-	if(legalMoves == 0)
-	{
-		while((src.limits.infinite && !src.stop) || src.limits.ponder){}
-
-		sync_cout<<"info depth 0 score cp 0"<<sync_endl;
-		sync_cout<<"bestmove 0000"<<sync_endl;
-
-		return;
-	}
-	else if( legalMoves == 1 )
-	{
-		if(!src.limits.infinite)
-		{
-			Move m = mg.getFirstMove();
-			sync_cout << "info pv " << displayUci(m) << sync_endl;
-			while(src.limits.ponder){}
-			sync_cout << "bestmove " << displayUci(m);
-
-			src.pos.doMove(m);
-			const ttEntry* const tte = TT.probe(src.pos.getKey());
-			src.pos.undoMove();
-
-			if(tte && ( m.packed = (tte->getPackedMove())))
-			{
-				std::cout<<" ponder "<<displayUci(m);
-			}
-			std::cout<<sync_endl;
-
-			return;
-		}
-	}
-
-	//----------------------------------------------
-	//	book probing
-	//----------------------------------------------
-	if(search::useOwnBook && !src.limits.infinite )
-	{
-		PolyglotBook pol;
-		Move bookM = pol.probe(src.pos, search::bestMoveBook);
-		if(bookM.packed)
-		{
-			sync_cout << "info pv " << displayUci(bookM) << sync_endl;
-			while( (src.limits.infinite && !src.stop) || src.limits.ponder){}
-			sync_cout<<"bestmove "<< displayUci(bookM) << sync_endl;
-			return;
-		}
-	}
-	startThinkResult res;
-	/*if(game.isPonderRight())
-	{
-		Game::GamePosition gp = game.getNewSearchParameters();
-
-		unsigned int d = 1;
-		if( gp.depth > 6)
-			d = gp.depth -6;
-
-		if(gp.beta-gp.alpha == 1600)
-		{
-			sync_cout<< d<<" "<< gp.alpha<<" "<< gp.beta<<sync_endl;
-			res = src.startThinking(d, gp.alpha, gp.beta);
-		}
-		else
-		{
-			res = src.startThinking();
-		}
-	}
-	else*/
-	{
-		res = src.startThinking();
-	}
-
-
-	std::list<Move> PV = res.PV;
-
-	while(src.limits.ponder)
-	{
-	}
-
-	//-----------------------------
-	// print out the choosen line
-	//-----------------------------
-	sync_cout << "bestmove " << displayUci( PV.front() );
-
-	if(PV.size() > 1)
-	{
-		std::list<Move>::iterator it = PV.begin();
-		std::advance(it, 1);
-		std::cout<<" ponder "<<displayUci(*it);
+		autoGame();
 	}
 	else
 	{
-		src.pos.doMove( PV.front() );
-		const ttEntry* const tte = TT.probe(src.pos.getKey());
-		src.pos.undoMove();
+		/*************************************************
+		 *	first of all check the number of legal moves
+		 *	if there is only 1 moves do it
+		 *	if there is 0 legal moves return null move
+		 *************************************************/
 
-		Move m;
-		if(tte && ( m.packed = tte->getPackedMove()))
+		if( game.isNewGame(src.pos))
 		{
-			std::cout << " ponder " << displayUci(m);
+			game.CreateNewGame();
+
+		}
+		game.insertNewMoves(src.pos);
+
+
+		Movegen mg(src.pos);
+		unsigned int legalMoves = mg.getNumberOfLegalMoves();
+
+		if(legalMoves == 0)
+		{
+			while((src.limits.infinite && !src.stop) || src.limits.ponder){}
+
+			sync_cout<<"info depth 0 score cp 0"<<sync_endl;
+			sync_cout<<"bestmove 0000"<<sync_endl;
+
+			return;
+		}
+		else if( legalMoves == 1 )
+		{
+			if(!src.limits.infinite)
+			{
+				Move m = mg.getFirstMove();
+				sync_cout << "info pv " << displayUci(m) << sync_endl;
+				while(src.limits.ponder){}
+				sync_cout << "bestmove " << displayUci(m);
+
+				src.pos.doMove(m);
+				const ttEntry* const tte = TT.probe(src.pos.getKey());
+				src.pos.undoMove();
+
+				if(tte && ( m.packed = (tte->getPackedMove())))
+				{
+					std::cout<<" ponder "<<displayUci(m);
+				}
+				std::cout<<sync_endl;
+
+				return;
+			}
 		}
 
-	}
+		//----------------------------------------------
+		//	book probing
+		//----------------------------------------------
+		if(search::useOwnBook && !src.limits.infinite )
+		{
+			PolyglotBook pol;
+			Move bookM = pol.probe(src.pos, search::bestMoveBook);
+			if(bookM.packed)
+			{
+				sync_cout << "info pv " << displayUci(bookM) << sync_endl;
+				while( (src.limits.infinite && !src.stop) || src.limits.ponder){}
+				sync_cout<<"bestmove "<< displayUci(bookM) << sync_endl;
+				return;
+			}
+		}
+		startThinkResult res;
+		/*if(game.isPonderRight())
+		{
+			Game::GamePosition gp = game.getNewSearchParameters();
 
-	std::cout<<sync_endl;
-	game.savePV(PV, res.depth, res.alpha, res.beta);
+			unsigned int d = 1;
+			if( gp.depth > 6)
+				d = gp.depth -6;
+
+			if(gp.beta-gp.alpha == 1600)
+			{
+				sync_cout<< d<<" "<< gp.alpha<<" "<< gp.beta<<sync_endl;
+				res = src.startThinking(d, gp.alpha, gp.beta);
+			}
+			else
+			{
+				res = src.startThinking();
+			}
+		}
+		else*/
+		{
+			res = src.startThinking();
+		}
+
+
+		std::list<Move> PV = res.PV;
+
+		while(src.limits.ponder)
+		{
+		}
+
+		//-----------------------------
+		// print out the choosen line
+		//-----------------------------
+		sync_cout << "bestmove " << displayUci( PV.front() );
+
+		if(PV.size() > 1)
+		{
+			std::list<Move>::iterator it = PV.begin();
+			std::advance(it, 1);
+			std::cout<<" ponder "<<displayUci(*it);
+		}
+		else
+		{
+			src.pos.doMove( PV.front() );
+			const ttEntry* const tte = TT.probe(src.pos.getKey());
+			src.pos.undoMove();
+
+			Move m;
+			if(tte && ( m.packed = tte->getPackedMove()))
+			{
+				std::cout << " ponder " << displayUci(m);
+			}
+
+		}
+
+		std::cout<<sync_endl;
+		game.savePV(PV, res.depth, res.alpha, res.beta);
+	}
 
 
 }
@@ -322,6 +329,57 @@ void my_thread::quitThreads()
 	timerCond.notify_one();
 	timer.join();
 	searcher.join();
+}
+
+void my_thread::autoGame()
+{
+	src.limits.depth = 10;
+	src.verbose = false;
+
+	sync_cout<<"AUTOGAME"<<sync_endl;
+	bool finished = false;
+
+	while(!finished)
+	{
+		sync_cout<<"------------------------------------------"<<sync_endl;
+		//src.pos.display();
+
+		startThinkResult res = src.startThinking();
+		sync_cout <<"MOVE "<<displayUci(res.PV.front())<<sync_endl;
+		src.pos.doMove(res.PV.front());
+
+		if( src.pos.isDraw(true))
+		{
+			finished = true;
+			sync_cout<<"RESULT = 1/2-1/2"<<sync_endl;
+		}
+
+
+		Movegen mg(src.pos);
+		if(mg.getNumberOfLegalMoves() == 0)
+		{
+			finished = true;
+
+			if(src.pos.isInCheck())
+			{
+				if(src.pos.getActualState().nextMove == Position::whiteTurn)
+				{
+					sync_cout<<"RESULT = white WIN"<<sync_endl;
+				}
+				else
+				{
+					sync_cout<<"RESULT = black WIN"<<sync_endl;
+				}
+			}
+			else
+			{
+				sync_cout<<"RESULT = draw"<<sync_endl;
+			}
+		}
+	}
+
+	sync_cout<<"FINISHED"<<sync_endl;
+
 }
 
 
