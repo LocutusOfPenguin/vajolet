@@ -34,6 +34,7 @@
 #include "thread.h"
 #include "transposition.h"
 #include "benchmark.h"
+#include "mcts.h"
 
 
 
@@ -400,6 +401,12 @@ void uciLoop()
 		{
 			printUciInfo();
 		}
+		else if(token== "MCTS")
+		{
+			mcts mc(pos);
+			mc.UCT();
+			mc.printBestMove();
+		}
 		else if (token == "quit" || token == "stop")
 		{
 			thr->stopThinking();
@@ -457,7 +464,10 @@ void uciLoop()
 		}
 		else if (token == "go")
 		{
-			go(is, pos, thr);
+			mcts mc(pos);
+			mc.UCT();
+			mc.printBestMove();
+			//go(is, pos, thr);
 		}
 		else if (token == "bench")
 		{

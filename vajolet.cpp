@@ -57,42 +57,9 @@ int main()
 	Position::initCastleRightsMask();
 	Movegen::initMovegenConstant();
 	search::initLMRreduction();
-	TT.setSize(1);
+	TT.setSize(512);
 	Position::initMaterialKeys();
 	initMobilityBonus();
-
-	mcts mc;
-	mc.selectNode();
-	mc.print();
-
-	/*Move m;
-	m.packed = 0;
-	m.bit.from = E2;
-	m.bit.to = E4;
-	mc.firstNode.insertChildren(m);
-	m.bit.from = D2;
-	m.bit.to = D4;
-	mc.firstNode.insertChildren(m);
-
-	mctsNode& node = mc.firstNode.childrens[1];
-	m.bit.from = E7;
-	m.bit.to = E5;
-	node.insertChildren(m);
-	m.bit.from = D7;
-	m.bit.to = D5;
-	node.insertChildren(m);
-
-	mctsNode& node2 = mc.firstNode.childrens[0];
-	m.bit.from = A7;
-	m.bit.to = A5;
-	node2.insertChildren(m);
-	m.bit.from = B7;
-	m.bit.to = B5;
-	node2.insertChildren(m);
-
-	mc.print();*/
-
-
 
 
 	//----------------------------------
