@@ -32,7 +32,7 @@
 
 struct timeManagementStruct
 {
-	volatile unsigned long allocatedTime;
+	volatile long long allocatedTime;
 	//volatile unsigned long minSearchTime;
 	//volatile unsigned long maxSearchTime;
 	volatile unsigned int depth;
