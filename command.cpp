@@ -281,7 +281,7 @@ void setoption(std::istringstream& is)
 
 }
 
-/*
+
 void setvalue(std::istringstream& is)
 {
 	std::string token, name, value;
@@ -330,13 +330,235 @@ void setvalue(std::istringstream& is)
 		Position::pieceValue[Position::whiteKnights].insert(1,stoi(value));
 		Position::pieceValue[Position::blackKnights].insert(1,stoi(value));
 		Position::initPstValues();
-	}else if(name =="pawnsEG")
+	}else if(name =="pawnsMG")
 	{
-		Position::pieceValue[Position::whitePawns].insert(1,stoi(value));
-		Position::pieceValue[Position::blackPawns].insert(1,stoi(value));
+		Position::pieceValue[Position::whitePawns].insert(0,stoi(value));
+		Position::pieceValue[Position::blackPawns].insert(0,stoi(value));
 		Position::initPstValues();
+	}else if(name =="PawnD3MG")
+	{
+		PawnD3.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnD3EG")
+	{
+		PawnD3.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnD4MG")
+	{
+		PawnD4.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnD4EG")
+	{
+		PawnD4.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnD5MG")
+	{
+		PawnD5.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnD5EG")
+	{
+		PawnD5.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE3MG")
+	{
+		PawnE3.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE3EG")
+	{
+		PawnE3.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE4MG")
+	{
+		PawnE4.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE4EG")
+	{
+		PawnE4.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE5MG")
+	{
+		PawnE5.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnE5EG")
+	{
+		PawnE5.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnCenteringMG")
+	{
+		PawnCentering.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnCenteringEG")
+	{
+		PawnCentering.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnRankBonusMG")
+	{
+		PawnRankBonus.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="PawnRankBonusEG")
+	{
+		PawnRankBonus.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KnightPSTMG")
+	{
+		KnightPST.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KnightPSTEG")
+	{
+		KnightPST.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopPSTMG")
+	{
+		BishopPST.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopPSTEG")
+	{
+		BishopPST.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="RookPSTMG")
+	{
+		RookPST.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="RookPSTEG")
+	{
+		RookPST.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="QueenPSTMG")
+	{
+		QueenPST.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="QueenPSTEG")
+	{
+		QueenPST.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KingPSTMG")
+	{
+		KingPST.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KingPSTEG")
+	{
+		KingPST.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopBackRankOpeningMG")
+	{
+		BishopBackRankOpening.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopBackRankOpeningEG")
+	{
+		BishopBackRankOpening.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KnightBackRankOpeningMG")
+	{
+		KnightBackRankOpening.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="KnightBackRankOpeningEG")
+	{
+		KnightBackRankOpening.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="RookBackRankOpeningMG")
+	{
+		RookBackRankOpening.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="RookBackRankOpeningEG")
+	{
+		RookBackRankOpening.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="QueenBackRankOpeningMG")
+	{
+		QueenBackRankOpening.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="QueenBackRankOpeningEG")
+	{
+		QueenBackRankOpening.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopOnBigDiagonalsMG")
+	{
+		BishopOnBigDiagonals.insert(0,stoi(value));
+		Position::initPstValues();
+	}else if(name =="BishopOnBigDiagonalsEG")
+	{
+		BishopOnBigDiagonals.insert(1,stoi(value));
+		Position::initPstValues();
+	}else if(name =="queenMobilityPars0")
+	{
+		queenMobilityPars.insert(0,stoi(value));
+		initMobilityBonus();
 	}
-}*/
+	else if(name =="queenMobilityPars1")
+	{
+		queenMobilityPars.insert(1,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="queenMobilityPars2")
+	{
+		queenMobilityPars.insert(2,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="queenMobilityPars3")
+	{
+		queenMobilityPars.insert(3,stoi(value));
+		initMobilityBonus();
+	}else if(name =="rookMobilityPars0")
+	{
+		rookMobilityPars.insert(0,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="rookMobilityPars1")
+	{
+		rookMobilityPars.insert(1,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="rookMobilityPars2")
+	{
+		rookMobilityPars.insert(2,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="rookMobilityPars3")
+	{
+		rookMobilityPars.insert(3,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="bishopMobilityPars0")
+	{
+		bishopMobilityPars.insert(0,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="bishopMobilityPars1")
+	{
+		bishopMobilityPars.insert(1,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="bishopMobilityPars2")
+	{
+		bishopMobilityPars.insert(2,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="bishopMobilityPars3")
+	{
+		bishopMobilityPars.insert(3,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="knightMobilityPars0")
+	{
+		knightMobilityPars.insert(0,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="knightMobilityPars1")
+	{
+		knightMobilityPars.insert(1,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="knightMobilityPars2")
+	{
+		knightMobilityPars.insert(2,stoi(value));
+		initMobilityBonus();
+	}
+	else if(name =="knightMobilityPars3")
+	{
+		knightMobilityPars.insert(3,stoi(value));
+		initMobilityBonus();
+	}
+}
 
 
 /*	\brief manage the uci loop
@@ -384,10 +606,10 @@ void uciLoop()
 		{
 			setoption(is);
 		}
-		/*else if(token == "setvalue")
+		else if(token == "setvalue")
 		{
 			setvalue(is);
-		}*/
+		}
 		else if (token == "eval")
 		{
 			sync_cout << "Eval:" << pos.eval<true>() / 10000.0 << sync_endl;

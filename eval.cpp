@@ -44,10 +44,10 @@ const int KingExposed[] = {
 //------------------------------------------------
 //	MOBILITY BONUS
 //------------------------------------------------
-simdScore queenMobilityPars=simdScore(5,5,20,335);
-simdScore rookMobilityPars=simdScore(5,5,215,230);
-simdScore bishopMobilityPars=simdScore(4,4,283,318);
-simdScore knightMobilityPars=simdScore(3,3,280,220);
+simdScore queenMobilityPars=simdScore(3,4,9,325);
+simdScore rookMobilityPars=simdScore(2,2,215,283);
+simdScore bishopMobilityPars=simdScore(1,1,262,236);
+simdScore knightMobilityPars=simdScore(0,0,279,201);
 simdScore mobilityBonus[Position::separationBitmap][32];
 
 

@@ -27,6 +27,11 @@
 
 void initMobilityBonus();
 
+extern simdScore queenMobilityPars;
+extern simdScore rookMobilityPars;
+extern simdScore bishopMobilityPars;
+extern simdScore knightMobilityPars;
+
 
 
 
