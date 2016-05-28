@@ -34,14 +34,23 @@ enum ttType
 
 class ttEntry
 {
-private:
-	unsigned int key; 			/*! 32 bit for the upper part of the key*/
+public:
+
 	Score value;				/*! 32 bit for the value*/
 	Score staticValue;			/*! 32 bit for the static evalutation (eval())*/
-	unsigned short packedMove;	/*!	16 bit for the move*/
-	signed short int depth;		/*! 16 bit for depth*/
-	unsigned char generation;	/*! 8 bit for the generation id*/
-	unsigned char type;			/*! 8 bit for the type of the entry*/
+
+	struct _bit
+	{
+		unsigned int packedMove:16;	/*!	16 bit for the move*/
+		unsigned int key:16;		/*! 32 bit for the upper part of the key*/
+	}bit;
+	struct _bit2{
+		signed short int depth:12;/*! 12 bit for depth*/
+		unsigned char generation:2;	/*! 2 bit for the generation id*/
+		unsigned char type:2;		/*! 2 bit for the type of the entry*/
+	}bit2;
+
+
 								/*  144 bits total =18 bytes*/
 public:
 	void save(unsigned int Key, Score Value, unsigned char Type, signed short int Depth, unsigned short Move, Score StaticValue)
@@ -51,26 +60,26 @@ public:
 		assert(StaticValue < SCORE_INFINITE);
 		assert(StaticValue > -SCORE_INFINITE);
 		assert(Type <= typeScoreHigherThanBeta);
-		key = Key;
+		bit.key = Key;
 		value = Value;
 		staticValue = StaticValue;
-		packedMove = Move;
-		depth = Depth;
-		type = Type;
+		bit.packedMove = Move;
+		bit2.depth = Depth;
+		bit2.type = Type;
 	}
 
 	void setGeneration(unsigned char gen)
 	{
-		generation = gen;
+		bit2.generation = gen;
 	}
 
-	inline unsigned int getKey() const{ return key; }
+	inline unsigned int getKey() const{ return bit.key; }
 	Score getValue()const { return value; }
 	Score getStaticValue()const { return staticValue; }
-	unsigned short getPackedMove()const { return packedMove; }
-	signed short int getDepth()const { return depth; }
-	unsigned char getType()const { return type; }
-	unsigned char getGeneration()const { return generation; }
+	unsigned short getPackedMove()const { return bit.packedMove; }
+	signed short int getDepth()const {return bit2.depth; }
+	unsigned char getType()const { return bit2.type; }
+	unsigned char getGeneration()const { return bit2.generation; }
 
 
 };

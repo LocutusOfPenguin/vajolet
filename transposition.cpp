@@ -16,7 +16,6 @@
 */
 
 #include "transposition.h"
-#include "io.h"
 
 
 transpositionTable TT;
@@ -46,7 +45,7 @@ ttEntry* transpositionTable::probe(const U64 key) const
 {
 
 	ttCluster& ttc = findCluster(key);
-	unsigned int keyH = (unsigned int)(key >> 32);
+	unsigned short keyH = (unsigned int)(key >> 32);
 
 
 	for (unsigned i = 0; i < 4; i++)
@@ -63,7 +62,7 @@ void transpositionTable::store(const U64 key, Score value, unsigned char type, s
 
 	int c1, c2, c3;
 	ttEntry *tte, *replace;
-	unsigned int key32 = (unsigned int)(key >> 32); // Use the high 32 bits as key inside the cluster
+	unsigned short key32 = (unsigned int)(key >> 32); // Use the high 32 bits as key inside the cluster
 
 	ttCluster& ttc = findCluster(key);
 	tte = replace = ttc.data;
