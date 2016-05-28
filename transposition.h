@@ -45,8 +45,8 @@ public:
 		unsigned int key:16;		/*! 32 bit for the upper part of the key*/
 	}bit;
 	struct _bit2{
-		signed short int depth:12;/*! 12 bit for depth*/
-		unsigned char generation:2;	/*! 2 bit for the generation id*/
+		signed short int depth:13;/*! 12 bit for depth*/
+		unsigned char generation:1;	/*! 2 bit for the generation id*/
 		unsigned char type:2;		/*! 2 bit for the type of the entry*/
 	}bit2;
 
