@@ -84,6 +84,7 @@ const int Center[8]	= { -3, -1, +0, +1, +1, +0, -1, -3};
 const int KFile[8]	= { +3, +4, +2, +0, +0, +2, +4, +3};
 const int KRank[8]	= { +1, +0, -2, -3, -4, -5, -6, -7};
 
+simdScore Position::SeePieceValue[lastBitboard] = {0,30,9,5,3,3,1,0,0,30,9,5,3,3,1,0};
 simdScore Position::pieceValue[lastBitboard];
 simdScore Position::pstValue[lastBitboard][squareNumber];
 simdScore Position::nonPawnValue[lastBitboard];

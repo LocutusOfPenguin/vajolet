@@ -243,7 +243,7 @@ public:
 			stagedGeneratorState = getProbCutTT;
 		}
 
-		captureThreshold = Position::pieceValue[capturePiece][0];
+		captureThreshold = Position::SeePieceValue[capturePiece][0];
 		if(ttMove.packed && ((!pos.isCaptureMove(ttMove)) || (pos.see(ttMove) < captureThreshold)))
 		{
 			ttMove = NOMOVE;

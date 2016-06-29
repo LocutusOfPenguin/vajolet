@@ -319,6 +319,7 @@ public:
 	static void initScoreValues(void);
 	static void initPstValues(void);
 	static simdScore pieceValue[lastBitboard];
+	static simdScore SeePieceValue[lastBitboard];
 
 
 

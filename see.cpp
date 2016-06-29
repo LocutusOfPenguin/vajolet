@@ -27,7 +27,7 @@
 Score Position::seeSign(const Move& m) const
 {
 	assert(m.packed);
-	if (pieceValue[getPieceAt((tSquare)m.bit.from)][0] <= pieceValue[getPieceAt((tSquare)m.bit.to)][0])
+	if (SeePieceValue[getPieceAt((tSquare)m.bit.from)][0] <= SeePieceValue[getPieceAt((tSquare)m.bit.to)][0])
 	{
 		return 1;
 	}
@@ -54,13 +54,13 @@ Score Position::see(const Move& m) const
 	bitMap colorAttackers;
 	bitboardIndex captured;
 
-	swapList[0] = pieceValue[getPieceAt(to)][0];
+	swapList[0] = SeePieceValue[getPieceAt(to)][0];
 	captured = bitboardIndex(getPieceAt(from) % separationBitmap);
 
 	if(m.bit.flags == Move::fenpassant)
 	{
 		occupied ^= to - pawnPush(color);
-		swapList[0] = pieceValue[whitePawns][0];
+		swapList[0] = SeePieceValue[whitePawns][0];
 	}
 	if(m.bit.flags == Move::fcastle)
 	{
@@ -69,7 +69,7 @@ Score Position::see(const Move& m) const
 	if(m.bit.flags == Move::fpromotion)
 	{
 		captured = bitboardIndex(whiteQueens + m.bit.promotion);
-		swapList[0] += pieceValue[whiteQueens + m.bit.promotion][0] - pieceValue[whitePawns][0];
+		swapList[0] += SeePieceValue[whiteQueens + m.bit.promotion][0] - SeePieceValue[whitePawns][0];
 	}
 
 	// Find all attackers to the destination square, with the moving piece
@@ -102,7 +102,7 @@ Score Position::see(const Move& m) const
 		assert(slIndex < 64);
 
 		// Add the new entry to the swap list
-		swapList[slIndex] = -swapList[slIndex - 1] + pieceValue[captured][0];
+		swapList[slIndex] = -swapList[slIndex - 1] + SeePieceValue[captured][0];
 		slIndex++;
 
 		// Locate and remove the next least valuable attacker
@@ -144,7 +144,7 @@ Score Position::see(const Move& m) const
 		// Stop before processing a king capture
 		if (captured == King && colorAttackers)
 		{
-			swapList[slIndex++] = pieceValue[whiteKing][0];
+			swapList[slIndex++] = SeePieceValue[whiteKing][0];
 			break;
 		}
 
