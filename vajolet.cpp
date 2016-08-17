@@ -27,6 +27,8 @@
 #include "search.h"
 #include "eval.h"
 #include "syzygy/tbprobe.h"
+#include "tbprobe.h"
+
 
 
 /*!	\brief	print the startup information
@@ -57,16 +59,33 @@ int main()
 	Position::initCastleRightsMask();
 	Movegen::initMovegenConstant();
 
-	search::initLMRreduction();
+	Search::initLMRreduction();
 	TT.setSize(1);
 	Position::initMaterialKeys();
 	initMobilityBonus();
-	tb_init(search::SyzygyPath.c_str());
+	tb_init(Search::SyzygyPath.c_str());
+	Tablebases::init(Search::SyzygyPath);
 
+	Position pos;
+	pos.setupFromFen("3K4/8/3k4/8/4p3/4B3/5P2/8 w - - 0 5");
+
+	//pos.display();
+
+
+	Tablebases::ProbeState s1, s2;
+	sync_cout<<"start probing"<<sync_endl;
+	Tablebases::WDLScore wdl = Tablebases::probe_wdl(pos, &s1);
+	sync_cout<<"wdl done"<<sync_endl;
+	int dtz = Tablebases::probe_dtz(pos, &s2);
+	sync_cout<<"dtz done"<<sync_endl;
+
+	sync_cout << "\nProbe WDL: " << wdl << " (" << s1 << ")"
+	          << "\nProbe DTZ: " << dtz << " (" << s2 << ")" << sync_endl;
+/*
 	//----------------------------------
 	//	main loop
 	//----------------------------------
 	printStartInfo();
-	uciLoop();
+	uciLoop();*/
 	return 0;
 }

@@ -41,6 +41,7 @@ simdScore initialPieceValue[Position::lastBitboard] = {
 		simdScore(34500,35400,0,0),//knight
 		simdScore(4100,10000,0,0),//panws*/
 		{3000000,3000000,0,0},//king
+		//{107000,107000,0,0},//queen
 		{137000,100000,0,0},//queen
 		{52000,61000,0,0},//rook
 		{35300,36100,0,0},//bishop
@@ -358,6 +359,23 @@ void Position::setupFromFen(const std::string& fenStr)
 
 
 	checkPosConsistency(1);
+}
+
+void Position::setup(const std::string& code, color c)
+{
+
+  assert(code.length() > 0 && code.length() < 8);
+  assert(code[0] == 'K');
+
+  std::string sides[] = { code.substr(code.find('K', 1)),      // Weak
+                     code.substr(0, code.find('K', 1)) }; // Strong
+
+  std::transform(sides[c].begin(), sides[c].end(), sides[c].begin(), tolower);
+
+  std::string fenStr =  sides[0] + char(8 - sides[0].length() + '0') + "/8/8/8/8/8/8/"
+                 + sides[1] + char(8 - sides[1].length() + '0') + " w - - 0 10";
+
+  return setupFromFen(fenStr);
 }
 
 

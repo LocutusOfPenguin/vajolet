@@ -21,8 +21,8 @@
  * DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef TBPROBE_H
-#define TBPROBE_H
+#ifndef TBPROBE_H1
+#define TBPROBE_H1
 
 #include "tbconfig.h"
 
