@@ -944,7 +944,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 	//------------------------
 	if(depth >= (PVnode ? 5 * ONE_PLY : 8 * ONE_PLY)
 		&& ttMove.packed == 0
-		&& (PVnode || staticEval + 10000 >= beta))
+		&& (PVnode || /*(type == Search::nodeType::CUT_NODE && */staticEval + 10000 >= beta/*)*/))
 	{
 		int d = depth - 2 * ONE_PLY - (PVnode ? 0 : depth / 4);
 
@@ -960,7 +960,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 		tte = TT.probe(posKey);
 		ttMove = tte != nullptr ? tte->getPackedMove() : 0;
-	}
+		}
 
 
 
@@ -1011,6 +1011,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 		bool moveGivesCheck = pos.moveGivesCheck(m);
 		bool isDangerous = moveGivesCheck || pos.isCastleMove(m) || pos.isPassedPawnMove(m);
+		bool MoveCounterPruning;
 
 		int ext = 0;
 		if(PVnode && isDangerous)
@@ -1052,6 +1053,12 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 		int newDepth = depth-ONE_PLY+ext;
 
+		MoveCounterPruning =false;
+		if(newDepth < 11*ONE_PLY &&	moveNumber >= FutilityMoveCounts[newDepth >> ONE_PLY_SHIFT])
+		{
+			MoveCounterPruning = true;
+		}
+
 
 		//---------------------------------------
 		//	FUTILITY PRUNING
@@ -1065,10 +1072,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		){
 			assert(moveNumber > 1);
 
-			if(newDepth < 11*ONE_PLY
-				&& moveNumber >= FutilityMoveCounts[newDepth >> ONE_PLY_SHIFT]
-				&& (!threatMove.packed)
-				)
+			if( MoveCounterPruning && (!threatMove.packed))
 			{
 				assert((newDepth>>ONE_PLY_SHIFT)<11);
 				continue;
@@ -1135,7 +1139,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				//------------------------------
 				bool doFullDepthSearch = true;
 				if( depth >= 3*ONE_PLY
-					&& !captureOrPromotion
+					&& (!captureOrPromotion || MoveCounterPruning)
 					&& !isDangerous
 					&& m != ttMove
 					&& !mg.isKillerMove(m)
@@ -1144,10 +1148,13 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 					assert(moveNumber!=0);
 
 					int reduction = PVreduction[ std::min(depth, 32*ONE_PLY-1) ][ std::min(moveNumber, (unsigned int)63) ];
-					int d = std::max(newDepth - reduction, ONE_PLY);
-
-					if(reduction != 0)
+					if(captureOrPromotion)
 					{
+						reduction -= ONE_PLY;
+					}
+					if(reduction >= 0)
+					{
+						int d = std::max(newDepth - reduction, ONE_PLY);
 						val = -alphaBeta<Search::nodeType::CUT_NODE>(ply+1, d, -alpha-1, -alpha, childPV);
 						if(val<=alpha)
 						{
@@ -1191,18 +1198,23 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			//------------------------------
 			bool doFullDepthSearch = true;
 			if( depth >= 3*ONE_PLY
-				&& !captureOrPromotion
+				&& (!captureOrPromotion || MoveCounterPruning)
 				&& !isDangerous
 				&& m != ttMove
 				&& !mg.isKillerMove(m)
 			)
 			{
 				int reduction = nonPVreduction[std::min(depth, 32*ONE_PLY-1)][std::min(moveNumber, (unsigned int)63)];
-				int d = std::max(newDepth - reduction, ONE_PLY);
-
-				if(reduction != 0)
+				if(captureOrPromotion)
 				{
+					reduction -= ONE_PLY;
+				}
+				if(reduction >= 0)
+				{
+					int d = std::max(newDepth - reduction, ONE_PLY);
+
 					val = -alphaBeta<childNodesType>(ply+1, d, -alpha-1, -alpha, childPV);
+
 					if(val <= alpha)
 					{
 						doFullDepthSearch = false;
