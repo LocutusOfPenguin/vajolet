@@ -39,6 +39,7 @@
 	Position ppp;
 #endif
 
+Move minhash[1 << 11]={0};
 Search defaultSearch;
 std::vector<rootMove> Search::rootMoves;
 std::atomic<unsigned long long> Search::visitedNodes;

@@ -128,6 +128,8 @@ public:
 	{
 		stateIndex = 0;
 		actualState = &stateInfo[stateIndex];
+		Us=&bitBoard[ getNextTurn() ];
+		Them=&bitBoard[blackTurn - getNextTurn()];
 	}
 
 
@@ -530,6 +532,7 @@ private:
 
 public:
 
+	void minHash(int &h0, int &h1) const;
 	bool isMoveLegal(const Move &m) const;
 
 	/*! \brief return a bitmap with all the attacker/defender of a given square

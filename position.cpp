@@ -1900,3 +1900,20 @@ bool Position::isMoveLegal(const Move &m)const
 
 	return true;
 }
+
+void Position::minHash(int &h0, int &h1) const
+{
+
+	U64 bh0 = murmurMix(getOurBitmap(Pieces), murmurSeed[getNextTurn()!=whiteTurn]);
+
+	tSquare to = (tSquare)(getActualState().currentMove.bit.to);
+
+	bitMap bb =getBitmap(getPieceAt(to));
+
+
+
+	U64 bh1 = murmurMix(bb, murmurSeed[getNextTurn()!=whiteTurn]);
+
+	h0 = bh0>>53;
+	h1 = bh1>>53;
+}

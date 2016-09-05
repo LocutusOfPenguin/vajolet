@@ -78,6 +78,15 @@ inline bool squaresAligned(tSquare s1, tSquare s2, tSquare s3)
 	/*return  (SQUARES_BETWEEN[s1][s2] | SQUARES_BETWEEN[s1][s3] | SQUARES_BETWEEN[s2][s3])
 			& (     bitSet(s1) |        bitSet(s2) |        bitSet(s3));*/
 }
+extern U64 murmurSeed[3];
+inline U64 murmurMix(bitMap k, bitMap h )
+{
+	h ^= k;
+	h *= U64(0x5045a6e47f1051a1);
+	h += h >> 51;
+	return h;
+
+}
 //------------------------------------------------
 //	function prototype
 //------------------------------------------------

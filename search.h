@@ -30,6 +30,7 @@
 #include "eval.h"
 
 
+extern Move minhash[1 << 11];
 struct startThinkResult
 {
 	Score alpha;
@@ -127,12 +128,17 @@ private:
 
 	void saveKillers(unsigned int ply, Move& m)
 	{
-		Move * const tempKillers =  sd[ply].killers;
+		int h0, h1;
+		pos.minHash(h0,h1);
+		minhash[h0]= m;
+		minhash[h1]= m;
+
+		/*Move * const tempKillers =  sd[ply].killers;
 		if(tempKillers[0] != m)
 		{
 			tempKillers[1] = tempKillers[0];
 			tempKillers[0] = m;
-		}
+		}*/
 
 	}
 
@@ -194,7 +200,16 @@ public:
 	volatile bool stop = false;
 
 
-	const Move&  getKillers(unsigned int ply,unsigned int n) const { return sd[ply].killers[n]; }
+	const Move&  getKillers(unsigned int ply,unsigned int n) const {
+		/*if(n<2) return sd[ply].killers[n];*/
+		int h0, h1;
+		pos.minHash(h0,h1);
+		if(n==0){
+			return minhash[h0];
+
+		}
+		return minhash[h1];
+	}
 
 
 	startThinkResult startThinking(unsigned int depth = 1, Score alpha = -SCORE_INFINITE, Score beta = SCORE_INFINITE);

@@ -78,6 +78,12 @@ int SQUARE_DISTANCE[squareNumber][squareNumber];
 bitMap centerBitmap;
 bitMap bigCenterBitmap;
 
+U64	murmurSeed[3] = {
+		0x77a166129ab66e91,
+		0x4f4863d5038ea3a3,
+		0xe14ec7e648a4068b
+};
+
 //--------------------------------------------------------------
 //	function bodies
 //--------------------------------------------------------------
