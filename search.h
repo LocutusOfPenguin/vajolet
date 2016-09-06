@@ -97,7 +97,7 @@ class searchData
 public:
 	Move excludeMove;
 	bool skipNullMove;
-	Move killers[2];
+	//Move killers[2];
 };
 
 
@@ -126,7 +126,7 @@ private:
 		std::memset(sd, 0, sizeof(sd));
 	}
 
-	void saveKillers(unsigned int ply, Move& m)
+	void saveKillers(unsigned int , Move& m)
 	{
 		int h0, h1;
 		pos.minHash(h0,h1);
@@ -200,7 +200,7 @@ public:
 	volatile bool stop = false;
 
 
-	const Move&  getKillers(unsigned int ply,unsigned int n) const {
+	const Move&  getKillers(unsigned int ,unsigned int n) const {
 		/*if(n<2) return sd[ply].killers[n];*/
 		int h0, h1;
 		pos.minHash(h0,h1);

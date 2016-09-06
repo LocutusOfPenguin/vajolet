@@ -361,8 +361,8 @@ startThinkResult Search::startThinking(unsigned int depth, Score alpha, Score be
 
 				newPV.clear();
 				// main thread
-				res = alphaBeta<Search::nodeType::ROOT_NODE>(0, (depth-globalReduction) * ONE_PLY, alpha, beta, newPV);
 
+				res = alphaBeta<Search::nodeType::ROOT_NODE>(0, (depth-globalReduction) * ONE_PLY, alpha, beta, newPV);
 
 				res = useTBresult ? TBres : res;
 				// stop helper threads
@@ -601,6 +601,16 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 	Move ttMove;
 
 	ttMove = (tte != nullptr) ? tte->getPackedMove() : 0;
+	if(PVnode)
+	{
+		if(rootMoves[0].PV.size() > ply)
+		{
+			std::list<Move>::iterator iter = rootMoves[0].PV.begin();
+			std::advance(iter, ply);
+			ttMove = *iter;
+		}
+
+	}
 	Score ttValue = tte != nullptr ? transpositionTable::scoreFromTT(tte->getValue(), ply) : SCORE_NONE;
 
 	if (	type != Search::nodeType::ROOT_NODE
