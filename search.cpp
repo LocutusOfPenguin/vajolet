@@ -827,7 +827,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& eval > -SCORE_INFINITE + futility[ depth>>ONE_PLY_SHIFT ]
 			&& eval - futility[depth>>ONE_PLY_SHIFT] >= beta
 			&& abs(eval) < SCORE_KNOWN_WIN
-			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] >= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getNextTurn() && st.nonPawnMaterial[0] >= Position::pieceValue[Position::whiteKnights][0])))
+			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] > 0) || (!pos.getNextTurn() && st.nonPawnMaterial[0] > 0 )))
 		{
 			assert((eval -futility[depth>>ONE_PLY_SHIFT] >-SCORE_INFINITE));
 			return eval - futility[depth>>ONE_PLY_SHIFT];
@@ -845,7 +845,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& */eval >= beta
 			&& (staticEval >=beta || depth >= 13 * ONE_PLY)
 			&& !sd[ply].skipNullMove
-			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] >= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getNextTurn() && st.nonPawnMaterial[0] >= Position::pieceValue[Position::whiteKnights][0]))
+			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] > 0 ) || (!pos.getNextTurn() && st.nonPawnMaterial[0] > 0))
 		){
 			// Null move dynamic reduction based on depth
 			int red = 3 * ONE_PLY + depth / 4;

@@ -40,12 +40,12 @@ simdScore initialPieceValue[Position::lastBitboard] = {
 		simdScore(34500,36400,0,0),//bishop
 		simdScore(34500,35400,0,0),//knight
 		simdScore(4100,10000,0,0),//panws*/
-		{3000000,3000000,0,0},//king
-		{137000,100000,0,0},//queen
-		{52000,61000,0,0},//rook
-		{35300,36100,0,0},//bishop
-		{34500,34900,0,0},//knight
-		{5700,10000,0,0},//panws
+		{3000000,3000000,3000000,3000000},//king
+		{137000,100000,137000,80000},//queen
+		{52000,61000,52000,51000},//rook
+		{35300,36100,35300,26100},//bishop
+		{34500,34900,34500,24900},//knight
+		{5700,10000,5700,10000},//panws
 		{0,0,0,0},
 		{0,0,0,0},
 		{0,0,0,0},
@@ -57,25 +57,25 @@ simdScore initialPieceValue[Position::lastBitboard] = {
 		{0,0,0,0}
 };
 
-simdScore PawnD3 = {1755,0,0,0};
-simdScore PawnD4 = {2100,0,0,0};
-simdScore PawnD5 = {85,0,0,0};
-simdScore PawnE3 = {185,0,0,0};
-simdScore PawnE4 = {620,0,0,0};
-simdScore PawnE5 = {-5,0,0,0};
-simdScore PawnCentering = {141,-119,0,0};
-simdScore PawnRankBonus = {450,30,0,0};
-simdScore KnightPST = {545,462,0,0};
-simdScore BishopPST = {22,273,0,0};
-simdScore RookPST = {418,-290,0,0};
-simdScore QueenPST = {-170,342,0,0};
-simdScore KingPST = {700,787,0,0};
+simdScore PawnD3 = {1755,0,1755,0};
+simdScore PawnD4 = {2100,0,2100,0};
+simdScore PawnD5 = {85,0,85,0};
+simdScore PawnE3 = {185,0,185,0};
+simdScore PawnE4 = {620,0,620,0};
+simdScore PawnE5 = {-5,0,-5,0};
+simdScore PawnCentering = {141,-119,141,-119};
+simdScore PawnRankBonus = {450,30,450,30};
+simdScore KnightPST = {545,462,545,462};
+simdScore BishopPST = {22,273,22,273};
+simdScore RookPST = {418,-290,418,-290};
+simdScore QueenPST = {-170,342,-170,342};
+simdScore KingPST = {700,787,700,787};
 
-simdScore BishopBackRankOpening = {400,-200,0,0};
-simdScore KnightBackRankOpening = {-800,-300,0,0};
-simdScore RookBackRankOpening = {-400,400,0,0};
-simdScore QueenBackRankOpening = {200,3900,0,0};
-simdScore BishopOnBigDiagonals = {1400,600,0,0};
+simdScore BishopBackRankOpening = {400,-200,400,-200};
+simdScore KnightBackRankOpening = {-800,-300,-800,-300};
+simdScore RookBackRankOpening = {-400,400,-400,400};
+simdScore QueenBackRankOpening = {200,3900,200,3900};
+simdScore BishopOnBigDiagonals = {1400,600,1400,600};
 
 
 
@@ -177,7 +177,8 @@ void Position::initPstValues(void)
 					pstValue[piece][s] = simdScore{
 							(KFile[file]+KRank[rank]) * KingPST[0],
 							(Center[file]+Center[rank]) * KingPST[1],
-							0,0};
+							(KFile[file]+KRank[rank]) * KingPST[2],
+							(Center[file]+Center[rank]) * KingPST[3]};
 				}
 				if(!isKing((bitboardIndex)piece))
 				{

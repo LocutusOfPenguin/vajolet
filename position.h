@@ -219,7 +219,6 @@ public:
 			ply;			/*!<  ply from the start*/
 
 		bitboardIndex capturedPiece; /*!<  index of the captured piece for unmakeMove*/
-		//Score material[2];	/*!<  two values for opening/endgame score*/
 		simdScore material;
 		bitMap checkingSquares[lastBitboard]; /*!< squares of the board from where a king can be checked*/
 		bitMap hiddenCheckersCandidate;	/*!< pieces who can make a discover check moving*/
