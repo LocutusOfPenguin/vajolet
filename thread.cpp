@@ -230,6 +230,22 @@ void my_thread::searchThread()
 	}
 }
 
+void my_thread::createNewGame()
+{
+
+	sync_cout<<"info string NEW GAME"<<sync_endl;
+
+	if(game.getGameLength()>0)
+	{
+		sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
+		game.printGamesInfo();
+
+	}
+	game.CreateNewGame();
+}
+
+
+
 void my_thread::manageNewSearch()
 {
 
@@ -242,6 +258,14 @@ void my_thread::manageNewSearch()
 
 	if( game.isNewGame(src.pos))
 	{
+
+		if(game.getGameLength()>0)
+		{
+			sync_cout<<"info string NEW GAME"<<sync_endl;
+			sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
+			game.printGamesInfo();
+
+		}
 		game.CreateNewGame();
 
 	}
@@ -342,7 +366,7 @@ void my_thread::manageNewSearch()
 	}
 
 	std::cout<<sync_endl;
-	game.savePV(PV, res.depth, res.alpha, res.beta);
+	game.savePV(PV, res.depth, res.alpha, res.beta,res.res);
 
 
 }
@@ -358,6 +382,7 @@ void my_thread::initThreads()
 
 void my_thread::quitThreads()
 {
+	game.printGamesInfo();
 	quit = true;
 	searchCond.notify_one();
 	timerCond.notify_one();

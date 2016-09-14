@@ -27,6 +27,8 @@
 
 void initMobilityBonus();
 
+extern simdScore holesPenalty;
+
 
 
 

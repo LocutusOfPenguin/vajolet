@@ -36,7 +36,7 @@
 
 
 #ifdef DEBUG_EVAL_SIMMETRY
-	Position ppp;
+
 #endif
 
 Search defaultSearch;
@@ -295,6 +295,7 @@ startThinkResult Search::startThinking(unsigned int depth, Score alpha, Score be
 		ret.depth = 0;
 		ret.alpha = -SCORE_INFINITE;
 		ret.beta = SCORE_INFINITE;
+		ret.res = res;
 
 
 		return ret;
@@ -309,6 +310,8 @@ startThinkResult Search::startThinking(unsigned int depth, Score alpha, Score be
 	Score delta = 800;
 	Move oldBestMove(Movegen::NOMOVE);
 
+	Score retScore = 0;
+	Score retDepth = 0;
 	do
 	{
 		sync_cout<<"info depth "<<depth<<sync_endl;
@@ -425,6 +428,12 @@ startThinkResult Search::startThinking(unsigned int depth, Score alpha, Score be
 
 					}
 
+					if( validIteration || !stop)
+					{
+						retScore = res;
+						retDepth = depth;
+					}
+
 
 
 
@@ -538,9 +547,10 @@ startThinkResult Search::startThinking(unsigned int depth, Score alpha, Score be
 
 	startThinkResult ret;
 	ret.PV = rootMoves[0].PV;
-	ret.depth = depth-1;
+	ret.depth = retDepth;
 	ret.alpha = alpha;
 	ret.beta = beta;
+	ret.res = retScore;
 
 
 	return ret;
@@ -757,6 +767,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		eval = staticEval;
 
 #ifdef DEBUG_EVAL_SIMMETRY
+		Position ppp;
 		ppp.setupFromFen(pos.getSymmetricFen());
 		Score test=ppp.eval<false>();
 		if(test!=eval){
@@ -1445,6 +1456,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 
 	Score staticEval = tte ? tte->getStaticValue() : pos.eval<false>();
 #ifdef DEBUG_EVAL_SIMMETRY
+	Position ppp;
 	ppp.setupFromFen(pos.getSymmetricFen());
 	Score test = ppp.eval<false>();
 	if(test != staticEval)

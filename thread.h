@@ -27,6 +27,7 @@
 #include "transposition.h"
 #include "command.h"
 #include "movegen.h"
+#include "eval.h"
 
 
 
@@ -46,9 +47,28 @@ struct timeManagementStruct
 
 };
 
+class Tdleaf
+{
+public:
+	struct tdleafData
+	{
+		std::string fen;
+		double logistic;
+		double dt;
+		double multiplier;
+		double sum;
+		Score derivata;
+	};
+
+	double lambda = 0.7;
+	double alpha = 1.0;
+	double Param = holesPenalty[0] ;
+	std::vector<tdleafData> data;
+};
 
 class Game
 {
+	Tdleaf tdleaf;
 public:
 	struct GamePosition
 	{
@@ -57,11 +77,17 @@ public:
 		std::vector<Move> PV;
 		Score alpha;
 		Score beta;
+		std::string fen;
+		Score res;
 		unsigned int depth;
 	};
 private:
 	std::vector<GamePosition> positions;
 public:
+	unsigned int getGameLength()
+	{
+		return positions.size();
+	}
 
 	void CreateNewGame(void)
 	{
@@ -71,43 +97,142 @@ public:
 
 	void insertNewMoves(Position &pos)
 	{
-		unsigned int actualPosition = positions.size();
+		unsigned int actualPosition = getGameLength();
 		for(unsigned int i = actualPosition; i <= pos.getStateIndex(); i++)
 		{
 			//sync_cout<<"info debug new position inserted in game:"<<displayUci(pos.getState(i).currentMove)<<sync_endl;
 			GamePosition p;
 			p.key = pos.getState(i).key;
 			p.m =  pos.getState(i).currentMove;
+			p.fen = pos.getFen();
 			positions.push_back(p);
 		}
 	}
 
-	void savePV(std::list<Move> PV,unsigned int depth, Score alpha, Score beta)
+	void savePV(std::list<Move> PV,unsigned int depth, Score alpha, Score beta, Score res)
 	{
 		std::copy(std::begin(PV), std::end(PV), std::back_inserter(positions.back().PV));
 		positions.back().depth = depth;
 		positions.back().alpha = alpha;
 		positions.back().beta = beta;
+		positions.back().res = res;
+
 	}
 
 
 	void printGamesInfo()
 	{
+
+		tdleaf.data.clear();
+		//float oldLogi = 0;
+		//float logi = 0;
 		for(auto p : positions)
 		{
 			if( p.m != Movegen::NOMOVE)
 			{
-				std::cout<<"Move: "<<displayUci(p.m)<<"  PV:";
-				for( auto m : p.PV )
+				//std::cout<<"move leading here: "<<displayUci(p.m);
+				if(p.PV.size()>0)
 				{
-					std::cout<<displayUci(m)<<" ";
+					/*std::cout<<std::endl;
+					Position ppp;
+					ppp.setupFromFen(p.fen);
+					ppp.display();*/
+					/*std::cout<<" PV:";
+					for( auto m : p.PV )
+					{
+						std::cout<<displayUci(m)<<" ";
+					}*/
+					//logi = logistic(p.res);
+					/*std::cout<<" res:"<<p.res/100<<" logistic:"<<logi <<" dt:"<<logi-oldLogi;*/
+
+					//p.fen
+					Position pp;
+					pp.setupFromFen(p.fen);
+					for( auto m : p.PV )
+					{
+						pp.doMove(m);
+					}
+
+					Tdleaf::tdleafData data;
+					data.fen = pp.getFen();
+					data.multiplier = p.PV.size()%2 ==0 ? 1.0 : -1.0;
+					tdleaf.data.push_back(data);
 				}
 
+				std::cout<<std::endl;
+				//oldLogi = logi;
 			}
-			std::cout<<std::endl;
+
+
 		}
 
+		Position p;
+		for( auto& d :tdleaf.data)
+		{
+			p.setupFromFen(d.fen);
+			d.logistic= d.multiplier * logistic(p.eval<false>());
+		}
+		for (unsigned int i = 0; i<tdleaf.data.size() - 1; i++)
+		{
+			float lt2 = tdleaf.data[i+1].logistic;
+			auto  lt1 = tdleaf.data[i].logistic;
+			tdleaf.data[i].dt = lt2 - lt1;
+			//sync_cout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<sync_endl;
+		}
+		tdleaf.data.back().dt = 0;
+		//sync_cout<<tdleaf.data.back().fen<<" "<<tdleaf.data.back().dt<<sync_endl;
+
+
+
+		for (unsigned int i = 0; i<tdleaf.data.size(); i++)
+		{
+			double sum = 0;
+			for (unsigned int n = i; n<tdleaf.data.size(); n++)
+			{
+				sum += std::pow(tdleaf.lambda,n-i) * tdleaf.data[n].dt;
+			}
+			tdleaf.data[i].sum = sum;
+			//sync_cout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<" "<<sum<<sync_endl;
+		}
+
+		for( auto& d :tdleaf.data)
+		{
+			p.setupFromFen(d.fen);
+			int backup = holesPenalty[0];
+			Score original = p.eval<false>();
+			holesPenalty[0] = backup + 1;
+			Score modified = p.eval<false>();
+			holesPenalty[0] = backup ;
+			Score derivata = modified - original;
+			d.derivata = derivata;
+
+		}
+		for( auto& d :tdleaf.data)
+		{
+			sync_cout<<d.fen<<" "<<d.logistic<<" "<<d.dt<<" "<<d.sum<<" "<<d.derivata<<sync_endl;
+		}
+		double delta = 0;
+		for( auto& d :tdleaf.data)
+		{
+			delta += tdleaf.alpha * d.derivata * d.sum;
+		}
+		sync_cout<<"delta: "<< delta <<sync_endl;
+		tdleaf.Param += delta;
+		sync_cout<<"Param: "<< tdleaf.Param <<sync_endl;
+		holesPenalty[0] = (int)tdleaf.Param;
+
+
+
+
+
+
 	}
+
+	float logistic(int res)
+	{
+		return float( 2.0 /(1.0 + exp(-0.00005 * res)) - 1.0);
+	}
+
 
 	~Game()
 	{
@@ -115,7 +240,7 @@ public:
 	}
 	bool isNewGame(Position &pos)
 	{
-		if( positions.size() == 0 || pos.getStateIndex()+1 < positions.size())
+		if( getGameLength() == 0 || pos.getStateIndex()+1 <  getGameLength())
 		{
 			//printGamesInfo();
 			//sync_cout<<"NEW GAME"<<sync_endl;
@@ -139,7 +264,7 @@ public:
 
 	bool isPonderRight(void)
 	{
-		if( positions.size() > 2)
+		if( getGameLength() > 2)
 		{
 			GamePosition previous =*(positions.end()-3);
 			if(previous.PV.size()>=1 && previous.PV[1] == positions.back().m)
@@ -193,6 +318,7 @@ class my_thread
 	void manageNewSearch();
 public :
 	void quitThreads();
+	void createNewGame();
 
 	static std::mutex  _mutex;
 

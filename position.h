@@ -247,7 +247,7 @@ private:
 
 
 	/*used for search*/
-	pawnTable pawnHashTable;
+	//pawnTable pawnHashTable;
 
 	/*data defining the position*/
 	state * actualState;

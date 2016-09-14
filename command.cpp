@@ -380,6 +380,7 @@ void uciLoop()
 		}
 		else if (token == "ucinewgame")
 		{
+			thr->createNewGame();
 		}
 		else if (token == "d")
 		{

@@ -1576,7 +1576,7 @@ Score Position::eval(void)
 	//	PAWNS EVALUTATION
 	//----------------------------------------------
 	simdScore pawnResult;
-	U64 pawnKey = getPawnKey();
+/*	U64 pawnKey = getPawnKey();
 	pawnEntry& probePawn = pawnHashTable.probe(pawnKey);
 	if( probePawn.key == pawnKey)
 	{
@@ -1593,7 +1593,7 @@ Score Position::eval(void)
 	else
 	{
 
-
+*/
 		pawnResult = simdScore{0,0,0,0};
 		bitMap pawns = getBitmap(whitePawns);
 
@@ -1653,11 +1653,11 @@ Score Position::eval(void)
 
 		holes[black] = weakSquares[black] & temp;
 		pawnResult -= ( bitCnt( holes[white] ) - bitCnt( holes[black] ) ) * holesPenalty;
-
+/*
 		pawnHashTable.insert(pawnKey, pawnResult, weakPawns, passedPawns, attackedSquares[whitePawns], attackedSquares[blackPawns], weakSquares[white], weakSquares[black], holes[white], holes[black] );
 
 	}
-
+*/
 	res += pawnResult;
 	//---------------------------------------------
 	// center control
