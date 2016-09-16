@@ -71,7 +71,7 @@ simdScore unstoppablePassed = {0,2000,0,2000};
 simdScore rookBehindPassedPawn = {0,10,0,10};
 simdScore EnemyRookBehindPassedPawn = {0,10,0,10};
 
-simdScore holesPenalty={100,260,100,260};
+simdScore holesPenalty={88,260,100,260};
 simdScore pawnCenterControl={70,120,70,120};
 simdScore pawnBigCenterControl={360,-670,360,-670};
 
@@ -1637,7 +1637,7 @@ Score Position::eval(void)
 
 		weakSquares[black] = ~pawnAttack;
 
-		temp = getBitmap(whitePawns) << 8;
+		temp = (getBitmap(whitePawns) & ~passedPawns) << 8;
 		temp |= temp << 8;
 		temp |= temp << 16;
 		temp |= temp << 32;
@@ -1646,7 +1646,7 @@ Score Position::eval(void)
 
 
 
-		temp = getBitmap(blackPawns) >> 8;
+		temp = (getBitmap(blackPawns)& ~passedPawns) >> 8;
 		temp |= temp >> 8;
 		temp |= temp >> 16;
 		temp |= temp >> 32;
