@@ -28,6 +28,7 @@
 void initMobilityBonus();
 
 extern simdScore holesPenalty;
+extern simdScore passedPawnBonus;
 
 
 

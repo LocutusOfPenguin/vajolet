@@ -22,6 +22,8 @@
 #include <mutex>
 #include <chrono>
 #include <condition_variable>
+#include <iostream>
+#include <fstream>
 #include "position.h"
 #include "search.h"
 #include "transposition.h"
@@ -57,12 +59,12 @@ public:
 		double dt;
 		double multiplier;
 		double sum;
-		Score derivata;
+		double derivata;
 	};
 
 	double lambda = 0.7;
 	double alpha = 1.0;
-	double Param = holesPenalty[0] ;
+	double Param[4] ={float(passedPawnBonus[0]),float(passedPawnBonus[1]),float(passedPawnBonus[2]),float(passedPawnBonus[3])};
 	std::vector<tdleafData> data;
 };
 
@@ -123,6 +125,10 @@ public:
 	void printGamesInfo()
 	{
 
+
+		std::ofstream fout;
+		fout.open("out.csv",std::ios::app);
+		//fout<<"new iteration"<<std::endl;
 		tdleaf.data.clear();
 		//float oldLogi = 0;
 		//float logi = 0;
@@ -159,7 +165,7 @@ public:
 					tdleaf.data.push_back(data);
 				}
 
-				std::cout<<std::endl;
+				//std::cout<<std::endl;
 				//oldLogi = logi;
 			}
 
@@ -195,37 +201,40 @@ public:
 			//sync_cout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<" "<<sum<<sync_endl;
 		}
 
-		for( auto& d :tdleaf.data)
-		{
-			p.setupFromFen(d.fen);
-			int backup = holesPenalty[0];
-			Score original = p.eval<false>();
-			holesPenalty[0] = backup + 1;
-			Score modified = p.eval<false>();
-			holesPenalty[0] = backup ;
-			Score derivata = modified - original;
-			d.derivata = derivata;
+		for( int i=0 ;i<4;i++){
+			for( auto& d :tdleaf.data)
+			{
+				p.setupFromFen(d.fen);
+				int backup = passedPawnBonus[i];
+				Score original = p.eval<false>();
+				passedPawnBonus[i] = backup + 10;
+				Score modified = p.eval<false>();
+				passedPawnBonus[i] = backup ;
+				double derivata = (modified - original)/10.0;
+				d.derivata = derivata;
 
+			}
+			/*for( auto& d :tdleaf.data)
+			{
+				sync_cout<<d.fen<<" "<<d.logistic<<" "<<d.dt<<" "<<d.sum<<" "<<d.derivata<<sync_endl;
+			}*/
+			double delta = 0;
+			for( auto& d :tdleaf.data)
+			{
+				delta += tdleaf.alpha * d.derivata * d.sum;
+			}
+			//fout<<"delta: "<< delta;
+			tdleaf.Param[i] += delta;
+			fout<< tdleaf.Param[i] <<";";
+			passedPawnBonus[i] =tdleaf.Param[i];
 		}
-		for( auto& d :tdleaf.data)
-		{
-			sync_cout<<d.fen<<" "<<d.logistic<<" "<<d.dt<<" "<<d.sum<<" "<<d.derivata<<sync_endl;
-		}
-		double delta = 0;
-		for( auto& d :tdleaf.data)
-		{
-			delta += tdleaf.alpha * d.derivata * d.sum;
-		}
-		sync_cout<<"delta: "<< delta <<sync_endl;
-		tdleaf.Param += delta;
-		sync_cout<<"Param: "<< tdleaf.Param <<sync_endl;
-		holesPenalty[0] = (int)tdleaf.Param;
 
 
 
 
 
 
+		fout<< std::endl;
 	}
 
 	float logistic(int res)

@@ -1637,7 +1637,7 @@ Score Position::eval(void)
 
 		weakSquares[black] = ~pawnAttack;
 
-		temp = getBitmap(whitePawns) << 8;
+		temp = (getBitmap(whitePawns) & ~passedPawns) << 8;
 		temp |= temp << 8;
 		temp |= temp << 16;
 		temp |= temp << 32;
@@ -1646,7 +1646,7 @@ Score Position::eval(void)
 
 
 
-		temp = getBitmap(blackPawns) >> 8;
+		temp = (getBitmap(blackPawns)& ~passedPawns) >> 8;
 		temp |= temp >> 8;
 		temp |= temp >> 16;
 		temp |= temp >> 32;

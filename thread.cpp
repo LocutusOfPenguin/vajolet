@@ -233,11 +233,11 @@ void my_thread::searchThread()
 void my_thread::createNewGame()
 {
 
-	sync_cout<<"info string NEW GAME"<<sync_endl;
+	//sync_cout<<"info string NEW GAME"<<sync_endl;
 
 	if(game.getGameLength()>0)
 	{
-		sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
+		//sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
 		game.printGamesInfo();
 
 	}
@@ -261,8 +261,8 @@ void my_thread::manageNewSearch()
 
 		if(game.getGameLength()>0)
 		{
-			sync_cout<<"info string NEW GAME"<<sync_endl;
-			sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
+			//sync_cout<<"info string NEW GAME"<<sync_endl;
+			//sync_cout<<"info string PRINT OLD GAME DATA"<<sync_endl;
 			game.printGamesInfo();
 
 		}
