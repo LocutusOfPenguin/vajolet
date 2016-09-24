@@ -62,10 +62,45 @@ public:
 		double derivata;
 	};
 
+	struct tdleafPars
+	{
+		simdScore* pointer;
+		double value[4];
+		tdleafPars(simdScore * v)
+		{
+			pointer = v;
+			value[0] = (*v)[0];
+			value[1] = (*v)[1];
+			value[2] = (*v)[2];
+			value[3] = (*v)[3];
+		}
+	};
+
 	double lambda = 0.7;
 	double alpha = 1.0;
-	double Param[4] ={float(passedPawnBonus[0]),float(passedPawnBonus[1]),float(passedPawnBonus[2]),float(passedPawnBonus[3])};
+	double Param;
 	std::vector<tdleafData> data;
+	std::vector<tdleafPars> params;
+	Tdleaf(){
+		params.push_back(tdleafPars(&isolatedPawnPenalty));
+		params.push_back(tdleafPars(&isolatedPawnPenaltyOpp));
+		params.push_back(tdleafPars(&doubledPawnPenalty));
+		params.push_back(tdleafPars(&backwardPawnPenalty));
+		params.push_back(tdleafPars(&chainedPawnBonus));
+		params.push_back(tdleafPars(&passedPawnFileAHPenalty));
+		params.push_back(tdleafPars(&passedPawnSupportedBonus));
+		params.push_back(tdleafPars(&candidateBonus));
+		params.push_back(tdleafPars(&passedPawnBonus));
+		params.push_back(tdleafPars(&passedPawnUnsafeSquares));
+		params.push_back(tdleafPars(&passedPawnBlockedSquares));
+		params.push_back(tdleafPars(&passedPawnDefendedSquares));
+		params.push_back(tdleafPars(&passedPawnDefendedBlockingSquare));
+		params.push_back(tdleafPars(&unstoppablePassed));
+		params.push_back(tdleafPars(&rookBehindPassedPawn));
+		params.push_back(tdleafPars(&EnemyRookBehindPassedPawn));
+
+		params.push_back(tdleafPars(&holesPenalty));
+	}
 };
 
 class Game
@@ -130,13 +165,13 @@ public:
 		fout.open("out.csv",std::ios::app);
 		//fout<<"new iteration"<<std::endl;
 		tdleaf.data.clear();
-		//float oldLogi = 0;
-		//float logi = 0;
+		float oldLogi = 0;
+		float logi = 0;
 		for(auto p : positions)
 		{
 			if( p.m != Movegen::NOMOVE)
 			{
-				//std::cout<<"move leading here: "<<displayUci(p.m);
+				std::cout<<"move leading here: "<<displayUci(p.m);
 				if(p.PV.size()>0)
 				{
 					/*std::cout<<std::endl;
@@ -148,8 +183,8 @@ public:
 					{
 						std::cout<<displayUci(m)<<" ";
 					}*/
-					//logi = logistic(p.res);
-					/*std::cout<<" res:"<<p.res/100<<" logistic:"<<logi <<" dt:"<<logi-oldLogi;*/
+					logi = logistic(p.res);
+					fout<<" res:"<<p.res/100<<" logistic:"<<logi <<" dt:"<<logi-oldLogi;
 
 					//p.fen
 					Position pp;
@@ -165,8 +200,8 @@ public:
 					tdleaf.data.push_back(data);
 				}
 
-				//std::cout<<std::endl;
-				//oldLogi = logi;
+				fout<<std::endl;
+				oldLogi = logi;
 			}
 
 
@@ -183,10 +218,10 @@ public:
 			float lt2 = tdleaf.data[i+1].logistic;
 			auto  lt1 = tdleaf.data[i].logistic;
 			tdleaf.data[i].dt = lt2 - lt1;
-			//sync_cout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<sync_endl;
+			fout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<sync_endl;
 		}
 		tdleaf.data.back().dt = 0;
-		//sync_cout<<tdleaf.data.back().fen<<" "<<tdleaf.data.back().dt<<sync_endl;
+		fout<<tdleaf.data.back().fen<<" "<<tdleaf.data.back().dt<<sync_endl;
 
 
 
@@ -198,41 +233,40 @@ public:
 				sum += std::pow(tdleaf.lambda,n-i) * tdleaf.data[n].dt;
 			}
 			tdleaf.data[i].sum = sum;
-			//sync_cout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<" "<<sum<<sync_endl;
+			fout<<tdleaf.data[i].fen<<" "<<tdleaf.data[i].dt<<" "<<sum<<sync_endl;
 		}
 
-		for( int i=0 ;i<4;i++){
-			for( auto& d :tdleaf.data)
-			{
-				p.setupFromFen(d.fen);
-				int backup = passedPawnBonus[i];
-				Score original = p.eval<false>();
-				passedPawnBonus[i] = backup + 10;
-				Score modified = p.eval<false>();
-				passedPawnBonus[i] = backup ;
-				double derivata = (modified - original)/10.0;
-				d.derivata = derivata;
+		for (auto par: tdleaf.params)
+		{
 
+			for( int i=0 ;i<4;i++){
+				for( auto& d :tdleaf.data)
+				{
+					p.setupFromFen(d.fen);
+					int backup = (*par.pointer)[i];
+					Score original = p.eval<false>();
+					(*par.pointer)[i] = backup + 10;
+					Score modified = p.eval<false>();
+					(*par.pointer)[i] = backup ;
+					double derivata = (modified - original)/10.0;
+					d.derivata = derivata;
+
+				}
+				for( auto& d :tdleaf.data)
+				{
+					fout<<d.fen<<" "<<d.logistic<<" "<<d.dt<<" "<<d.sum<<" "<<d.derivata<<std::endl;
+				}
+				double delta = 0;
+				for( auto& d :tdleaf.data)
+				{
+					delta += tdleaf.alpha * d.derivata * d.sum;
+				}
+				fout<<"delta: "<< delta;
+				par.value[i] += delta;
+				fout<<" "<< par.value[i] <<";"<<std::endl;
+				(*par.pointer)[i] = par.value[i];
 			}
-			/*for( auto& d :tdleaf.data)
-			{
-				sync_cout<<d.fen<<" "<<d.logistic<<" "<<d.dt<<" "<<d.sum<<" "<<d.derivata<<sync_endl;
-			}*/
-			double delta = 0;
-			for( auto& d :tdleaf.data)
-			{
-				delta += tdleaf.alpha * d.derivata * d.sum;
-			}
-			//fout<<"delta: "<< delta;
-			tdleaf.Param[i] += delta;
-			fout<< tdleaf.Param[i] <<";";
-			passedPawnBonus[i] =tdleaf.Param[i];
 		}
-
-
-
-
-
 
 		fout<< std::endl;
 	}
