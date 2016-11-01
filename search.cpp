@@ -318,13 +318,14 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 		std::list<Move> newPV;
 		Score res =qsearch<Search::nodeType::PV_NODE>(0, 0, -SCORE_INFINITE,SCORE_INFINITE, newPV);
-		sync_cout<<"info score cp "<<int(res/100)<<sync_endl;
+		//sync_cout<<"info score cp "<<int(res/100)<<" nodes "<<visitedNodes<<sync_endl;
 
 		startThinkResult ret;
 		ret.PV = newPV;
 		ret.depth = 0;
 		ret.alpha = -SCORE_INFINITE;
 		ret.beta = SCORE_INFINITE;
+		ret.score = res;
 
 
 		return ret;
@@ -431,7 +432,7 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 					long long int elapsedTime  = getElapsedTime();
 
-					assert(newPV.size()==0 || res >alpha);
+					assert(newPV.size()==0 || score >alpha);
 					if( newPV.size() !=0 && res > alpha)
 					{
 						auto it = std::find(rootMoves.begin()+indexPV, rootMoves.end(), newPV.front() );
@@ -582,6 +583,7 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 	ret.depth = depth-1;
 	ret.alpha = alpha;
 	ret.beta = beta;
+	ret.score = rootMoves[0].score;
 
 
 	return ret;
@@ -1449,7 +1451,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 				Search::nodeType::PV_NODE;
 
 
-	ttEntry* const tte = TT.probe(pos.getKey());
+	ttEntry* const tte = nullptr;//TT.probe(pos.getKey());
 	Move ttMove;
 	ttMove = tte ? tte->getPackedMove() : Movegen::NOMOVE;
 
@@ -1544,7 +1546,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		{
 			if( !pos.isCaptureMoveOrPromotion(ttMove) )
 			{
-				saveKillers(ply,ttMove);
+				//saveKillers(ply,ttMove);
 			}
 			if(!stop)
 			{
@@ -1667,7 +1669,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 				{
 					if( !pos.isCaptureMoveOrPromotion(bestMove) && !inCheck )
 					{
-						saveKillers(ply,bestMove);
+						//saveKillers(ply,bestMove);
 					}
 					if(!stop)
 					{

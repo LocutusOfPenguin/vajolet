@@ -27,6 +27,11 @@
 
 void initMobilityBonus();
 
+extern simdScore knightOnOutpost;
+extern simdScore knightOnOutpostSupported;
+extern simdScore knightOnHole;
+extern simdScore KnightAttackingWeakPawn;
+
 
 
 

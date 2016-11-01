@@ -32,6 +32,7 @@
 
 struct startThinkResult
 {
+	Score score;
 	Score alpha;
 	Score beta;
 	unsigned int depth;

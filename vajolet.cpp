@@ -27,6 +27,7 @@
 #include "search.h"
 #include "eval.h"
 #include "syzygy/tbprobe.h"
+#include "tuner.h"
 
 
 /*!	\brief	print the startup information
@@ -62,6 +63,9 @@ int main()
 	Position::initMaterialKeys();
 	initMobilityBonus();
 	tb_init(Search::SyzygyPath.c_str());
+
+	tune();
+	return 0;
 
 	//----------------------------------
 	//	main loop
