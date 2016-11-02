@@ -51,6 +51,7 @@ double calcError()
 
 void tune()
 {
+	const int delta = 10;
 	simdScore* values[4] ={&knightOnOutpost,&knightOnOutpostSupported,&knightOnHole,&KnightAttackingWeakPawn};
 
 	sync_cout<<"calc initial Error"<<sync_endl;
@@ -70,31 +71,31 @@ void tune()
 
 				int originalVal = (*values[valNumber])[valSub];
 
-				// try +1
-				int newVal = originalVal+1;
+				// try +delta
+				int newVal = originalVal+delta;
 				(*values[valNumber])[valSub] = newVal;
 				double newError = calcError();
-				sync_cout <<"+1: "<<newVal<< std::setprecision(10)<<" "<<newError <<sync_endl;
+				sync_cout <<"try +"<<delta<<": "<<newVal<< std::setprecision(10)<<" "<<newError <<" "<<newError-bestError<<sync_endl;
 
 				if(newError < bestError)
 				{
 					improved = true;
 					bestError = newError;
-					sync_cout <<"ok +1: "<<newVal<<sync_endl;
+					sync_cout <<"+"<<delta<<": ok "<<newVal<<sync_endl;
 				}
 				else
 				{
-					//try -1
-					newVal = originalVal-1;
+					//try -delta
+					newVal = originalVal-delta;
 					(*values[valNumber])[valSub] = newVal;
 					double newError = calcError();
-					sync_cout <<"-1: "<<newVal<< std::setprecision(10)<<" "<<newError <<sync_endl;
+					sync_cout <<"try -"<<delta<<": "<<newVal<< std::setprecision(10)<<" "<<newError <<" "<<newError-bestError<<sync_endl;
 
 					if(newError < bestError)
 					{
 						improved = true;
 						bestError = newError;
-						sync_cout <<"ok -1: "<<newVal<<sync_endl;
+						sync_cout <<"-"<<delta<<": ok "<<newVal<<sync_endl;
 					}
 					else
 					{
@@ -107,6 +108,11 @@ void tune()
 
 
 			}
+		}
+		sync_cout<<"BEST VALUES"<<sync_endl;
+		for( int valNumber = 0;valNumber<4;valNumber++)
+		{
+			sync_cout<<(*values[valNumber])[0]<<" "<<(*values[valNumber])[1]<<sync_endl;
 		}
 	}
 
