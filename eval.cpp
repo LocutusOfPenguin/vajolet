@@ -90,10 +90,10 @@ simdScore rookOnSemi={500,1100,0,0};
 simdScore rookTrapped = {300,0,0,0};
 simdScore rookTrappedKingWithoutCastling = {300,0,0,0};
 
-simdScore knightOnOutpost= {1007,-113,0,0};
-simdScore knightOnOutpostSupported= {967,2157,0,0};
-simdScore knightOnHole= {2687,404,0,0};
-simdScore KnightAttackingWeakPawn= {-777,1377,0,0};
+simdScore knightOnOutpost= {380,0,0,0};
+simdScore knightOnOutpostSupported= {100,1290,0,0};
+simdScore knightOnHole= {1610,1190,0,0};
+simdScore KnightAttackingWeakPawn= {300,300,0,0};
 
 simdScore bishopOnOutpost= {-1020,810,0,0};
 simdScore bishopOnOutpostSupported= {3600,270,0,0};

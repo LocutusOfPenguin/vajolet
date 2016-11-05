@@ -18,14 +18,14 @@ double sigmoid(Score input, double scaling )
 	return 1.0/(1.0+ std::pow(10.0,-(input * scaling)/400.0));
 }
 
-double calcError()
+double calcError(std::string fileName)
 {
 	double scaling = 0.011;
 	double totalError = 0.0;
 	unsigned long long count = 0;
 	Search src;
 	std::string delimiter = ";";
-	std::ifstream input("positions.epd");
+	std::ifstream input(fileName);
 	for (std::string line; getline(input, line);) {
 		int stringPos = line.find(delimiter);
 		std::string fen = line.substr(0, stringPos);
@@ -51,17 +51,22 @@ double calcError()
 
 void tune()
 {
+
+	unsigned int verificationCounter = 0;
 	const int delta = 10;
 	simdScore* values[4] ={&knightOnOutpost,&knightOnOutpostSupported,&knightOnHole,&KnightAttackingWeakPawn};
 
 	sync_cout<<"calc initial Error"<<sync_endl;
-	double initialError = calcError();
+	double initialError = calcError("positions.epd");
+	double vericationError = calcError("verification.epd");
 	double bestError = initialError;
 	sync_cout<<"initial Error "<<std::setprecision(10)<<initialError<<sync_endl;
+	sync_cout<<"verification Error "<<std::setprecision(10)<<vericationError<<sync_endl;
 
 	bool improved = true;
 	while(improved)
 	{
+		verificationCounter++;
 		improved = false;
 		for( int valNumber = 0;valNumber<4;valNumber++)
 		{
@@ -74,7 +79,7 @@ void tune()
 				// try +delta
 				int newVal = originalVal+delta;
 				(*values[valNumber])[valSub] = newVal;
-				double newError = calcError();
+				double newError = calcError("positions.epd");
 				sync_cout <<"try +"<<delta<<": "<<newVal<< std::setprecision(10)<<" "<<newError <<" "<<newError-bestError<<sync_endl;
 
 				if(newError < bestError)
@@ -88,7 +93,7 @@ void tune()
 					//try -delta
 					newVal = originalVal-delta;
 					(*values[valNumber])[valSub] = newVal;
-					double newError = calcError();
+					double newError = calcError("positions.epd");
 					sync_cout <<"try -"<<delta<<": "<<newVal<< std::setprecision(10)<<" "<<newError <<" "<<newError-bestError<<sync_endl;
 
 					if(newError < bestError)
@@ -113,6 +118,16 @@ void tune()
 		for( int valNumber = 0;valNumber<4;valNumber++)
 		{
 			sync_cout<<(*values[valNumber])[0]<<" "<<(*values[valNumber])[1]<<sync_endl;
+		}
+		if( verificationCounter == 10)
+		{
+			verificationCounter = 0;
+			double memory = vericationError;
+			sync_cout<<"-----verification--------------"<<sync_endl;
+			sync_cout<<"verification oldError "<<vericationError<<sync_endl;
+			vericationError = calcError("verification.epd");
+			sync_cout<<"verification newError "<<vericationError<<sync_endl;
+			sync_cout<<"delta "<<vericationError-memory<<sync_endl;
 		}
 	}
 
