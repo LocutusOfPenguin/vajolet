@@ -31,6 +31,10 @@ extern simdScore knightOnOutpost;
 extern simdScore knightOnOutpostSupported;
 extern simdScore knightOnHole;
 extern simdScore KnightAttackingWeakPawn;
+extern simdScore bishopOnOutpost;
+extern simdScore bishopOnOutpostSupported;
+extern simdScore bishopOnHole;
+extern simdScore badBishop;
 
 
 
