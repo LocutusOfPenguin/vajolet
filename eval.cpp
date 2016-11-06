@@ -95,10 +95,10 @@ simdScore knightOnOutpostSupported= {300,1490,0,0};
 simdScore knightOnHole= {1810,990,0,0};
 simdScore KnightAttackingWeakPawn= {100,500,0,0};
 
-simdScore bishopOnOutpost= {-1020,810,0,0};
-simdScore bishopOnOutpostSupported= {3600,270,0,0};
-simdScore bishopOnHole= {590,-730,0,0};
-simdScore badBishop= {-200,1530,0,0};
+simdScore bishopOnOutpost= {-500,1240,0,0};
+simdScore bishopOnOutpostSupported= {3530,-250,0,0};
+simdScore bishopOnHole= {1110,-210,0,0};
+simdScore badBishop= {0,1660,0,0};
 
 simdScore tempo= {530,480,0,0};
 simdScore bishopPair ={3260,4690,0,0};

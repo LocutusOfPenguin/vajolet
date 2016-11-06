@@ -35,6 +35,10 @@ extern simdScore bishopOnOutpost;
 extern simdScore bishopOnOutpostSupported;
 extern simdScore bishopOnHole;
 extern simdScore badBishop;
+extern simdScore tempo;
+extern simdScore bishopPair;
+extern simdScore ownKingNearPassedPawn;
+extern simdScore enemyKingNearPassedPawn;
 
 
 

@@ -55,7 +55,7 @@ void tune()
 	unsigned int verificationCounter = 0;
 	const int delta = 10;
 
-	simdScore* values[4] ={&bishopOnOutpost,&bishopOnOutpostSupported,&bishopOnHole,&badBishop};
+	simdScore* values[4] ={&tempo,&bishopPair,&ownKingNearPassedPawn,&enemyKingNearPassedPawn};
 
 	sync_cout<<"calc initial Error"<<sync_endl;
 	double initialError = calcError("positions.epd");
