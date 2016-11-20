@@ -205,7 +205,7 @@ public:
 	}
 
 
-	int setupQuiescentSearch(const bool inCheck,const int depth)
+	int setupQuiescentSearch(const bool inCheck)
 	{
 		if(inCheck)
 		{
@@ -214,20 +214,14 @@ public:
 		}
 		else
 		{
-			if(depth >= (0*ONE_PLY))
-			{
-				stagedGeneratorState = getQsearchTTquiet;
-				return -1*ONE_PLY;
-			}
-			else
-			{
+
 				stagedGeneratorState = getQsearchTT;
 				if(ttMove.packed && !pos.isCaptureMove(ttMove))
 				{
 					ttMove = NOMOVE;
 				}
 				return (-2*ONE_PLY);
-			}
+
 		}
 	}
 
