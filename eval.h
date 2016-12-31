@@ -27,7 +27,7 @@
 
 void initMobilityBonus();
 
-
+extern simdScore isolatedPawnPenalty;
 
 
 

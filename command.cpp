@@ -75,6 +75,8 @@ void static printUciInfo(void)
 	sync_cout << "option name UCI_ShowCurrLine type check default false" << sync_endl;
 	sync_cout << "option name SyzygyPath type string default <empty>" << sync_endl;
 	sync_cout << "option name SyzygyProbeDepth type spin default 1 min 1 max 100" << sync_endl;
+	sync_cout << "option name isolatedPawnPenaltyOp type spin default 1 min 0 max 10000" << sync_endl;
+	sync_cout << "option name isolatedPawnPenaltyEn type spin default 1 min 0 max 10000" << sync_endl;
 
 	sync_cout << "uciok" << sync_endl;
 }
@@ -280,6 +282,18 @@ void setoption(std::istringstream& is)
 		{
 			Search::Syzygy50MoveRule = false;
 		}
+	}
+	else if(name == "isolatedPawnPenaltyOp")
+	{
+		int i = stoi(value);
+		isolatedPawnPenalty[0] = i;
+		sync_cout<<"info string ReceivedPar isolatedPawnPenaltyOp = "<<i<<sync_endl;
+	}
+	else if(name == "isolatedPawnPenaltyEn")
+	{
+		int i = stoi(value);
+		isolatedPawnPenalty[1] = i;
+		sync_cout<<"info string ReceivedPar isolatedPawnPenaltyEn = "<<i<<sync_endl;
 	}
 	else
 	{
