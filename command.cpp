@@ -295,12 +295,193 @@ void setoption(std::istringstream& is)
 		isolatedPawnPenalty[1] = i;
 		sync_cout<<"info string ReceivedPar isolatedPawnPenaltyEn = "<<i<<sync_endl;
 	}
+	else if(name == "isolatedPawnPenaltyOppOp")
+	{
+		int i = stoi(value);
+		isolatedPawnPenaltyOpp[0] = i;
+		sync_cout<<"info string ReceivedPar isolatedPawnPenaltyOppOp = "<<i<<sync_endl;
+	}
+	else if(name == "isolatedPawnPenaltyOppEn")
+	{
+		int i = stoi(value);
+		isolatedPawnPenaltyOpp[1] = i;
+		sync_cout<<"info string ReceivedPar isolatedPawnPenaltyOppEn = "<<i<<sync_endl;
+	}
+	else if(name == "doubledPawnPenaltyOp")
+	{
+		int i = stoi(value);
+		doubledPawnPenalty[0] = i;
+		sync_cout<<"info string ReceivedPar doubledPawnPenaltyOp = "<<i<<sync_endl;
+	}
+	else if(name == "doubledPawnPenaltyEn")
+	{
+		int i = stoi(value);
+		doubledPawnPenalty[1] = i;
+		sync_cout<<"info string ReceivedPar doubledPawnPenaltyEn = "<<i<<sync_endl;
+	}
+	else if(name == "backwardPawnPenaltyOp")
+	{
+		int i = stoi(value);
+		backwardPawnPenalty[0] = i;
+		sync_cout<<"info string ReceivedPar backwardPawnPenaltyOp = "<<i<<sync_endl;
+	}
+	else if(name == "backwardPawnPenaltyEn")
+	{
+		int i = stoi(value);
+		backwardPawnPenalty[1] = i;
+		sync_cout<<"info string ReceivedPar backwardPawnPenaltyEn = "<<i<<sync_endl;
+	}
+	else if(name == "chainedPawnBonusOp")
+	{
+		int i = stoi(value);
+		chainedPawnBonus[0] = i;
+		sync_cout<<"info string ReceivedPar chainedPawnBonusOp = "<<i<<sync_endl;
+	}
+	else if(name == "chainedPawnBonusEn")
+	{
+		int i = stoi(value);
+		chainedPawnBonus[1] = i;
+		sync_cout<<"info string ReceivedPar chainedPawnBonusEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnFileAHPenaltyOp")
+	{
+		int i = stoi(value);
+		passedPawnFileAHPenalty[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnFileAHPenaltyOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnFileAHPenaltyEn")
+	{
+		int i = stoi(value);
+		passedPawnFileAHPenalty[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnFileAHPenaltyEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnSupportedBonusOp")
+	{
+		int i = stoi(value);
+		passedPawnSupportedBonus[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnSupportedBonusOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnSupportedBonusEn")
+	{
+		int i = stoi(value);
+		passedPawnSupportedBonus[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnSupportedBonusEn = "<<i<<sync_endl;
+	}
+	else if(name == "candidateBonusOp")
+	{
+		int i = stoi(value);
+		candidateBonus[0] = i;
+		sync_cout<<"info string ReceivedPar candidateBonusOp = "<<i<<sync_endl;
+	}
+	else if(name == "candidateBonusEn")
+	{
+		int i = stoi(value);
+		candidateBonus[1] = i;
+		sync_cout<<"info string ReceivedPar candidateBonusEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnBonusOp")
+	{
+		int i = stoi(value);
+		passedPawnBonus[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnBonusOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnBonusEn")
+	{
+		int i = stoi(value);
+		passedPawnBonus[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnBonusEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnUnsafeSquaresOp")
+	{
+		int i = stoi(value);
+		passedPawnUnsafeSquares[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnUnsafeSquaresOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnUnsafeSquaresEn")
+	{
+		int i = stoi(value);
+		passedPawnUnsafeSquares[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnUnsafeSquaresEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnBlockedSquaresOp")
+	{
+		int i = stoi(value);
+		passedPawnBlockedSquares[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnBlockedSquaresOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnBlockedSquaresEn")
+	{
+		int i = stoi(value);
+		passedPawnBlockedSquares[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnBlockedSquaresEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnDefendedSquaresOp")
+	{
+		int i = stoi(value);
+		passedPawnDefendedSquares[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnDefendedSquaresOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnDefendedSquaresEn")
+	{
+		int i = stoi(value);
+		passedPawnDefendedSquares[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnDefendedSquaresEn = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnDefendedBlockingSquareOp")
+	{
+		int i = stoi(value);
+		passedPawnDefendedBlockingSquare[0] = i;
+		sync_cout<<"info string ReceivedPar passedPawnDefendedBlockingSquareOp = "<<i<<sync_endl;
+	}
+	else if(name == "passedPawnDefendedBlockingSquareEn")
+	{
+		int i = stoi(value);
+		passedPawnDefendedBlockingSquare[1] = i;
+		sync_cout<<"info string ReceivedPar passedPawnDefendedBlockingSquareEn = "<<i<<sync_endl;
+	}
+	else if(name == "unstoppablePassedOp")
+	{
+		int i = stoi(value);
+		unstoppablePassed[0] = i;
+		sync_cout<<"info string ReceivedPar unstoppablePassedOp = "<<i<<sync_endl;
+	}
+	else if(name == "unstoppablePassedEn")
+	{
+		int i = stoi(value);
+		unstoppablePassed[1] = i;
+		sync_cout<<"info string ReceivedPar unstoppablePassedEn = "<<i<<sync_endl;
+	}
+	else if(name == "rookBehindPassedPawnOp")
+	{
+		int i = stoi(value);
+		rookBehindPassedPawn[0] = i;
+		sync_cout<<"info string ReceivedPar rookBehindPassedPawnOp = "<<i<<sync_endl;
+	}
+	else if(name == "rookBehindPassedPawnEn")
+	{
+		int i = stoi(value);
+		rookBehindPassedPawn[1] = i;
+		sync_cout<<"info string ReceivedPar rookBehindPassedPawnEn = "<<i<<sync_endl;
+	}
+	else if(name == "EnemyRookBehindPassedPawnOp")
+	{
+		int i = stoi(value);
+		EnemyRookBehindPassedPawn[0] = i;
+		sync_cout<<"info string ReceivedPar EnemyRookBehindPassedPawnOp = "<<i<<sync_endl;
+	}
+	else if(name == "EnemyRookBehindPassedPawnEn")
+	{
+		int i = stoi(value);
+		EnemyRookBehindPassedPawn[1] = i;
+		sync_cout<<"info string ReceivedPar EnemyRookBehindPassedPawnEn = "<<i<<sync_endl;
+	}
 	else
 	{
 		sync_cout << "No such option: " << name << sync_endl;
 	}
 
 }
+
 
 /*
 void setvalue(std::istringstream& is)
