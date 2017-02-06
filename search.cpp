@@ -868,7 +868,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& depth < 8 * ONE_PLY
 			&& eval > -SCORE_INFINITE + futility[ depth>>ONE_PLY_SHIFT ]
 			&& eval - futility[depth>>ONE_PLY_SHIFT] >= beta
-			&& abs(eval) < SCORE_KNOWN_WIN
+			//&& abs(eval) < SCORE_KNOWN_WIN
 			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] >= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getNextTurn() && st.nonPawnMaterial[0] >= Position::pieceValue[Position::whiteKnights][0])))
 		{
 			assert((depth>>ONE_PLY_SHIFT)<8);
@@ -910,6 +910,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			}
 			else
 			{
+				assert(-beta>=-SCORE_INFINITE);
+				assert(-beta+1<=SCORE_INFINITE);
 				nullVal = -alphaBeta<childNodesType>(ply+1, depth - red, -beta, -beta+1, childPV);
 			}
 
@@ -942,6 +944,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				}
 				else
 				{*/
+					assert(beta-1>=-SCORE_INFINITE);
+					assert(beta<=SCORE_INFINITE);
 					val = alphaBeta<childNodesType>(ply, depth - red, beta-1, beta, childPV);
 				/*}*/
 				sd[ply].skipNullMove = false;
@@ -984,6 +988,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				pos.doMove(m);
 
 				assert(rDepth>=ONE_PLY);
+				assert(-rBeta>=-SCORE_INFINITE);
+				assert(-rBeta+1<=SCORE_INFINITE);
 				s = -alphaBeta<childNodesType>(ply+1, rDepth, -rBeta ,-rBeta+1, childPV);
 
 				pos.undoMove();
@@ -1013,6 +1019,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		std::list<Move> childPV;
 		const Search::nodeType iidType = type;
 		assert(d >= ONE_PLY);
+		assert(alpha>=-SCORE_INFINITE);
+		assert(beta<=SCORE_INFINITE);
 		alphaBeta<iidType>(ply, d, alpha, beta, childPV);
 
 		sd[ply].skipNullMove = skipBackup;
@@ -1087,18 +1095,20 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		if( singularExtensionNode
 			&& !ext
 			&&  m == ttMove
-			&&  abs(ttValue) < SCORE_KNOWN_WIN
+			//&&  abs(ttValue) < SCORE_KNOWN_WIN
 //			&& abs(beta) < SCORE_MATE_IN_MAX_PLY
 		)
 		{
 
 			std::list<Move> childPv;
 
-			Score rBeta = ttValue - int(depth*20);
+			Score rBeta = std::max(ttValue - int(depth*20),-SCORE_INFINITE+1);
 
 			sd[ply].excludeMove = m;
 			bool backup = sd[ply].skipNullMove;
 			sd[ply].skipNullMove = true;
+			assert(rBeta-1>=-SCORE_INFINITE);
+			assert(rBeta<=SCORE_INFINITE);
 			Score temp = alphaBeta<ALL_NODE>(ply, depth/2, rBeta-1, rBeta, childPv);
 			sd[ply].skipNullMove = backup;
 			sd[ply].excludeMove = Movegen::NOMOVE;
@@ -1183,6 +1193,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				}
 				else
 				{
+					assert(-beta>=-SCORE_INFINITE);
+					assert(-alpha<=SCORE_INFINITE);
 					val = -alphaBeta<Search::nodeType::PV_NODE>(ply+1, newDepth, -beta, -alpha, childPV);
 				}
 			}
@@ -1207,6 +1219,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 					if(reduction != 0)
 					{
+						assert(-alpha-1>=-SCORE_INFINITE);
+						assert(-alpha<=SCORE_INFINITE);
 						val = -alphaBeta<Search::nodeType::CUT_NODE>(ply+1, d, -alpha-1, -alpha, childPV);
 						if(val<=alpha)
 						{
@@ -1225,6 +1239,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 					}
 					else
 					{
+						assert(-alpha-1>=-SCORE_INFINITE);
+						assert(-alpha<=SCORE_INFINITE);
 						val = -alphaBeta<Search::nodeType::CUT_NODE>(ply+1, newDepth, -alpha-1, -alpha, childPV);
 					}
 
@@ -1236,6 +1252,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 						}
 						else
 						{
+							assert(-beta>=-SCORE_INFINITE);
+							assert(-alpha<=SCORE_INFINITE);
 							val = -alphaBeta<Search::nodeType::PV_NODE>(ply+1, newDepth, -beta, -alpha, childPV);
 						}
 					}
@@ -1261,6 +1279,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 				if(reduction != 0)
 				{
+					assert(-alpha-1>=-SCORE_INFINITE);
+					assert(-alpha<=SCORE_INFINITE);
 					val = -alphaBeta<childNodesType>(ply+1, d, -alpha-1, -alpha, childPV);
 					if(val <= alpha)
 					{
@@ -1280,6 +1300,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 					}
 					else
 					{
+						assert(-alpha-1>=-SCORE_INFINITE);
+						assert(-alpha<=SCORE_INFINITE);
 						val = -alphaBeta<childNodesType>(ply+1, newDepth, -alpha-1, -alpha, childPV);
 					}
 				}
@@ -1291,6 +1313,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 					}
 					else
 					{
+						assert(-alpha-1>=-SCORE_INFINITE);
+						assert(-alpha<=SCORE_INFINITE);
 						val = -alphaBeta<Search::nodeType::CUT_NODE>(ply+1, newDepth, -alpha-1, -alpha, childPV);
 					}
 				}
@@ -1597,7 +1621,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 				if(
 						!moveGiveCheck
 						&& !pos.isPassedPawnMove(m)
-						&& abs(staticEval)<SCORE_KNOWN_WIN
+						//&& abs(staticEval)<SCORE_KNOWN_WIN
 				)
 				{
 					Score futilityValue = futilityBase
