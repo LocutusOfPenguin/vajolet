@@ -1095,7 +1095,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		if( singularExtensionNode
 			&& !ext
 			&&  m == ttMove
-			//&&  abs(ttValue) < SCORE_KNOWN_WIN
+			&&  abs(ttValue) < SCORE_KNOWN_WIN
 //			&& abs(beta) < SCORE_MATE_IN_MAX_PLY
 		)
 		{

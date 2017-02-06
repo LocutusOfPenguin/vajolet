@@ -54,8 +54,8 @@
 //SCORE DEFINITION
 //---------------------------------------------
 
-#define SCORE_NONE				(2000000001)
-#define SCORE_INFINITE			(2000000000)
+#define SCORE_NONE				(2100000001)
+#define SCORE_INFINITE			(2100000000)
 #define SCORE_MATE				(1999999990)
 #define SCORE_MATED				(-SCORE_MATE)
 #define SCORE_MATE_IN_MAX_PLY	(1999990000)
