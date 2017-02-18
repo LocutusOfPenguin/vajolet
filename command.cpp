@@ -538,7 +538,7 @@ void showCurrLine(const Position & pos, unsigned int ply)
 	sync_cout << "info currline";
 	unsigned int start = pos.getStateIndex()-ply + 1;
 
-	for (unsigned int i = start; i<= start+ply/2; i++) // show only half of the search line
+	for (unsigned int i = start; i<= start+ply; i++) // show only half of the search line
 	{
 		std::cout << " " << displayUci(pos.getState(i).currentMove);
 	}

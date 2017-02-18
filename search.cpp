@@ -561,7 +561,6 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 		//------------------------------------------------
 		oldBestMove = newPV.front();
 
-		printPV(res, depth, maxPlyReached, alpha, beta, getElapsedTime(), 0, newPV, visitedNodes,tbHits);
 
 		my_thread::timeMan.idLoopIterationFinished = true;
 		my_thread::timeMan.idLoopAlpha = false;
@@ -620,9 +619,40 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 	Move ttMove;
 
 	ttMove = (tte != nullptr) ? tte->getPackedMove() : 0;
+	Score ttValue = tte != nullptr ? transpositionTable::scoreFromTT(tte->getValue(), ply) : SCORE_NONE;
 
+	if (	type != Search::nodeType::ROOT_NODE
+			&& type != Search::nodeType::HELPER_ROOT_NODE
+			&& tte != nullptr
+			&& tte->getDepth() >= depth
+		    && ttValue != SCORE_NONE // Only in case of TT access race
+			)
+	{
+		TT.refresh(tte);
 
+		//save killers
+		if (ttValue >= beta
+			&& ttMove.packed
+			&& !pos.isCaptureMoveOrPromotion(ttMove)
+			&& !inCheck)
+		{
+			saveKillers(ply ,ttMove);
+		}
 
+		if(PVnode)
+		{
+			if(ttMove.packed && pos.isMoveLegal(ttMove))
+			{
+				pvLine.clear();
+				pvLine.push_back(ttMove);
+			}
+			else
+			{
+				pvLine.clear();
+			}
+		}
+		return ttValue;
+	}
 
 
 
@@ -676,13 +706,18 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			val = -alphaBeta<Search::nodeType::PV_NODE>(ply+1, newDepth, -beta, -alpha, childPV);
 		}
 		pos.undoMove();
+		/*if( ply <=1 )
+		{
+			showCurrLine(pos,ply);
+			sync_cout<<"eval:"<<val<<sync_endl;
+		}*/
 
 		if(!stop && val > bestScore)
 		{
 			bestScore = val;
-			if (bestScore >alpha)
+			//if (bestScore >alpha)
 			{
-				alpha = bestScore;
+				//alpha = bestScore;
 				bestMove = m;
 				pvLine.clear();
 				pvLine.push_back(bestMove);
@@ -719,8 +754,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 	if(!stop)
 	{
 		TT.store(posKey, transpositionTable::scoreToTT(bestScore, ply),
-			bestScore >= beta  ? typeScoreHigherThanBeta :
-					(PVnode && bestMove.packed) ? typeExact : typeScoreLowerThanAlpha,
+			typeExact,
 							(short int)depth, bestMove.packed, 0);
 	}
 	return bestScore;
@@ -730,18 +764,6 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int depth, Score alpha, Score beta, std::list<Move>& pvLine)
 {
-	//sync_cout<<alpha<<" "<<beta<<" "<<depth<<sync_endl;
-
-	/*if( ply >=50)
-	{
-		sync_cout<< alpha<<" "<<beta<<" ";
-		for(unsigned int i = 1;i<ply;i++)
-		{
-			std::cout<<displayUci(pos.getState(i).currentMove)<<" ";
-		}
-
-		std::cout<<sync_endl;
-	}*/
 
 	assert(ply>0);
 	assert(depth<ONE_PLY);
@@ -753,7 +775,6 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 	assert(PVnode || alpha+1==beta);
 
 	bool inCheck = pos.isInCheck();
-	unsigned int moveCount = 0;
 
 	maxPlyReached = std::max(ply, maxPlyReached);
 	visitedNodes++;
@@ -766,14 +787,30 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		{
 			pvLine.clear();
 		}
-		return 0;
+		return std::min((int)0,(int)(-5000 + pos.getPly()*250));
 	}
+/*	//---------------------------------------
+	//	MATE DISTANCE PRUNING
+	//---------------------------------------
 
+	alpha = std::max(matedIn(ply), alpha);
+	beta = std::min(mateIn(ply+1), beta);
+
+	if(ply>20)
+	{sync_cout<<ply<<"    "<< alpha<<":"<< beta<<sync_endl;}
+	if (alpha >= beta)
+	{
+		return alpha;
+	}*/
 
 	//----------------------------
 	//	next node type
 	//----------------------------
-	const Search::nodeType childNodesType = Search::nodeType::PV_NODE;
+	const Search::nodeType childNodesType =
+		type == Search::nodeType::ALL_NODE?
+			Search::nodeType::CUT_NODE:
+			type == Search::nodeType::CUT_NODE ? Search::nodeType::ALL_NODE:
+				Search::nodeType::PV_NODE;
 
 
 	ttEntry* const tte = TT.probe(pos.getKey());
@@ -781,26 +818,112 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 	ttMove = tte ? tte->getPackedMove() : Movegen::NOMOVE;
 
 	Movegen mg(pos, *this, ply, ttMove);
-	mg.setupQuiescentSearch(inCheck);
+	int TTdepth = mg.setupQuiescentSearch(inCheck, depth);
+	Score ttValue = tte ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
+
+	if (tte
+		&& tte->getDepth() >= TTdepth
+	    && ttValue != SCORE_NONE // Only in case of TT access race
+	    && (	PVnode ?  false/*tte->getType() == typeExact*/
+	            : ttValue >= beta ? (tte->getType() ==  typeScoreHigherThanBeta || tte->getType() == typeExact)
+	                              : (tte->getType() ==  typeScoreLowerThanAlpha || tte->getType() == typeExact)))
+	{
+		TT.refresh(tte);
+
+		if(PVnode)
+		{
+			if(ttMove.packed && pos.isMoveLegal(ttMove))
+			{
+				pvLine.clear();
+				pvLine.push_back(ttMove);
+			}
+			else
+			{
+				pvLine.clear();
+			}
+		}
+		return ttValue;
+	}
+
+	ttType TTtype = typeScoreLowerThanAlpha;
 
 
+	Score staticEval = tte ? tte->getStaticValue() : pos.eval<false>();
+#ifdef DEBUG_EVAL_SIMMETRY
+	ppp.setupFromFen(pos.getSymmetricFen());
+	Score test = ppp.eval<false>();
+	if(test != staticEval)
+	{
+		sync_cout << 3 << " " << test << " " << staticEval << " " << pos.eval<false>() << sync_endl;
+		pos.display();
+		ppp.display();
+		while(1);
+	}
+#endif
 
-	Score staticEval = pos.eval<false>();
+
 	//----------------------------
 	//	stand pat score
 	//----------------------------
-	Score bestScore = staticEval;
-	if( inCheck )
+	Score bestScore;
+	Score futilityBase;
+	if(!inCheck)
+	{
+		bestScore = staticEval;
+		// todo trovare un valore buono per il futility
+		futilityBase = bestScore + 5000;
+
+
+
+		/*if (ttValue != SCORE_NONE)
+		{
+			if (
+					((tte->getType() ==  typeScoreHigherThanBeta || tte->getType() == typeExact) && (ttValue > staticEval) )
+					|| ((tte->getType() == typeScoreLowerThanAlpha || tte->getType() == typeExact ) && (ttValue < staticEval) )
+				)
+			{
+				bestScore = ttValue;
+			}
+		}*/
+	}
+	else
 	{
 		bestScore = -SCORE_INFINITE;
+		futilityBase = -SCORE_INFINITE;
+
 	}
 
-	if(!inCheck && bestScore>alpha)
+
+	if(bestScore > alpha)
 	{
+		assert(!inCheck);
+
+		// TODO testare se la riga TTtype=typeExact; ha senso
+		if(PVnode)
+		{
+			pvLine.clear();
+		}
+
+		if( bestScore >= beta)
+		{
+			if( !pos.isCaptureMoveOrPromotion(ttMove) )
+			{
+				saveKillers(ply,ttMove);
+			}
+			if(!stop)
+			{
+				TT.store(pos.getKey(), transpositionTable::scoreToTT(bestScore, ply), typeScoreHigherThanBeta,(short int)TTdepth, ttMove.packed, staticEval);
+			}
+			return bestScore;
+		}
 		alpha = bestScore;
+		TTtype = typeExact;
+		
+
+
 	}
 
-//	return bestScore;
+
 	//----------------------------
 	//	try the captures
 	//----------------------------
@@ -809,6 +932,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 
 	std::list<Move> childPV;
 
+	Position::state &st = pos.getActualState();
 	while (/*bestScore < beta  &&  */(m = mg.getNextMove()) != Movegen::NOMOVE)
 	{
 		assert(alpha < beta);
@@ -816,8 +940,70 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		assert(alpha >= -SCORE_INFINITE);
 		assert(m.packed);
 
-		moveCount++;
 
+		if(!inCheck)
+		{
+			// allow only queen promotion at deeper search
+			if( (TTdepth <- 1*ONE_PLY) && (m.bit.flags == Move::fpromotion) && (m.bit.promotion != Move::promQueen))
+			{
+				continue;
+			}
+
+			// at very deep search allow only recapture
+			if(depth < -7 * ONE_PLY && st.currentMove.bit.to != m.bit.to)
+			{
+					continue;
+			}
+
+			//----------------------------
+			//	futility pruning (delta pruning)
+			//----------------------------
+			if(	!PVnode
+				&& m != ttMove
+				&& m.bit.flags != Move::fpromotion
+				//&& !pos.moveGivesCheck(m)
+				)
+			{
+				bool moveGiveCheck = pos.moveGivesCheck(m);
+				if(
+						!moveGiveCheck
+						&& !pos.isPassedPawnMove(m)
+						&& abs(staticEval)<SCORE_KNOWN_WIN
+				)
+				{
+					Score futilityValue = futilityBase
+							+ Position::pieceValue[pos.getPieceAt((tSquare)m.bit.to)][1]
+							+ (m.bit.flags == Move::fenpassant ? Position::pieceValue[Position::whitePawns][1] : 0);
+
+					if (futilityValue < beta)
+					{
+						bestScore = std::max(bestScore, futilityValue);
+						continue;
+					}
+					if (futilityBase < beta && pos.seeSign(m) <= 0)
+					{
+						bestScore = std::max(bestScore, futilityBase);
+						continue;
+					}
+
+				}
+
+
+				//----------------------------
+				//	don't check moves with negative see
+				//----------------------------
+
+				// TODO controllare se conviene fare o non fare la condizione type != search::nodeType::PV_NODE
+				// TODO testare se aggiungere o no !movegivesCheck() &&
+				if(
+						//!moveGiveCheck &&
+						pos.seeSign(m) < 0)
+				{
+					continue;
+				}
+			}
+
+		}
 		pos.doMove(m);
 		Score val = -qsearch<childNodesType>(ply+1, depth-ONE_PLY, -beta, -alpha, childPV);
 
@@ -828,12 +1014,11 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		if( val > bestScore)
 		{
 			bestScore = val;
-
-			if( bestScore> alpha )
+			if( val > alpha )
 			{
 				bestMove = m;
-				alpha = bestScore;
-
+				TTtype = typeExact;
+				alpha = val;
 
 				if(PVnode && !stop)
 				{
@@ -844,27 +1029,39 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 				}
 				if( bestScore >= beta)
 				{
+					if( !pos.isCaptureMoveOrPromotion(bestMove) && !inCheck )
+					{
+						saveKillers(ply,bestMove);
+					}
 					if(!stop)
 					{
-						TT.store(pos.getKey(), transpositionTable::scoreToTT(bestScore, ply), typeScoreHigherThanBeta,(short int)0, bestMove.packed, 0);
+						TT.store(pos.getKey(), transpositionTable::scoreToTT(bestScore, ply), typeScoreHigherThanBeta,(short int)TTdepth, bestMove.packed, staticEval);
 					}
 					return bestScore;
 				}
 			}
-
 		}
 	}
 
-	if(!moveCount)
+	if(bestScore == -SCORE_INFINITE)
 	{
-		pvLine.clear();
-		if(inCheck)
+		assert(inCheck);
+		if(PVnode)
 		{
-			bestScore = matedIn(ply);
+			pvLine.clear();
 		}
+		return matedIn(ply);
 	}
 
+	assert(bestScore != -SCORE_INFINITE);
 
+
+
+
+	if( !stop )
+	{
+		TT.store(pos.getKey(), transpositionTable::scoreToTT(bestScore, ply), TTtype, (short int)TTdepth, bestMove.packed, staticEval);
+	}
 	return bestScore;
 
 }
