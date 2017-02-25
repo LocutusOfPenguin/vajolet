@@ -58,7 +58,7 @@ int main()
 	Movegen::initMovegenConstant();
 
 	Search::initLMRreduction();
-	TT.setSize(256);
+	TT.setSize(1024);
 	Position::initMaterialKeys();
 	initMobilityBonus();
 	tb_init(Search::SyzygyPath.c_str());

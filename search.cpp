@@ -341,7 +341,12 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 	do
 	{
+		std::ofstream ofs;
+		ofs.open ("test.txt", std::ofstream::out | std::ofstream::trunc);
+		ofs <<"----------------------------------------------"<<std::endl;
+		ofs.close();
 		sync_cout<<"info depth "<<depth<<sync_endl;
+
 		//----------------------------
 		// iterative loop
 		//----------------------------
@@ -606,6 +611,15 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			{
 				pvLine.clear();
 			}
+			if( ply <3)
+			{
+				std::ofstream ofs;
+				ofs.open ("test.txt", std::ofstream::out | std::ofstream::app);
+				std::string st;
+				for(unsigned int i=0; i<ply;i++){ st+=" ";}
+				ofs <<";"<< st<<"; "<<pos.getFen()<<";draw;"<<displayUci(pos.getActualState().currentMove)<<";0;"<<std::endl;
+				ofs.close();
+			}
 			return 0;
 		}
 
@@ -650,6 +664,20 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			{
 				pvLine.clear();
 			}
+		}
+		if( ply <3)
+		{
+			std::ofstream ofs;
+			ofs.open ("test.txt", std::ofstream::out | std::ofstream::app);
+			std::string st;
+			for(unsigned int i=0; i<ply;i++){ st+=" ";}
+			ofs <<";"<< st<<"; "<<pos.getFen()<<";ttvalue;"<<displayUci(pos.getActualState().currentMove)<< ";"<<ttValue<<";";
+			if( std::abs(ttValue)>20000)
+			{
+				ofs<<"*****";
+			}
+			ofs<<std::endl;
+			ofs.close();
 		}
 		return ttValue;
 	}
@@ -756,6 +784,20 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		TT.store(posKey, transpositionTable::scoreToTT(bestScore, ply),
 			typeExact,
 							(short int)depth, bestMove.packed, 0);
+	}
+	if( ply <3)
+	{
+		std::ofstream ofs;
+		ofs.open ("test.txt", std::ofstream::out | std::ofstream::app);
+		std::string str;
+		for(unsigned int i=0; i<ply;i++){ str+=" ";}
+		ofs <<";"<< str<<"; "<<pos.getFen()<<";normal;"<<displayUci(pos.getActualState().currentMove)<< ";"<<bestScore<<";";
+		if( std::abs(bestScore)>20000)
+		{
+			ofs<<"*****";
+		}
+		ofs<<std::endl;
+		ofs.close();
 	}
 	return bestScore;
 
