@@ -604,9 +604,9 @@ public:
 	}
 	inline bool isPassedPawnMove(const Move & m) const
 	{
-		if(isPawn(squares[m.bit.to]))
+		if(isPawn(squares[m.bit.from]))
 		{
-			bool color = squares[m.bit.to] >= separationBitmap;
+			bool color = squares[m.bit.from] >= separationBitmap;
 			bitMap theirPawns = color? bitBoard[whitePawns]:bitBoard[blackPawns];
 			return !(theirPawns & PASSED_PAWN[color][m.bit.from]);
 		}
