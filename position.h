@@ -608,7 +608,8 @@ public:
 		{
 			bool color = squares[m.bit.from] >= separationBitmap;
 			bitMap theirPawns = color? bitBoard[whitePawns]:bitBoard[blackPawns];
-			return !(theirPawns & PASSED_PAWN[color][m.bit.from]);
+			bitMap ourPawns = color? bitBoard[blackPawns]:bitBoard[whitePawns];
+			return !(theirPawns & PASSED_PAWN[color][m.bit.from]) && !(ourPawns & SQUARES_IN_FRONT_OF[color][m.bit.from]);
 		}
 		return false;
 	}

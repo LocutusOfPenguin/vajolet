@@ -1184,25 +1184,25 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 	return res;
 }
 
-template<Color c>
+template<Color kingColor>
 Score Position::evalShieldStorm(tSquare ksq) const
 {
 	Score ks = 0;
-	const bitMap ourPawns = c ? getBitmap(blackPawns) : getBitmap(whitePawns);
-	const bitMap theirPawns = c ? getBitmap(whitePawns) : getBitmap(blackPawns);
-	const unsigned int disableRank= c ? 0: 7;
+	const bitMap ourPawns = kingColor ? getBitmap(blackPawns) : getBitmap(whitePawns);
+	const bitMap theirPawns = kingColor ? getBitmap(whitePawns) : getBitmap(blackPawns);
+	const unsigned int disableRank= kingColor ? 0: 7;
 	bitMap localKingRing = Movegen::attackFrom<Position::whiteKing>(ksq);
 	bitMap localKingShield = localKingRing;
 
 	if(RANKS[ksq] != disableRank)
 	{
-		localKingRing |= Movegen::attackFrom<Position::whiteKing>(ksq + pawnPush(c));
+		localKingRing |= Movegen::attackFrom<Position::whiteKing>(ksq + pawnPush(kingColor));
 	}
 	bitMap localKingFarShield = localKingRing & ~(localKingShield);
 
 	bitMap pawnShield = localKingShield & ourPawns;
 	bitMap pawnFarShield = localKingFarShield & ourPawns;
-	bitMap pawnStorm = PASSED_PAWN[c][ksq] & theirPawns;
+	bitMap pawnStorm = PASSED_PAWN[kingColor][ksq] & theirPawns;
 	if(pawnShield)
 	{
 		ks = bitCnt(pawnShield) * kingShieldBonus;
@@ -1214,7 +1214,7 @@ Score Position::evalShieldStorm(tSquare ksq) const
 	while(pawnStorm)
 	{
 		tSquare p = iterateBit(pawnStorm);
-		ks -= ( 8 - SQUARE_DISTANCE[p][ksq] ) * kingStormBonus;
+		ks -= ( 7 - SQUARE_DISTANCE[p][ksq] ) * kingStormBonus;
 	}
 	return ks;
 }
@@ -1952,6 +1952,7 @@ Score Position::eval(void)
 	}
 
 	kingSafety[black] = evalShieldStorm<black>(getSquareOfThePiece(blackKing));
+
 	if((st.castleRights & bCastleOO)
 		&& !(attackedSquares[whitePieces] & (bitSet(E8) | bitSet(F8) | bitSet(G8) ))
 		&& bitCnt(getOccupationBitmap() & (bitSet(F8) | bitSet(G8))) <=1
@@ -1969,7 +1970,7 @@ Score Position::eval(void)
 	}
 	if(trace)
 	{
-		bScore = simdScore{ kingSafety[black], 0, 0, 0};
+		bScore = -simdScore{ kingSafety[black], 0, 0, 0};
 	}
 
 	res+=simdScore{kingSafety[white]-kingSafety[black],0,0,0};
