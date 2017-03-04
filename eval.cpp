@@ -26,6 +26,7 @@
 
 
 
+Score weight[11] = {256,256,256,256,256,256,256,256,256,256,256};
 
 
 simdScore traceRes={0,0,0,0};
@@ -1503,6 +1504,8 @@ Score Position::eval(void)
 	//---------------------------------------------
 	res += st.nextMove ? -tempo : tempo;
 
+	res = (res * weight[0]) / 256;
+
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "Material, PST, Tempo" << " |   ---    --- |   ---    --- | "
@@ -1512,16 +1515,19 @@ Score Position::eval(void)
 	}
 
 
+
+
 	//---------------------------------------------
 	//	imbalancies
 	//---------------------------------------------
 	//	bishop pair
 
+	simdScore imbalances= {0};
 	if( getPieceCount(whiteBishops) >= 2 )
 	{
 		if(getPieceCount(whiteBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(whiteBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(whiteBishops, 1) ] )
 		{
-			res += bishopPair;
+			imbalances += bishopPair;
 		}
 	}
 
@@ -1529,7 +1535,7 @@ Score Position::eval(void)
 	{
 		if(getPieceCount(blackBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(blackBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(blackBishops, 1) ] )
 		{
-			res -= bishopPair;
+			imbalances -= bishopPair;
 		}
 	}
 	if( getPieceCount(blackPawns) + getPieceCount(whitePawns) == 0 )
@@ -1538,17 +1544,20 @@ Score Position::eval(void)
 				&& (int)getPieceCount(blackRooks) - (int)getPieceCount(whiteRooks) == 1
 				&& (int)getPieceCount(blackBishops) + (int)getPieceCount(blackKnights) - (int)getPieceCount(whiteBishops) - (int)getPieceCount(whiteKnights) == 2)
 		{
-			res += queenVsRook2MinorsImbalance;
+			imbalances += queenVsRook2MinorsImbalance;
 
 		}
 		else if((int)getPieceCount(whiteQueens) - (int)getPieceCount(blackQueens) == -1
 				&& (int)getPieceCount(blackRooks) - (int)getPieceCount(whiteRooks) == -1
 				&& (int)getPieceCount(blackBishops) + (int)getPieceCount(blackKnights) - (int)getPieceCount(whiteBishops) -(int)getPieceCount(whiteKnights) == -2)
 		{
-			res -= queenVsRook2MinorsImbalance;
+			imbalances -= queenVsRook2MinorsImbalance;
 
 		}
 	}
+
+	imbalances = (imbalances * weight[1]) / 256;
+	res += imbalances;
 
 	if(trace)
 	{
