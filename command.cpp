@@ -281,6 +281,50 @@ void setoption(std::istringstream& is)
 			Search::Syzygy50MoveRule = false;
 		}
 	}
+	else if(name == "weight0")
+	{
+		weight[0] = stoi(value);
+	}
+	else if(name == "weight1")
+	{
+		weight[1] = stoi(value);
+	}
+	else if(name == "weight2")
+	{
+		weight[2] = stoi(value);
+	}
+	else if(name == "weight3")
+	{
+		weight[3] = stoi(value);
+	}
+	else if(name == "weight4")
+	{
+		weight[4] = stoi(value);
+	}
+	else if(name == "weight5")
+	{
+		weight[5] = stoi(value);
+	}
+	else if(name == "weight6")
+	{
+		weight[6] = stoi(value);
+	}
+	else if(name == "weight7")
+	{
+		weight[7] = stoi(value);
+	}
+	else if(name == "weight8")
+	{
+		weight[8] = stoi(value);
+	}
+	else if(name == "weight9")
+	{
+		weight[9] = stoi(value);
+	}
+	else if(name == "weight10")
+	{
+		weight[10] = stoi(value);
+	}
 	else
 	{
 		sync_cout << "No such option: " << name << sync_endl;

@@ -24,7 +24,7 @@
 #include "position.h"
 #include "tables.h"
 
-
+extern Score weight[11];
 void initMobilityBonus();
 
 
