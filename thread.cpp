@@ -129,12 +129,12 @@ void my_thread::timerThread()
 			{
 				timeMan.FirstIterationFinished = true;
 			}
-			if(!src.stop &&time >= timeMan.allocatedTime && ( timeMan.idLoopAlpha || timeMan.idLoopBeta ) )
+			if(!src.stop && time >= timeMan.allocatedTime && ( timeMan.idLoopAlpha || timeMan.idLoopBeta ) )
 			{
 				timeMan.allocatedTime = timeMan.maxAllocatedTime;
 				//sync_cout<<"info debug EXTEND TIME: "<<timeMan.allocatedTime<<sync_endl;
 			}
-			if(!src.stop && timeMan.maxAllocatedTime == timeMan.allocatedTime && ( timeMan.idLoopIterationFinished ) && !(src.limits.infinite || src.limits.ponder) )
+			if(!src.stop && timeMan.maxAllocatedTime == timeMan.allocatedTime && time >= timeMan.allocatedTime && ( timeMan.idLoopIterationFinished ) && !(src.limits.infinite || src.limits.ponder) )
 			{
 				src.stop = true;
 				//sync_cout<<"info debug FINISHED ITERATION IN EXTEND TIME "<<time<<sync_endl;
@@ -195,6 +195,7 @@ void my_thread::timerThread()
 			}
 			if(src.limits.moveTime && timeMan.FirstIterationFinished && time>=src.limits.moveTime)
 			{
+				//sync_cout<<"info debug STOP BECAUSE TIME MOVETIME EXPIRED"<<sync_endl;
 				src.stop = true;
 			}
 			if(src.stop)

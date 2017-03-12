@@ -26,11 +26,10 @@
 
 
 
-Score weight[11] = {226, 331, 207, 344, 319, 267, 243, 178, 237, 151, 256};
+//Score weight[11] = {508, 356, 175, 410, 416, 325, 235, 189, 319, 157, 345};
 //Score weight[11] = {223, 330, 177, 364, 327, 280, 243, 172, 263, 139, 317};
+Score weight[11] = {228, 343, 186, 389, 405, 332, 223, 196, 329, 157, 336};
 
-
-simdScore traceRes={0,0,0,0};
 
 const int KingExposed[] = {
      2,  0,  2,  5,  5,  2,  0,  2,
@@ -64,12 +63,12 @@ simdScore chainedPawnBonus={540,180,0,0};
 simdScore passedPawnFileAHPenalty = {-1030,720,0,0};
 simdScore passedPawnSupportedBonus = {1060,-450,0,0};
 simdScore candidateBonus = {110,1330,0,0};
-simdScore passedPawnBonus = {460,840,0,0};
-simdScore passedPawnUnsafeSquares ={-10,70,0,0};
-simdScore passedPawnBlockedSquares ={150,370,0,0};
-simdScore passedPawnDefendedSquares = {150,240,0,0};
-simdScore passedPawnDefendedBlockingSquare = {260,170,0,0};
-simdScore unstoppablePassed = {0,2000,0,0};
+simdScore passedPawnBonus = {536,739,0,0};
+simdScore passedPawnUnsafeSquares ={-190,-69,0,0};
+simdScore passedPawnBlockedSquares ={181,359,0,0};
+simdScore passedPawnDefendedSquares = {126,114,0,0};
+simdScore passedPawnDefendedBlockingSquare = {266,274,0,0};
+simdScore unstoppablePassed = {0,1731,0,0};
 simdScore rookBehindPassedPawn = {0,10,0,0};
 simdScore EnemyRookBehindPassedPawn = {0,10,0,0};
 
@@ -137,12 +136,12 @@ simdScore weakPiecePenalty[Position::separationBitmap][Position::separationBitma
 //king safety
 //------------------------------------------------
 const unsigned int KingAttackWeights[] = { 0, 0, 5, 3, 2, 2 };
-Score kingShieldBonus= 2400;
-Score kingFarShieldBonus= 1800;
-Score kingStormBonus= 80;
-simdScore kingSafetyBonus={93,-5,0,0};
-simdScore kingSafetyScaling={310,0,0,0};
-simdScore KingSafetyMaxAttack={93,0,0,0};
+Score kingShieldBonus= 2361;
+Score kingFarShieldBonus= 1762;
+Score kingStormBonus= 90;
+simdScore kingSafetyBonus={127,-30,0,0};
+simdScore kingSafetyScaling={342,0,0,0};
+simdScore KingSafetyMaxAttack={81,0,0,0};
 simdScore KingSafetyLinearCoefficent={5,0,0,0};
 simdScore KingSafetyMaxResult={1000,0,0,0};
 //------------------------------------------------
@@ -1937,7 +1936,6 @@ Score Position::eval(void)
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
 				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
 				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
 	}
 
 	//--------------------------------------
@@ -1986,7 +1984,7 @@ Score Position::eval(void)
 	}
 	if(trace)
 	{
-		bScore = -simdScore{ kingSafety[black], 0, 0, 0};
+		bScore = simdScore{ kingSafety[black], 0, 0, 0};
 	}
 
 	PieceScore = simdScore{kingSafety[white]-kingSafety[black],0,0,0};
@@ -2004,7 +2002,7 @@ Score Position::eval(void)
 	PieceScore-= kingSaf;
 	if(trace)
 	{
-		bScore -= kingSaf;
+		bScore = kingSaf;
 	}
 
 	PieceScore = (PieceScore * weight[10]) / 256;
@@ -2027,7 +2025,6 @@ Score Position::eval(void)
 				  << std::setw(6)  << " " << " | "
 				  << std::setw(6)  << (res[0])/10000.0 << " "
 				  << std::setw(6)  << (res[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
 	}
 
 	//todo scaling

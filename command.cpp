@@ -283,47 +283,47 @@ void setoption(std::istringstream& is)
 	}
 	else if(name == "weight0")
 	{
-		weight[0] = stoi(value);
+		kingShieldBonus = stoi(value);
 	}
 	else if(name == "weight1")
 	{
-		weight[1] = stoi(value);
+		kingFarShieldBonus = stoi(value);
 	}
 	else if(name == "weight2")
 	{
-		weight[2] = stoi(value);
+		kingStormBonus = stoi(value);
 	}
 	else if(name == "weight3")
 	{
-		weight[3] = stoi(value);
+		kingSafetyBonus[0] = stoi(value);
 	}
 	else if(name == "weight4")
 	{
-		weight[4] = stoi(value);
+		kingSafetyBonus[1] = stoi(value);
 	}
 	else if(name == "weight5")
 	{
-		weight[5] = stoi(value);
+		kingSafetyScaling[0] = stoi(value);
 	}
 	else if(name == "weight6")
 	{
-		weight[6] = stoi(value);
+		KingSafetyMaxAttack[0] = stoi(value);
 	}
 	else if(name == "weight7")
 	{
-		weight[7] = stoi(value);
+		KingSafetyLinearCoefficent[0] = stoi(value);
 	}
 	else if(name == "weight8")
 	{
-		weight[8] = stoi(value);
+		KingSafetyMaxResult[0] = stoi(value);
 	}
 	else if(name == "weight9")
 	{
-		weight[9] = stoi(value);
+		passedPawnDefendedBlockingSquare[1] = stoi(value);
 	}
 	else if(name == "weight10")
 	{
-		weight[10] = stoi(value);
+		unstoppablePassed[1] = stoi(value);
 	}
 	else
 	{

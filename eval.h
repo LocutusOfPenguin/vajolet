@@ -25,6 +25,23 @@
 #include "tables.h"
 
 extern Score weight[11];
+extern simdScore passedPawnBonus;
+extern simdScore passedPawnUnsafeSquares;
+extern simdScore passedPawnBlockedSquares;
+extern simdScore passedPawnDefendedSquares;
+extern simdScore passedPawnDefendedBlockingSquare;
+extern simdScore unstoppablePassed;
+extern simdScore rookBehindPassedPawn;
+extern simdScore EnemyRookBehindPassedPawn;
+
+extern Score kingShieldBonus;
+extern Score kingFarShieldBonus;
+extern Score kingStormBonus;
+extern simdScore kingSafetyBonus;
+extern simdScore kingSafetyScaling;
+extern simdScore KingSafetyMaxAttack;
+extern simdScore KingSafetyLinearCoefficent;
+extern simdScore KingSafetyMaxResult;
 void initMobilityBonus();
 
 
