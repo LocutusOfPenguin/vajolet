@@ -174,7 +174,7 @@ public:
 		return m == killerMoves[0] || m == killerMoves[1];
 	}
 
-	Move getFirstMove() const {	return moveList[0].m; }
+	Move getMoveFromMoveList(unsigned int n) const {	return moveList[n].m; }
 
 	Move getNextMove(void);
 

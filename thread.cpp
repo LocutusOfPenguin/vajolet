@@ -134,7 +134,7 @@ void my_thread::timerThread()
 				timeMan.allocatedTime = timeMan.maxAllocatedTime;
 				//sync_cout<<"info debug EXTEND TIME: "<<timeMan.allocatedTime<<sync_endl;
 			}
-			if(!src.stop && timeMan.maxAllocatedTime == timeMan.allocatedTime && ( timeMan.idLoopIterationFinished ) && !(src.limits.infinite || src.limits.ponder) )
+			if(!src.stop && timeMan.maxAllocatedTime == timeMan.allocatedTime && time >= timeMan.allocatedTime && ( timeMan.idLoopIterationFinished ) && !(src.limits.infinite || src.limits.ponder) )
 			{
 				src.stop = true;
 				//sync_cout<<"info debug FINISHED ITERATION IN EXTEND TIME "<<time<<sync_endl;
@@ -265,7 +265,7 @@ void my_thread::manageNewSearch()
 	{
 		if(!src.limits.infinite)
 		{
-			Move m = mg.getFirstMove();
+			Move m = mg.getMoveFromMoveList(0);
 			sync_cout << "info pv " << displayUci(m) << sync_endl;
 			while(src.limits.ponder){}
 			sync_cout << "bestmove " << displayUci(m);
