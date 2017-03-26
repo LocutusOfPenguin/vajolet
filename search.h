@@ -106,11 +106,12 @@ class Search
 private:
 	static int globalReduction;
 	bool useTBresult;
+	static const unsigned int LmrLimit = 64;
 	static Score futility[8];
 	static Score futilityMargin[7];
 	static unsigned int FutilityMoveCounts[11];
-	static Score PVreduction[32*ONE_PLY][64];
-	static Score nonPVreduction[32*ONE_PLY][64];
+	static Score PVreduction[LmrLimit*ONE_PLY][64];
+	static Score nonPVreduction[LmrLimit*ONE_PLY][64];
 
 	static Score mateIn(int ply) { return SCORE_MATE - ply; }
 	static Score matedIn(int ply) { return SCORE_MATED + ply; }
@@ -135,6 +136,14 @@ private:
 			tempKillers[0] = m;
 		}
 
+	}
+
+	void clearKillers(unsigned int ply)
+	{
+		Move * const tempKillers =  sd[ply].killers;
+
+		tempKillers[1] = 0;
+		tempKillers[0] = 0;
 	}
 
 	signed int razorMargin(unsigned int depth,bool cut) const { return 20000+depth*78+cut*20000; }
@@ -182,7 +191,7 @@ public:
 
 	static void initLMRreduction(void)
 	{
-		for (int d = 1; d < 32*ONE_PLY; d++)
+		for (unsigned int d = 1; d < LmrLimit*ONE_PLY; d++)
 			for (int mc = 1; mc < 64; mc++)
 			{
 				double    PVRed = -1.5 + 0.33*log(double(d)) * log(double(mc));

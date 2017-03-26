@@ -49,8 +49,8 @@ int Search::globalReduction =0;
 Score Search::futility[8] = {0,6000,12000,18000,24000,30000,36000,42000};
 Score Search::futilityMargin[7] = {0,10000,20000,30000,40000,50000,60000};
 unsigned int Search::FutilityMoveCounts[11] = {5,10,17,26,37,50,66,85,105,130,151};
-Score Search::PVreduction[32*ONE_PLY][64];
-Score Search::nonPVreduction[32*ONE_PLY][64];
+Score Search::PVreduction[LmrLimit*ONE_PLY][64];
+Score Search::nonPVreduction[LmrLimit*ONE_PLY][64];
 unsigned int Search::threads = 1;
 unsigned int Search::multiPVLines = 1;
 bool Search::useOwnBook = true;
@@ -601,6 +601,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 	Position::state& st = pos.getActualState();
 	visitedNodes++;
+	clearKillers(ply+1);
 
 	const bool PVnode = ( type == Search::nodeType::PV_NODE || type == Search::nodeType::ROOT_NODE  || type == Search::nodeType::HELPER_ROOT_NODE);
 	const bool inCheck = pos.isInCheck();
@@ -1202,7 +1203,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				{
 					assert(moveNumber!=0);
 
-					int reduction = PVreduction[ std::min(depth, 32*ONE_PLY-1) ][ std::min(moveNumber, (unsigned int)63) ];
+					int reduction = PVreduction[ std::min(depth, int(LmrLimit*ONE_PLY-1)) ][ std::min(moveNumber, (unsigned int)63) ];
 					int d = std::max(newDepth - reduction, ONE_PLY);
 
 					if(reduction != 0)
@@ -1256,7 +1257,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				&& !mg.isKillerMove(m)
 			)
 			{
-				int reduction = nonPVreduction[std::min(depth, 32*ONE_PLY-1)][std::min(moveNumber, (unsigned int)63)];
+				int reduction = nonPVreduction[std::min(depth, int(LmrLimit*ONE_PLY-1))][std::min(moveNumber, (unsigned int)63)];
 				int d = std::max(newDepth - reduction, ONE_PLY);
 
 				if(reduction != 0)
@@ -1573,7 +1574,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		if(!inCheck)
 		{
 			// allow only queen promotion at deeper search
-			if( (TTdepth <- 1*ONE_PLY) && (m.bit.flags == Move::fpromotion) && (m.bit.promotion != Move::promQueen))
+			if( (TTdepth <- 1*ONE_PLY) && ( pos.isPromotionMove(m) ) && (m.bit.promotion != Move::promQueen))
 			{
 				continue;
 			}
@@ -1602,7 +1603,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 				{
 					Score futilityValue = futilityBase
 							+ Position::pieceValue[pos.getPieceAt((tSquare)m.bit.to)][1]
-							+ (m.bit.flags == Move::fenpassant ? Position::pieceValue[Position::whitePawns][1] : 0);
+							+ ( pos.isEnPassantMove(m) ? Position::pieceValue[Position::whitePawns][1] : 0);
 
 					if (futilityValue < beta)
 					{
