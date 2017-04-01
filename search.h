@@ -118,7 +118,8 @@ private:
 	bool validIteration =false;
 
 	unsigned int indexPV = 0;
-	History history;
+	History historyLow;
+	History historyHigh;
 	CounterMove counterMoves;
 
 	searchData sd[STATE_INFO_LENGTH];
@@ -174,7 +175,7 @@ public:
 	searchLimits limits;
 	Position pos;
 
-	const History& getHistory()const {return history;}
+	const History& getHistory(int depth)const { if(depth< 10 * ONE_PLY){return historyLow;}else{return historyHigh;} }
 	const CounterMove& getCounterMove()const {return  counterMoves;}
 
 

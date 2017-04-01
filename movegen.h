@@ -43,6 +43,7 @@ private:
 
 	unsigned int killerPos;
 	Score captureThreshold;
+	int depth;
 
 
 	const Position &pos;
@@ -133,7 +134,7 @@ private:
 	{
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
-			moveList[i].score = src.getHistory().getValue(pos.getPieceAt((tSquare)moveList[i].m.bit.from),(tSquare)moveList[i].m.bit.to);
+			moveList[i].score = src.getHistory(depth).getValue(pos.getPieceAt((tSquare)moveList[i].m.bit.from),(tSquare)moveList[i].m.bit.to);
 		}
 	}
 	inline void resetMoveList()
@@ -183,7 +184,7 @@ public:
 
 
 
-	Movegen(const Position & p, const Search& s, unsigned int ply, const Move & ttm): pos(p),src(s),ply(ply), ttMove(ttm)
+	Movegen(const Position & p, const Search& s, unsigned int ply, const Move & ttm, int depth): captureThreshold(0), depth(depth), pos(p),src(s),  ply(ply), ttMove(ttm)
 	{
 		if(pos.isInCheck())
 		{
@@ -200,7 +201,7 @@ public:
 
 	}
 
-	Movegen(const Position & p): Movegen(p, defaultSearch, 0, NOMOVE)
+	Movegen(const Position & p): Movegen(p, defaultSearch, 0, NOMOVE, 0)
 	{
 	}
 

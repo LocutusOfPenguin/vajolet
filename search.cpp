@@ -137,7 +137,8 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 
 	TT.newSearch();
-	history.clear();
+	historyLow.clear();
+	historyHigh.clear();
 	counterMoves.clear();
 	cleanData();
 	visitedNodes = 0;
@@ -668,6 +669,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& tte != nullptr
 			&& tte->getDepth() >= depth
 		    && ttValue != SCORE_NONE // Only in case of TT access race
+			&& ttMove != excludedMove
 		    && (	PVnode ?  false
 		            : ttValue >= beta ? (tte->getType() ==  typeScoreHigherThanBeta || tte->getType() == typeExact)
 		                              : (tte->getType() ==  typeScoreLowerThanAlpha || tte->getType() == typeExact)))
@@ -976,23 +978,26 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			Score rBeta = std::min(beta + 8000,SCORE_INFINITE);
 			int rDepth = depth -ONE_PLY- 3*ONE_PLY;
 
-			Movegen mg(pos, *this, ply, ttMove);
+			Movegen mg(pos, *this, ply, ttMove, depth);
 			mg.setupProbCutSearch(pos.getCapturedPiece());
 
 			Move m;
 			std::list<Move> childPV;
 			while((m = mg.getNextMove()) != Movegen::NOMOVE)
 			{
-				pos.doMove(m);
-
-				assert(rDepth>=ONE_PLY);
-				s = -alphaBeta<childNodesType>(ply+1, rDepth, -rBeta ,-rBeta+1, childPV);
-
-				pos.undoMove();
-
-				if(s >= rBeta)
+				if ( m != excludedMove )
 				{
-					return s;
+					pos.doMove(m);
+
+					assert(rDepth>=ONE_PLY);
+					s = -alphaBeta<childNodesType>(ply+1, rDepth, -rBeta ,-rBeta+1, childPV);
+
+					pos.undoMove();
+
+					if(s >= rBeta)
+					{
+						return s;
+					}
 				}
 
 			}
@@ -1031,7 +1036,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 	Move bestMove(Movegen::NOMOVE);
 
 	Move m;
-	Movegen mg(pos, *this, ply, ttMove);
+	Movegen mg(pos, *this, ply, ttMove, depth);
 	unsigned int moveNumber = 0;
 	unsigned int quietMoveCount = 0;
 	Move quietMoveList[64];
@@ -1371,13 +1376,27 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 
 		// update history
 		Score bonus = Score(depth * depth)/(ONE_PLY*ONE_PLY);
-		history.update(pos.getPieceAt((tSquare)bestMove.bit.from), (tSquare) bestMove.bit.to, bonus);
+		if( depth < 10 * ONE_PLY)
+		{
+			historyLow.update(pos.getPieceAt((tSquare)bestMove.bit.from), (tSquare) bestMove.bit.to, bonus);
+		}
+		else
+		{
+			historyHigh.update(pos.getPieceAt((tSquare)bestMove.bit.from), (tSquare) bestMove.bit.to, bonus);
+		}
 		if(quietMoveCount > 1)
 		{
 			for (unsigned int i = 0; i < quietMoveCount - 1; i++)
 			{
 				Move m = quietMoveList[i];
-				history.update(pos.getPieceAt((tSquare)m.bit.from), (tSquare) m.bit.to, -bonus);
+				if( depth < 10 * ONE_PLY)
+				{
+					historyLow.update(pos.getPieceAt((tSquare)m.bit.from), (tSquare) m.bit.to, -bonus);
+				}
+				else
+				{
+					historyHigh.update(pos.getPieceAt((tSquare)m.bit.from), (tSquare) m.bit.to, -bonus);
+				}
 			}
 		}
 
@@ -1448,7 +1467,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 	Move ttMove;
 	ttMove = tte ? tte->getPackedMove() : Movegen::NOMOVE;
 
-	Movegen mg(pos, *this, ply, ttMove);
+	Movegen mg(pos, *this, ply, ttMove, depth);
 	int TTdepth = mg.setupQuiescentSearch(inCheck, depth);
 	Score ttValue = tte ? transpositionTable::scoreFromTT(tte->getValue(),ply) : SCORE_NONE;
 
