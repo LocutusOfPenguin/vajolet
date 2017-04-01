@@ -28,8 +28,6 @@
 
 
 
-simdScore traceRes={0,0,0,0};
-
 const int KingExposed[] = {
      2,  0,  2,  5,  5,  2,  0,  2,
      2,  2,  4,  8,  8,  4,  2,  2,
@@ -1508,7 +1506,6 @@ Score Position::eval(void)
 		sync_cout << std::setw(20) << "Material, PST, Tempo" << " |   ---    --- |   ---    --- | "
 		          << std::setw(6)  << res[0]/10000.0 << " "
 		          << std::setw(6)  << res[1]/10000.0 << " "<< sync_endl;
-		traceRes = res;
 	}
 
 
@@ -1517,11 +1514,12 @@ Score Position::eval(void)
 	//---------------------------------------------
 	//	bishop pair
 
+	simdScore imbalances= {0};
 	if( getPieceCount(whiteBishops) >= 2 )
 	{
 		if(getPieceCount(whiteBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(whiteBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(whiteBishops, 1) ] )
 		{
-			res += bishopPair;
+			imbalances += bishopPair;
 		}
 	}
 
@@ -1529,7 +1527,7 @@ Score Position::eval(void)
 	{
 		if(getPieceCount(blackBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(blackBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(blackBishops, 1) ] )
 		{
-			res -= bishopPair;
+			imbalances -= bishopPair;
 		}
 	}
 	if( getPieceCount(blackPawns) + getPieceCount(whitePawns) == 0 )
@@ -1538,24 +1536,25 @@ Score Position::eval(void)
 				&& (int)getPieceCount(blackRooks) - (int)getPieceCount(whiteRooks) == 1
 				&& (int)getPieceCount(blackBishops) + (int)getPieceCount(blackKnights) - (int)getPieceCount(whiteBishops) - (int)getPieceCount(whiteKnights) == 2)
 		{
-			res += queenVsRook2MinorsImbalance;
+			imbalances += queenVsRook2MinorsImbalance;
 
 		}
 		else if((int)getPieceCount(whiteQueens) - (int)getPieceCount(blackQueens) == -1
 				&& (int)getPieceCount(blackRooks) - (int)getPieceCount(whiteRooks) == -1
 				&& (int)getPieceCount(blackBishops) + (int)getPieceCount(blackKnights) - (int)getPieceCount(whiteBishops) -(int)getPieceCount(whiteKnights) == -2)
 		{
-			res -= queenVsRook2MinorsImbalance;
+			imbalances -= queenVsRook2MinorsImbalance;
 
 		}
 	}
 
+	res += imbalances;
+
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "imbalancies" << " |   ---    --- |   ---    --- | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (imbalances[0])/10000.0 << " "
+				  << std::setw(6)  << (imbalances[1])/10000.0 << " " << sync_endl;
 	}
 
 
@@ -1652,36 +1651,35 @@ Score Position::eval(void)
 		pawnHashTable.insert(pawnKey, pawnResult, weakPawns, passedPawns, attackedSquares[whitePawns], attackedSquares[blackPawns], weakSquares[white], weakSquares[black], holes[white], holes[black] );
 
 	}
-
-	res += pawnResult;
 	//---------------------------------------------
 	// center control
 	//---------------------------------------------
 
 	if( attackedSquares[whitePawns] & centerBitmap )
 	{
-		res += bitCnt( attackedSquares[whitePawns] & centerBitmap ) * pawnCenterControl;
+		pawnResult += bitCnt( attackedSquares[whitePawns] & centerBitmap ) * pawnCenterControl;
 	}
 	if( attackedSquares[whitePawns] & bigCenterBitmap )
 	{
-		res += bitCnt( attackedSquares[whitePawns] & bigCenterBitmap )* pawnBigCenterControl;
+		pawnResult += bitCnt( attackedSquares[whitePawns] & bigCenterBitmap )* pawnBigCenterControl;
 	}
 
 	if( attackedSquares[blackPawns] & centerBitmap )
 	{
-		res -= bitCnt( attackedSquares[blackPawns] & centerBitmap ) * pawnCenterControl;
+		pawnResult -= bitCnt( attackedSquares[blackPawns] & centerBitmap ) * pawnCenterControl;
 	}
 	if( attackedSquares[blackPawns] & bigCenterBitmap )
 	{
-		res -= bitCnt( attackedSquares[blackPawns] & bigCenterBitmap ) * pawnBigCenterControl;
+		pawnResult -= bitCnt( attackedSquares[blackPawns] & bigCenterBitmap ) * pawnBigCenterControl;
 	}
+
+	res += pawnResult;
 
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "pawns" << " |   ---    --- |   ---    --- | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (pawnResult[0])/10000.0 << " "
+				  << std::setw(6)  << (pawnResult[1])/10000.0 << " " << sync_endl;
 	}
 
 
@@ -1699,9 +1697,11 @@ Score Position::eval(void)
 
 	simdScore wScore;
 	simdScore bScore;
+	simdScore PieceScore;
 	wScore = evalPieces<Position::whiteKnights>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
 	bScore = evalPieces<Position::blackKnights>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
-	res += wScore - bScore;
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "knights" << " |"
@@ -1709,14 +1709,14 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 	wScore = evalPieces<Position::whiteBishops>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
 	bScore = evalPieces<Position::blackBishops>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
-	res += wScore - bScore;
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "bishops" << " |"
@@ -1724,14 +1724,14 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 	wScore = evalPieces<Position::whiteRooks>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
 	bScore = evalPieces<Position::blackRooks>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
-	res += wScore - bScore;
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "rooks" << " |"
@@ -1739,14 +1739,14 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes=res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 	wScore = evalPieces<Position::whiteQueens>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
 	bScore = evalPieces<Position::blackQueens>(weakSquares, attackedSquares, holes, blockedPawns, kingRing, kingAttackersCount, kingAttackersWeight, kingAdjacentZoneAttacksCount, weakPawns );
-	res += wScore - bScore;
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 
 	if(trace)
 	{
@@ -1755,9 +1755,8 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 
@@ -1786,7 +1785,8 @@ Score Position::eval(void)
 
 	wScore = evalPassedPawn<white>(passedPawns & getBitmap( whitePawns ), attackedSquares);
 	bScore = evalPassedPawn<black>(passedPawns & getBitmap( blackPawns ), attackedSquares);
-	res += wScore - bScore;
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 
 	if(trace)
 	{
@@ -1795,9 +1795,8 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0]) / 10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1]) / 10000.0 << " " << sync_endl;
-		traceRes=res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 	//todo attacked squares
 
@@ -1818,7 +1817,8 @@ Score Position::eval(void)
 	spaceb |= spaceb << 32;
 	spaceb &= ~attackedSquares[whitePieces];
 
-	res += ( bitCnt(spacew) - bitCnt(spaceb) ) * spaceBonus;
+	PieceScore = ( bitCnt(spacew) - bitCnt(spaceb) ) * spaceBonus;
+	res += PieceScore;
 
 	if(trace)
 	{
@@ -1829,9 +1829,8 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 
@@ -1909,9 +1908,9 @@ Score Position::eval(void)
 	// trapped pieces
 	// rook trapped on first rank by own king
 
+	PieceScore = wScore - bScore;
+	res += PieceScore;
 
-
-	res += wScore - bScore;
 	if(trace)
 	{
 		sync_cout << std::setw(20) << "threat" << " |"
@@ -1919,9 +1918,8 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " " << sync_endl;
 	}
 
 	//--------------------------------------
@@ -1970,17 +1968,17 @@ Score Position::eval(void)
 	}
 	if(trace)
 	{
-		bScore = -simdScore{ kingSafety[black], 0, 0, 0};
+		bScore = simdScore{ kingSafety[black], 0, 0, 0};
 	}
 
-	res+=simdScore{kingSafety[white]-kingSafety[black],0,0,0};
+	PieceScore = simdScore{kingSafety[white]-kingSafety[black],0,0,0};
 
 
 
 
 	simdScore kingSaf = evalKingSafety<white>(kingSafety[white], kingAttackersCount[black], kingAdjacentZoneAttacksCount[black], kingAttackersWeight[black], attackedSquares);
 
-	res += kingSaf;
+	PieceScore += kingSaf;
 	if(trace)
 	{
 		wScore += kingSaf;
@@ -1988,11 +1986,13 @@ Score Position::eval(void)
 
 	kingSaf = evalKingSafety<black>(kingSafety[black], kingAttackersCount[white], kingAdjacentZoneAttacksCount[white], kingAttackersWeight[white], attackedSquares);
 
-	res-= kingSaf;
+	PieceScore-= kingSaf;
 	if(trace)
 	{
-		bScore -= kingSaf;
+		bScore = kingSaf;
 	}
+
+	res += PieceScore;
 
 	if(trace)
 	{
@@ -2001,8 +2001,8 @@ Score Position::eval(void)
 				  << std::setw(6)  << (wScore[1])/10000.0 << " |"
 				  << std::setw(6)  << (bScore[0])/10000.0 << " "
 				  << std::setw(6)  << (bScore[1])/10000.0 << " | "
-				  << std::setw(6)  << (res[0] - traceRes[0])/10000.0 << " "
-				  << std::setw(6)  << (res[1] - traceRes[1])/10000.0 << " "<< sync_endl;
+				  << std::setw(6)  << (PieceScore[0])/10000.0 << " "
+				  << std::setw(6)  << (PieceScore[1])/10000.0 << " "<< sync_endl;
 		sync_cout << "---------------------+--------------+--------------+-----------------" << sync_endl;
 		sync_cout << std::setw(20) << "result" << " |"
 				  << std::setw(6)  << " " << " "
@@ -2011,7 +2011,6 @@ Score Position::eval(void)
 				  << std::setw(6)  << " " << " | "
 				  << std::setw(6)  << (res[0])/10000.0 << " "
 				  << std::setw(6)  << (res[1])/10000.0 << " " << sync_endl;
-		traceRes = res;
 	}
 
 	//todo scaling
