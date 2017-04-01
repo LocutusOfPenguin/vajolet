@@ -129,7 +129,7 @@ void my_thread::timerThread()
 			{
 				timeMan.FirstIterationFinished = true;
 			}
-			if(!src.stop &&time >= timeMan.allocatedTime && ( timeMan.idLoopAlpha || timeMan.idLoopBeta ) )
+			if(!src.stop && time >= timeMan.allocatedTime && ( timeMan.idLoopAlpha || timeMan.idLoopBeta ) )
 			{
 				timeMan.allocatedTime = timeMan.maxAllocatedTime;
 				//sync_cout<<"info debug EXTEND TIME: "<<timeMan.allocatedTime<<sync_endl;
