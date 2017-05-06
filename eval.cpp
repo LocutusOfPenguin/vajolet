@@ -355,9 +355,41 @@ bool Position::evalKQvsK(Score& res)
 		enemySquare = getSquareOfThePiece(whiteKing);
 	}
 
-	res = SCORE_KNOWN_WIN + 50000;
+	res = SCORE_KNOWN_WIN + 40000;
 	res -= 5 * SQUARE_DISTANCE[enemySquare][kingSquare];// devo tenere il re vicino
 	res -= 5 * SQUARE_DISTANCE[enemySquare][queenSquare];// devo portare il re avversario nel giusto angolo
+
+	res *= mul;
+	return true;
+
+}
+
+bool Position::evalKRvsK(Score& res)
+{
+	Color color = getBitmap(whiteRooks) ? white : black;
+	tSquare rookSquare;
+	tSquare kingSquare;
+	tSquare enemySquare;
+
+	int mul = 1;
+	if(color == white)
+	{
+		mul = 1;
+		rookSquare = getSquareOfThePiece(whiteRooks);
+		kingSquare = getSquareOfThePiece(whiteKing);
+		enemySquare = getSquareOfThePiece(blackKing);
+	}
+	else
+	{
+		mul = -1;
+		rookSquare = getSquareOfThePiece(blackRooks);
+		kingSquare = getSquareOfThePiece(blackKing);
+		enemySquare = getSquareOfThePiece(whiteKing);
+	}
+
+	res = SCORE_KNOWN_WIN + 30000;
+	res -= 5 * SQUARE_DISTANCE[enemySquare][kingSquare];// devo tenere il re vicino
+	res -= 5 * SQUARE_DISTANCE[enemySquare][rookSquare];// devo portare il re avversario nel giusto angolo
 
 	res *= mul;
 	return true;
@@ -753,6 +785,9 @@ void Position::initMaterialKeys(void)
 
 			{"k7/8/8/8/8/8/8/6QK w - -",materialStruct::exactFunction, &Position::evalKQvsK, 0 },
 			{"kq6/8/8/8/8/8/8/7K w - -",materialStruct::exactFunction, &Position::evalKQvsK, 0 },
+
+			{"k7/8/8/8/8/8/8/6RK w - -",materialStruct::exactFunction, &Position::evalKRvsK, 0 },
+			{"kr6/8/8/8/8/8/8/7K w - -",materialStruct::exactFunction, &Position::evalKRvsK, 0 },
 
 			{"k7/8/8/8/8/8/8/6PK w - -",materialStruct::exactFunction, &Position::evalKPvsK, 0 },
 			{"kp6/8/8/8/8/8/8/7K w - -",materialStruct::exactFunction, &Position::evalKPvsK, 0 },
@@ -1389,11 +1424,17 @@ template<Color c> simdScore Position::evalKingSafety(Score kingSafety, unsigned 
 		{
 			attackUnits += bitCnt( longDistCheck );
 		}
+		//sync_cout<<"0:"<<attackUnits<<sync_endl;
 
 		attackUnits = std::min(KingSafetyMaxAttack[0], std::max(0, attackUnits));
+		//sync_cout<<"1:"<<attackUnits<<sync_endl;
+
 		attackUnits *= std::min(KingSafetyLinearCoefficent[0], attackUnits);
+		//sync_cout<<"2:"<<attackUnits<<sync_endl;
 		attackUnits = std::min(KingSafetyMaxResult[0], attackUnits);
+		//sync_cout<<"3:"<<attackUnits<<sync_endl;
 		res = -(kingSafetyBonus * attackUnits);
+
 
 	}
 	return res;
@@ -1989,7 +2030,7 @@ Score Position::eval(void)
 	PieceScore-= kingSaf;
 	if(trace)
 	{
-		bScore = kingSaf;
+		bScore += kingSaf;
 	}
 
 	res += PieceScore;

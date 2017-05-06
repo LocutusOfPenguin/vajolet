@@ -737,6 +737,7 @@ private:
 	bool evalKRPvsKr(Score& res);
 	bool evalKBNvsK(Score& res);
 	bool evalKQvsK(Score& res);
+	bool evalKRvsK(Score& res);
 	bool kingsDirectOpposition();
 	bool evalKPvsK(Score& res);
 	bool evalOppositeBishopEndgame(Score& res);

@@ -106,7 +106,7 @@ class Search
 private:
 	static int globalReduction;
 	bool useTBresult;
-	static const unsigned int LmrLimit = 64;
+	static const unsigned int LmrLimit = 16;
 	static Score futility[8];
 	static Score futilityMargin[7];
 	static unsigned int FutilityMoveCounts[11];

@@ -529,7 +529,7 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 			&& !stop
 			&&  linesToBeSearched == 1
 			&&  res > - SCORE_KNOWN_WIN
-			&& limits.depth!=-1)
+			&& limits.depth==-1)
 		{
 			for(int i = 9; i>=0;i--)
 			{
