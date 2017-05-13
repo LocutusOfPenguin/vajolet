@@ -15,8 +15,8 @@
     along with Vajolet.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "bitops.h"
-#include "data.h"
-#include "io.h"
+
+
 
 
 /*! \brief display a bitmap on stdout
@@ -24,33 +24,30 @@
 	\version 1.0
 	\date 21/10/2013
 */
-void displayBitmap(bitMap b)
+std::string displayBitmap(const bitMap b)
 {
-	char boardc[squareNumber];
+	std::string s;
 
-	for ( int i = 0; i < squareNumber; i++)
-	{
-		if (b & bitSet((tSquare)i))
-		{
-			boardc[i] = '1';
-		}
-		else
-		{
-			boardc[i] = '.';
-		}
-	}
-
-	sync_cout;
 	for (int rank = 7 ; rank >= 0; rank--)
 	{
-		std::cout <<rank +1<< " ";
+		s += std::to_string(rank +1) + " ";
 		for (int file = 0 ; file <= 7; file++)
 		{
-			std::cout << boardc[BOARDINDEX[file][rank]];
+
+			if ( isSquareInBitmap( b, file, rank ) )
+			{
+				s += '1';
+			}
+			else
+			{
+				s += '.';
+			}
+
 		}
-		std::cout << std::endl;
+		s += "\n";
 	}
-	std::cout << std::endl << "  abcdefgh" << sync_endl;
+	s +=  "  abcdefgh";
+	return s;
 }
 
 

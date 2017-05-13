@@ -54,12 +54,13 @@ private:
 	Move counterMoves[2];
 
 
-
+public:
 	enum CastleSide
 	{
 		kingSideCastle,
 		queenSideCastle
 	};
+private:
 
 	enum genType
 	{
@@ -249,12 +250,6 @@ public:
 		}
 	}
 
-
-
-
-
-
-
 	static void initMovegenConstant(void);
 
 	template<Position::bitboardIndex piece> inline static bitMap attackFrom(const tSquare& from,const bitMap & occupancy=0xffffffffffffffff)
@@ -303,14 +298,6 @@ public:
 
 	}
 
-
-
-
-
-
-
-
-
 	inline static const bitMap& getRookPseudoAttack(const tSquare& from)
 	{
 		assert(from<squareNumber);
@@ -333,16 +320,15 @@ private:
 	inline static bitMap attackFromRook(const tSquare& from,const bitMap & occupancy)
 	{
 		assert(from <squareNumber);
-		//return Rmagic(from,occupancy);
-		return *(magicmoves_r_indices[from]+(((occupancy&magicmoves_r_mask[from])*magicmoves_r_magics[from])>>magicmoves_r_shift[from]));
+		return MagicMove::getMagicAttackFromRook(from,occupancy);
 
 	}
 
 	inline static bitMap attackFromBishop(const tSquare from,const bitMap & occupancy)
 	{
 		assert(from <squareNumber);
-		return *(magicmoves_b_indices[from]+(((occupancy&magicmoves_b_mask[from])*magicmoves_b_magics[from])>>magicmoves_b_shift[from]));
-		//return Bmagic(from,occupancy);
+		return MagicMove::getMagicAttackFromBishop(from,occupancy);
+
 
 	}
 	inline static bitMap attackFromQueen(const tSquare from,const bitMap & occupancy)

@@ -25,6 +25,7 @@
 #include "move.h"
 #include "io.h"
 #include "tables.h"
+#include "bitops.h"
 
 
 
@@ -651,7 +652,7 @@ private:
 		assert(s<squareNumber);
 		assert(piece<lastBitboard);
 		bitboardIndex color = piece > separationBitmap ? blackPieces : whitePieces;
-		bitMap b=bitSet(s);
+		bitMap b=getBitmapFromSquare(s);
 
 		assert(squares[s]==empty);
 
@@ -678,7 +679,7 @@ private:
 		// as index[] is accessed just by known occupied squares.
 		assert(squares[from]!=empty);
 		assert(squares[to]==empty);
-		bitMap fromTo = bitSet(from) ^ bitSet(to);
+		bitMap fromTo = getBitmapFromSquare(from) ^ getBitmapFromSquare(to);
 		bitboardIndex color = piece > separationBitmap ? blackPieces : whitePieces;
 		bitBoard[occupiedSquares] ^= fromTo;
 		bitBoard[piece] ^= fromTo;
@@ -709,7 +710,7 @@ private:
 		// the list and not in its original place, it means index[] and pieceList[]
 		// are not guaranteed to be invariant to a do_move() + undo_move() sequence.
 		bitboardIndex color = piece  > separationBitmap ? blackPieces : whitePieces;
-		bitMap b = bitSet(s);
+		bitMap b = getBitmapFromSquare(s);
 		bitBoard[occupiedSquares] ^= b;
 		bitBoard[piece] ^= b;
 		bitBoard[color] ^= b;

@@ -416,7 +416,9 @@ void uciLoop()
 		}
 		else if (token == "perft" && (is>>token))
 		{
-			doPerft(stoi(token), pos);
+			int n = stoi(token);
+			n = std::max(n,1);
+			doPerft(n, pos);
 		}
 		else if (token == "divide" && (is>>token))
 		{

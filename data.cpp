@@ -102,11 +102,11 @@ void initData(void)
 		DIAGA8H1MASK[i] = 0;
 	}
 
-	centerBitmap = bitSet(E4)|bitSet(E5)|bitSet(D4)|bitSet(D5);
+	centerBitmap = getBitmapFromSquare(E4)|getBitmapFromSquare(E5)|getBitmapFromSquare(D4)|getBitmapFromSquare(D5);
 	bigCenterBitmap =
-			bitSet(C6)|bitSet(D6)|bitSet(E6)|bitSet(F6)|
-			bitSet(C5)|bitSet(C4)|bitSet(F5)|bitSet(F4)|
-			bitSet(C3)|bitSet(D3)|bitSet(E3)|bitSet(F3);
+			getBitmapFromSquare(C6)|getBitmapFromSquare(D6)|getBitmapFromSquare(E6)|getBitmapFromSquare(F6)|
+			getBitmapFromSquare(C5)|getBitmapFromSquare(C4)|getBitmapFromSquare(F5)|getBitmapFromSquare(F4)|
+			getBitmapFromSquare(C3)|getBitmapFromSquare(D3)|getBitmapFromSquare(E3)|getBitmapFromSquare(F3);
 
 
 	for (int file = 0; file < 8; file++)
@@ -117,14 +117,14 @@ void initData(void)
 			//initialize 8-bit rank mask
 			//===========================================================================
 
-			RANKMASK[BOARDINDEX[file][rank]]  = bitSet(BOARDINDEX[0][rank]) | bitSet(BOARDINDEX[1][rank]) | bitSet(BOARDINDEX[2][rank]) | bitSet(BOARDINDEX[3][rank]) ;
-			RANKMASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[4][rank]) | bitSet(BOARDINDEX[5][rank]) | bitSet(BOARDINDEX[6][rank]) | bitSet(BOARDINDEX[7][rank]) ;
+			RANKMASK[BOARDINDEX[file][rank]]  = getBitmapFromSquare(BOARDINDEX[0][rank]) | getBitmapFromSquare(BOARDINDEX[1][rank]) | getBitmapFromSquare(BOARDINDEX[2][rank]) | getBitmapFromSquare(BOARDINDEX[3][rank]) ;
+			RANKMASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[4][rank]) | getBitmapFromSquare(BOARDINDEX[5][rank]) | getBitmapFromSquare(BOARDINDEX[6][rank]) | getBitmapFromSquare(BOARDINDEX[7][rank]) ;
 
 			//===========================================================================
 			//initialize 8-bit file mask
 			//===========================================================================
-			FILEMASK[BOARDINDEX[file][rank]]  = bitSet(BOARDINDEX[file][0]) | bitSet(BOARDINDEX[file][1]) | bitSet(BOARDINDEX[file][2]) | bitSet(BOARDINDEX[file][3]) ;
-			FILEMASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[file][4]) | bitSet(BOARDINDEX[file][5]) | bitSet(BOARDINDEX[file][6]) | bitSet(BOARDINDEX[file][7]) ;
+			FILEMASK[BOARDINDEX[file][rank]]  = getBitmapFromSquare(BOARDINDEX[file][0]) | getBitmapFromSquare(BOARDINDEX[file][1]) | getBitmapFromSquare(BOARDINDEX[file][2]) | getBitmapFromSquare(BOARDINDEX[file][3]) ;
+			FILEMASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[file][4]) | getBitmapFromSquare(BOARDINDEX[file][5]) | getBitmapFromSquare(BOARDINDEX[file][6]) | getBitmapFromSquare(BOARDINDEX[file][7]) ;
 
 			//===========================================================================
 			//Initialize 8-bit diagonal mask
@@ -134,14 +134,14 @@ void initData(void)
 			{
 				for (int square = 0 ; square <= diaga8h1 ; square ++)
 				{
-					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[square][diaga8h1-square]);
+					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[square][diaga8h1-square]);
 				}
 			}
 			else  // upper half, diagonals 8 to 14
 			{
 				for (int square = 0 ; square < 15 - diaga8h1 ; square ++)
 				{
-					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[diaga8h1+square-7][7-square]);
+					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[diaga8h1+square-7][7-square]);
 				}
 			}
 
@@ -154,14 +154,14 @@ void initData(void)
 			{
 				for (int square = 0 ; square <= 7 - diaga1h8 ; square ++)
 				{
-					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[diaga1h8 + square][square]);
+					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[diaga1h8 + square][square]);
 				}
 			}
 			else
 			{
 				for (int square = 0 ; square <= 7 + diaga1h8 ; square ++)
 				{
-					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= bitSet(BOARDINDEX[square][square - diaga1h8]);
+					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[square][square - diaga1h8]);
 				}
 			}
 
@@ -198,7 +198,7 @@ void initData(void)
 					int temp = RANKS[square] + 1;
 					while(temp < RANKS[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[FILES[square]][temp]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[FILES[square]][temp]);
 						temp++;
 					}
 				}
@@ -207,7 +207,7 @@ void initData(void)
 					int temp = RANKS[square] - 1;
 					while(temp > RANKS[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[FILES[square]][temp]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[FILES[square]][temp]);
 						temp--;
 					}
 				}
@@ -220,7 +220,7 @@ void initData(void)
 					int temp = FILES[square] + 1;
 					while(temp < FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][RANKS[square]]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][RANKS[square]]);
 						temp++;
 					}
 				}
@@ -229,7 +229,7 @@ void initData(void)
 					int temp = FILES[square] - 1;
 					while(temp > FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][RANKS[square]]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][RANKS[square]]);
 						temp--;
 					}
 				}
@@ -243,7 +243,7 @@ void initData(void)
 					int temp2 = RANKS[square] + 1;
 					while(temp < FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
 						temp++;
 						temp2++;
 					}
@@ -254,7 +254,7 @@ void initData(void)
 					int temp2 = RANKS[square] - 1;
 					while(temp > FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
 						temp--;
 						temp2--;
 					}
@@ -269,7 +269,7 @@ void initData(void)
 					int temp2 = RANKS[square] - 1;
 					while(temp < FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
 						temp++;
 						temp2--;
 					}
@@ -280,7 +280,7 @@ void initData(void)
 					int temp2 = RANKS[square]+1;
 					while(temp > FILES[i])
 					{
-						SQUARES_BETWEEN[square][i] |= bitSet(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
 						temp--;
 						temp2++;
 					}

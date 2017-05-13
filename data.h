@@ -57,27 +57,9 @@ extern bitMap bigCenterBitmap;
 //	inline functions
 //------------------------------------------------
 
-/*	\brief set the Nth bit to 1
-	\author Marco Belli
-	\version 1.0
-	\date 08/11/2013
-*/
-inline bitMap bitSet(tSquare n)
-{
-	return BITSET[n];
-}
 
-/*	\brief return true if the 3 squares are aligned
-	\author Marco Belli
-	\version 1.0
-	\date 08/11/2013
-*/
-inline bool squaresAligned(tSquare s1, tSquare s2, tSquare s3)
-{
-	return LINES[s1][s2] & bitSet(s3);
-	/*return  (SQUARES_BETWEEN[s1][s2] | SQUARES_BETWEEN[s1][s3] | SQUARES_BETWEEN[s2][s3])
-			& (     bitSet(s1) |        bitSet(s2) |        bitSet(s3));*/
-}
+
+
 //------------------------------------------------
 //	function prototype
 //------------------------------------------------

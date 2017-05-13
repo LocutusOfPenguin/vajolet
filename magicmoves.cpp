@@ -29,12 +29,10 @@
 
 #include "magicmoves.h"
 
-//For rooks
+U64 MagicMove::magicmovesbdb[5248];
+U64 MagicMove::magicmovesrdb[102400];
 
-#define C64(constantU64) constantU64##ULL
-
-
-const unsigned int magicmoves_r_shift[64]=
+const unsigned int MagicMove::magicmoves_r_shift[64]=
 {
 	52, 53, 53, 53, 53, 53, 53, 52,
 	53, 54, 54, 54, 54, 54, 54, 53,
@@ -46,7 +44,7 @@ const unsigned int magicmoves_r_shift[64]=
 	53, 54, 54, 53, 53, 53, 53, 53
 };
 
-const U64 magicmoves_r_magics[64]=
+const U64 MagicMove::magicmoves_r_magics[64]=
 {
 	C64(0x0080001020400080), C64(0x0040001000200040), C64(0x0080081000200080), C64(0x0080040800100080),
 	C64(0x0080020400080080), C64(0x0080010200040080), C64(0x0080008001000200), C64(0x0080002040800100),
@@ -65,8 +63,9 @@ const U64 magicmoves_r_magics[64]=
 	C64(0x00FFFCDDFCED714A), C64(0x007FFCDDFCED714A), C64(0x003FFFCDFFD88096), C64(0x0000040810002101),
 	C64(0x0001000204080011), C64(0x0001000204000801), C64(0x0001000082000401), C64(0x0001FFFAABFAD1A2)
 };
-const U64 magicmoves_r_mask[64]=
-{	
+
+const U64 MagicMove::magicmoves_r_mask[64]=
+{
 	C64(0x000101010101017E), C64(0x000202020202027C), C64(0x000404040404047A), C64(0x0008080808080876),
 	C64(0x001010101010106E), C64(0x002020202020205E), C64(0x004040404040403E), C64(0x008080808080807E),
 	C64(0x0001010101017E00), C64(0x0002020202027C00), C64(0x0004040404047A00), C64(0x0008080808087600),
@@ -86,7 +85,7 @@ const U64 magicmoves_r_mask[64]=
 };
 
 //my original tables for bishops
-const unsigned int magicmoves_b_shift[64]=
+const unsigned int MagicMove::magicmoves_b_shift[64]=
 {
 	58, 59, 59, 59, 59, 59, 59, 58,
 	59, 59, 59, 59, 59, 59, 59, 59,
@@ -98,7 +97,7 @@ const unsigned int magicmoves_b_shift[64]=
 	58, 59, 59, 59, 59, 59, 59, 58
 };
 
-const U64 magicmoves_b_magics[64]=
+const U64 MagicMove::magicmoves_b_magics[64]=
 {
 	C64(0x0002020202020200), C64(0x0002020202020000), C64(0x0004010202000000), C64(0x0004040080000000),
 	C64(0x0001104000000000), C64(0x0000821040000000), C64(0x0000410410400000), C64(0x0000104104104000),
@@ -118,8 +117,7 @@ const U64 magicmoves_b_magics[64]=
 	C64(0x0000000010020200), C64(0x0000000404080200), C64(0x0000040404040400), C64(0x0002020202020200)
 };
 
-
-const U64 magicmoves_b_mask[64]=
+const U64 MagicMove::magicmoves_b_mask[64]=
 {
 	C64(0x0040201008040200), C64(0x0000402010080400), C64(0x0000004020100A00), C64(0x0000000040221400),
 	C64(0x0000000002442800), C64(0x0000000204085000), C64(0x0000020408102000), C64(0x0002040810204000),
@@ -139,9 +137,7 @@ const U64 magicmoves_b_mask[64]=
 	C64(0x0028440200000000), C64(0x0050080402000000), C64(0x0020100804020000), C64(0x0040201008040200)
 };
 
-
-U64 magicmovesbdb[5248];
-const U64* magicmoves_b_indices[64]=
+const U64* MagicMove::magicmoves_b_indices[64]=
 {
 	magicmovesbdb+4992, magicmovesbdb+2624,  magicmovesbdb+256,  magicmovesbdb+896,
 	magicmovesbdb+1280, magicmovesbdb+1664, magicmovesbdb+4800, magicmovesbdb+5120,
@@ -161,9 +157,7 @@ const U64* magicmoves_b_indices[64]=
 	magicmovesbdb+1632, magicmovesbdb+2272, magicmovesbdb+4896, magicmovesbdb+5184
 };
 
-
-U64 magicmovesrdb[102400];
-const U64* magicmoves_r_indices[64]=
+const U64* MagicMove::magicmoves_r_indices[64]=
 {
 	magicmovesrdb+86016, magicmovesrdb+73728, magicmovesrdb+36864, magicmovesrdb+43008,
 	magicmovesrdb+47104, magicmovesrdb+51200, magicmovesrdb+77824, magicmovesrdb+94208,
@@ -172,9 +166,9 @@ const U64* magicmoves_r_indices[64]=
 	magicmovesrdb+24576, magicmovesrdb+33792,  magicmovesrdb+6144, magicmovesrdb+11264,
 	magicmovesrdb+15360, magicmovesrdb+18432, magicmovesrdb+58368, magicmovesrdb+61440,
 	magicmovesrdb+26624,  magicmovesrdb+4096,  magicmovesrdb+7168,     magicmovesrdb+0,
-	 magicmovesrdb+2048, magicmovesrdb+19456, magicmovesrdb+22528, magicmovesrdb+63488,
+	magicmovesrdb+2048, magicmovesrdb+19456, magicmovesrdb+22528, magicmovesrdb+63488,
 	magicmovesrdb+28672,  magicmovesrdb+5120,  magicmovesrdb+8192,  magicmovesrdb+1024,
-	 magicmovesrdb+3072, magicmovesrdb+20480, magicmovesrdb+23552, magicmovesrdb+65536,
+	magicmovesrdb+3072, magicmovesrdb+20480, magicmovesrdb+23552, magicmovesrdb+65536,
 	magicmovesrdb+30720, magicmovesrdb+34816,  magicmovesrdb+9216, magicmovesrdb+12288,
 	magicmovesrdb+16384, magicmovesrdb+21504, magicmovesrdb+59392, magicmovesrdb+67584,
 	magicmovesrdb+71680, magicmovesrdb+35840, magicmovesrdb+39936, magicmovesrdb+13312,
@@ -183,7 +177,7 @@ const U64* magicmoves_r_indices[64]=
 	magicmovesrdb+49152, magicmovesrdb+55296, magicmovesrdb+79872, magicmovesrdb+98304
 };
 
-U64 initmagicmoves_occ(const int* squares, const int numSquares, const U64 linocc)
+U64 MagicMove::initmagicmoves_occ(const int* squares, const int numSquares, const U64 linocc)
 {
 	int i;
 	U64 ret=0;
@@ -192,12 +186,12 @@ U64 initmagicmoves_occ(const int* squares, const int numSquares, const U64 linoc
 	return ret;
 }
 
-U64 initmagicmoves_Rmoves(const int square, const U64 occ)
+U64 MagicMove::initmagicmoves_Rmoves(const int square, const U64 occ)
 {
 	U64 ret=0;
 	U64 bit;
 	U64 rowbits=(((U64)0xFF)<<(8*(square/8)));
-	
+
 	bit=(((U64)(1))<<square);
 	do
 	{
@@ -227,13 +221,13 @@ U64 initmagicmoves_Rmoves(const int square, const U64 occ)
 	return ret;
 }
 
-U64 initmagicmoves_Bmoves(const int square, const U64 occ)
+U64 MagicMove::initmagicmoves_Bmoves(const int square, const U64 occ)
 {
 	U64 ret=0;
 	U64 bit;
 	U64 bit2;
 	U64 rowbits=(((U64)0xFF)<<(8*(square/8)));
-	
+
 	bit=(((U64)(1))<<square);
 	bit2=bit;
 	do
@@ -273,12 +267,9 @@ U64 initmagicmoves_Bmoves(const int square, const U64 occ)
 	return ret;
 }
 
-//used so that the original indices can be left as const so that the compiler can optimize better
-
 #define BmagicNOMASK2(square, occupancy) *(magicmoves_b_indices2[square]+(((occupancy)*magicmoves_b_magics[square])>>magicmoves_b_shift[square]))
 #define RmagicNOMASK2(square, occupancy) *(magicmoves_r_indices2[square]+(((occupancy)*magicmoves_r_magics[square])>>magicmoves_r_shift[square]))
-
-void initmagicmoves(void)
+void MagicMove::initmagicmoves(void)
 {
 	int i;
 

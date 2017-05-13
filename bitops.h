@@ -18,7 +18,9 @@
 #ifndef BITOPS_H_
 #define BITOPS_H_
 
+#include <string>
 #include "vajolet.h"
+#include "data.h"
 
 
 //-----------------------------------------------------------------------------
@@ -30,7 +32,7 @@
 	\version 1.0
 	\date 21/10/2013
 */
-static inline unsigned int bitCnt(bitMap bitmap)
+static inline unsigned int bitCnt(const bitMap bitmap)
 {
 	return __builtin_popcountll(bitmap);
 }
@@ -41,11 +43,16 @@ static inline unsigned int bitCnt(bitMap bitmap)
 	\version 1.0
 	\date 22/10/2013
 */
-static inline tSquare firstOne(bitMap bitmap)
+static inline tSquare firstOne(const bitMap bitmap)
 {
 	return (tSquare)__builtin_ctzll(bitmap);
 }
 
+/*	\brief get the index of the rightmost one bit and clear the bit in the bitmap
+	\author Marco Belli
+	\version 1.0
+	\date 22/10/2013
+*/
 static inline tSquare iterateBit(bitMap & b)
 {
 	const tSquare t = firstOne(b);
@@ -53,6 +60,53 @@ static inline tSquare iterateBit(bitMap & b)
 	return t;
 
 }
+
+
+
+/*	\brief get a tSquare from file and rank
+	\author Marco Belli
+	\version 1.0
+	\date 13/05/2017
+*/
+static inline tSquare getTsquareFromFileRank(const unsigned int file, const unsigned int rank)
+{
+	return BOARDINDEX[file][rank];
+}
+
+/*	\brief set the Nth bit to 1
+	\author Marco Belli
+	\version 1.0
+	\date 08/11/2013
+*/
+inline bitMap getBitmapFromSquare(const tSquare n)
+{
+	return BITSET[n];
+}
+
+inline bitMap getBitmapFromSquare(const unsigned int file, const unsigned int rank)
+{
+	return getBitmapFromSquare(getTsquareFromFileRank(file,rank));
+}
+
+/*	\brief tell wheter a square is present in a bitmap
+	\author Marco Belli
+	\version 1.0
+	\date 13/05/2017
+*/
+static inline bool isSquareInBitmap(const bitMap b, const tSquare sq)
+{
+	return b & getBitmapFromSquare(sq);
+}
+/*	\brief tell wheter a square defined by file and rank is present in a bitmap
+	\author Marco Belli
+	\version 1.0
+	\date 13/05/2017
+*/
+static inline bool isSquareInBitmap(const bitMap b, const unsigned int file, const unsigned int rank)
+{
+	return b & getBitmapFromSquare(file,rank);
+}
+
 
 
 /*	\brief return true if the bitmap has more than one bit set
@@ -65,10 +119,22 @@ inline bool moreThanOneBit(const bitMap b)
   return b & (b - 1);
 }
 
+/*	\brief return true if the 3 squares are aligned
+	\author Marco Belli
+	\version 1.0
+	\date 08/11/2013
+*/
+inline bool squaresAligned(tSquare s1, tSquare s2, tSquare s3)
+{
+	return LINES[s1][s2] & getBitmapFromSquare(s3);
+	/*return  (SQUARES_BETWEEN[s1][s2] | SQUARES_BETWEEN[s1][s3] | SQUARES_BETWEEN[s2][s3])
+			& (     bitSet(s1) |        bitSet(s2) |        bitSet(s3));*/
+}
+
 //-----------------------------------------------------------------------------
 //	function prototype
 //-----------------------------------------------------------------------------
-void displayBitmap(bitMap b);
+std::string displayBitmap(const bitMap b);
 
 
 #endif /* BITOPS_H_ */

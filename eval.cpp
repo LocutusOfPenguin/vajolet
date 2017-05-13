@@ -168,7 +168,7 @@ bool Position::evalKBPvsK(Score& res)
 		if( pawnFile ==0 || pawnFile ==7 )
 		{
 			bishopSquare = getSquareOfThePiece(whiteBishops);
-			if( SQUARE_COLOR[BOARDINDEX[pawnFile][7]] != SQUARE_COLOR[bishopSquare])
+			if( SQUARE_COLOR[ getTsquareFromFileRank( pawnFile, 7)] != SQUARE_COLOR[bishopSquare])
 			{
 				tSquare kingSquare = getSquareOfThePiece(blackKing);
 				if(RANKS[kingSquare] >= 6  && abs( pawnFile - FILES[kingSquare] ) <= 1 )
@@ -186,7 +186,7 @@ bool Position::evalKBPvsK(Score& res)
 		if( pawnFile==0 || pawnFile == 7 )
 		{
 			bishopSquare = getSquareOfThePiece(blackBishops);
-			if( SQUARE_COLOR[BOARDINDEX[pawnFile][0]] != SQUARE_COLOR[ bishopSquare ])
+			if( SQUARE_COLOR[ getTsquareFromFileRank( pawnFile, 0)] != SQUARE_COLOR[ bishopSquare ])
 			{
 				tSquare kingSquare = getSquareOfThePiece(whiteKing);
 				if(RANKS[kingSquare] <= 1  && abs(pawnFile - FILES[kingSquare]) <= 1)
@@ -424,7 +424,7 @@ bool Position::evalKPvsK(Score& res)
 		enemySquare = getSquareOfThePiece(blackKing);
 
 
-		tSquare promotionSquare = BOARDINDEX[ FILES[pawnSquare] ][7];
+		tSquare promotionSquare = getTsquareFromFileRank( FILES[pawnSquare], 7);
 		const int relativeRank = RANKS[pawnSquare];
 		// Rule of the square
 		if ( std::min( 5, (int)(7- relativeRank)) <  std::max(SQUARE_DISTANCE[enemySquare][promotionSquare] - (getNextTurn() == whiteTurn? 0 : 1) , 0) )
@@ -503,7 +503,7 @@ bool Position::evalKPvsK(Score& res)
 
 
 
-		tSquare promotionSquare = BOARDINDEX[FILES[pawnSquare]][0];
+		tSquare promotionSquare = getTsquareFromFileRank ( FILES[pawnSquare], 0 );
 		const int relativeRank = 7 - RANKS[pawnSquare];
 		// Rule of the square
 		if ( std::min( 5, (int)( 7 - relativeRank)) <  std::max(SQUARE_DISTANCE[enemySquare][promotionSquare] - (getNextTurn() == blackTurn ? 0 : 1 ), 0) )
@@ -923,7 +923,7 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 		{
 			res -= isolatedPawnPenalty;
 		}
-		weakPawns |= BITSET[ sq ];
+		weakPawns |= getBitmapFromSquare( sq );
 	}
 
     if( doubled )
@@ -941,7 +941,7 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 		{
 			res -= backwardPawnPenalty;
 		}
-		weakPawns |= BITSET[ sq ];
+		weakPawns |= getBitmapFromSquare( sq );
 	}
 
     if(chain)
@@ -950,14 +950,14 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 	}
 	else
 	{
-		weakPawns |= BITSET[ sq ];
+		weakPawns |= getBitmapFromSquare( sq );
 	}
 
 
 	//passed pawn
 	if( passed && !doubled )
 	{
-		passedPawns |= BITSET[ sq ];
+		passedPawns |= getBitmapFromSquare( sq );
 	}
 
 	if ( !passed && !isolated && !doubled && !opposed && bitCnt( PASSED_PAWN[c][sq] & theirPawns ) < bitCnt(PASSED_PAWN[c][sq-pawnPush(c)] & ourPawns ) )
@@ -1051,7 +1051,7 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 		res += mobilityBonus[ piece % separationBitmap ][ mobility ];
 		if(piece != whiteKnights && piece != blackKnights)
 		{
-			if( !(attack & ~(threatenSquares | ourPieces) )  && ( threatenSquares & bitSet(sq) ) ) // zero mobility && attacked by pawn
+			if( !(attack & ~(threatenSquares | ourPieces) )  && ( isSquareInBitmap( threatenSquares , sq) ) ) // zero mobility && attacked by pawn
 			{
 				res -= ( pieceValue[piece] / 4 );
 			}
@@ -1162,14 +1162,14 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 		}
 		case Position::whiteBishops:
 		case Position::blackBishops:
-			if(relativeRank >= 4 && (enemyWeakSquares & BITSET[sq]))
+			if(relativeRank >= 4 && ( isSquareInBitmap( enemyWeakSquares, sq) ))
 			{
 				res += bishopOnOutpost;
-				if(supportedSquares & BITSET[sq])
+				if( isSquareInBitmap( supportedSquares, sq))
 				{
 					res += bishopOnOutpostSupported;
 				}
-				if(enemyHoles & BITSET[sq])
+				if(isSquareInBitmap(enemyHoles,sq))
 				{
 					res += bishopOnHole;
 				}
@@ -1188,14 +1188,14 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 			break;
 		case Position::whiteKnights:
 		case Position::blackKnights:
-			if(enemyWeakSquares & BITSET[sq])
+			if( isSquareInBitmap( enemyWeakSquares, sq))
 			{
 				res += knightOnOutpost * ( 5 - std::abs( (int)relativeRank - 5 ));
-				if(supportedSquares & BITSET[sq])
+				if( isSquareInBitmap( supportedSquares, sq))
 				{
 					res += knightOnOutpostSupported;
 				}
-				if(enemyHoles & BITSET[sq])
+				if( isSquareInBitmap( enemyHoles,sq))
 				{
 					res += knightOnHole;
 				}
@@ -1297,7 +1297,7 @@ simdScore Position::evalPassedPawn(bitMap pp, bitMap* attackedSquares) const
 				if(unsafeSquares)
 				{
 					passedPawnsBonus -= passedPawnUnsafeSquares * rr;
-					if ( unsafeSquares & bitSet(blockingSquare) )
+					if ( isSquareInBitmap( unsafeSquares, blockingSquare) )
 					{
 						passedPawnsBonus -= passedPawnBlockedSquares * rr;
 					}
@@ -1305,12 +1305,12 @@ simdScore Position::evalPassedPawn(bitMap pp, bitMap* attackedSquares) const
 				if(defendedSquares)
 				{
 					passedPawnsBonus += passedPawnDefendedSquares * rr * bitCnt( defendedSquares );
-					if(defendedSquares & bitSet(blockingSquare) )
+					if( isSquareInBitmap( defendedSquares, blockingSquare) )
 					{
 						passedPawnsBonus += passedPawnDefendedBlockingSquare * rr;
 					}
 				}
-				if(backWardSquares & getBitmap( ourRooks ))
+				if( backWardSquares & getBitmap( ourRooks ))
 				{
 					passedPawnsBonus += rookBehindPassedPawn * rr;
 				}
@@ -1338,7 +1338,7 @@ simdScore Position::evalPassedPawn(bitMap pp, bitMap* attackedSquares) const
 
 		if( st.nonPawnMaterial[ c ? 0 : 2 ] == 0 )
 		{
-			tSquare promotionSquare = BOARDINDEX[ FILES[ ppSq ] ][ c ? 0 : 7 ];
+			tSquare promotionSquare = getTsquareFromFileRank(FILES[ ppSq ], c ? 0 : 7 );
 			if ( std::min( 5, (int)(7- relativeRank)) <  std::max(SQUARE_DISTANCE[ enemyKingSquare ][ promotionSquare ] - (st.nextMove == (c ? blackTurn : whiteTurn) ? 0 : 1 ), 0) )
 			{
 				passedPawnsBonus += unstoppablePassed * rr;
@@ -1424,17 +1424,11 @@ template<Color c> simdScore Position::evalKingSafety(Score kingSafety, unsigned 
 		{
 			attackUnits += bitCnt( longDistCheck );
 		}
-		//sync_cout<<"0:"<<attackUnits<<sync_endl;
 
 		attackUnits = std::min(KingSafetyMaxAttack[0], std::max(0, attackUnits));
-		//sync_cout<<"1:"<<attackUnits<<sync_endl;
-
 		attackUnits *= std::min(KingSafetyLinearCoefficent[0], attackUnits);
-		//sync_cout<<"2:"<<attackUnits<<sync_endl;
 		attackUnits = std::min(KingSafetyMaxResult[0], attackUnits);
-		//sync_cout<<"3:"<<attackUnits<<sync_endl;
 		res = -(kingSafetyBonus * attackUnits);
-
 
 	}
 	return res;
@@ -1480,7 +1474,7 @@ Score Position::eval(void)
 	{
 		kingRing[white] |= Movegen::attackFrom<Position::whiteKing>( tSquare( k + 8) );
 	}
-	kingFarShield[white] = kingRing[white] & ~( kingShield[white] | BITSET[k] );
+	kingFarShield[white] = kingRing[white] & ~( kingShield[white] | getBitmapFromSquare(k) );
 
 
 	k = getSquareOfThePiece(blackKing);
@@ -1490,7 +1484,7 @@ Score Position::eval(void)
 	{
 		kingRing[black] |= Movegen::attackFrom<Position::whiteKing>( tSquare( k - 8 ) );
 	}
-	kingFarShield[black] = kingRing[black] & ~( kingShield[black] | BITSET[k] );
+	kingFarShield[black] = kingRing[black] & ~( kingShield[black] | getBitmapFromSquare(k) );
 
 	// todo modificare valori material value & pst
 	// material + pst
@@ -1908,7 +1902,7 @@ Score Position::eval(void)
 		bitboardIndex attackingPiece = blackPawns;
 		for(; attackingPiece >= blackKing; attackingPiece = (bitboardIndex)(attackingPiece - 1) )
 		{
-			if(attackedSquares[ attackingPiece ] & bitSet(p))
+			if( isSquareInBitmap( attackedSquares[ attackingPiece ], p))
 			{
 				wScore -= weakPiecePenalty[attackedPiece % separationBitmap][ attackingPiece % separationBitmap];
 				break;
@@ -1938,7 +1932,7 @@ Score Position::eval(void)
 		bitboardIndex attackingPiece = whitePawns;
 		for(; attackingPiece >= whiteKing; attackingPiece = (bitboardIndex)(attackingPiece - 1) )
 		{
-			if(attackedSquares[ attackingPiece ] & bitSet(p))
+			if( isSquareInBitmap( attackedSquares[ attackingPiece ] ,p ))
 			{
 				bScore -= weakPiecePenalty[attackedPiece % separationBitmap][attackingPiece % separationBitmap];
 				break;
@@ -1971,16 +1965,16 @@ Score Position::eval(void)
 	kingSafety[white] = evalShieldStorm<white>(getSquareOfThePiece(whiteKing));
 
 	if((st.castleRights & wCastleOO)
-		&& !(attackedSquares[blackPieces] & (bitSet(E1) | bitSet(F1) | bitSet(G1) ))
-		&& bitCnt(getOccupationBitmap() & (bitSet(F1) | bitSet(G1))) <= 1
+		&& !(attackedSquares[blackPieces] & (getBitmapFromSquare(E1) | getBitmapFromSquare(F1) | getBitmapFromSquare(G1) ))
+		&& bitCnt(getOccupationBitmap() &  Movegen::getCastlePath(0, Movegen::kingSideCastle) ) <= 1
 		)
 	{
 		kingSafety[white] = std::max( evalShieldStorm<white>(G1), kingSafety[white]);
 	}
 
 	if((st.castleRights & wCastleOOO)
-		&& !(attackedSquares[blackPieces] & (bitSet(E1) | bitSet(D1) | bitSet(C1) ))
-		&& bitCnt(getOccupationBitmap() & (bitSet(D1) | bitSet(C1) | bitSet(B1) )) <=1
+		&& !(attackedSquares[blackPieces] & (getBitmapFromSquare(E1) | getBitmapFromSquare(D1) | getBitmapFromSquare(C1) ))
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(0, Movegen::queenSideCastle) ) <=1
 		)
 	{
 		kingSafety[white] = std::max( evalShieldStorm<white>(C1), kingSafety[white]);
@@ -1993,16 +1987,16 @@ Score Position::eval(void)
 	kingSafety[black] = evalShieldStorm<black>(getSquareOfThePiece(blackKing));
 
 	if((st.castleRights & bCastleOO)
-		&& !(attackedSquares[whitePieces] & (bitSet(E8) | bitSet(F8) | bitSet(G8) ))
-		&& bitCnt(getOccupationBitmap() & (bitSet(F8) | bitSet(G8))) <=1
+		&& !(attackedSquares[whitePieces] & (getBitmapFromSquare(E8) | getBitmapFromSquare(F8) | getBitmapFromSquare(G8) ))
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(1, Movegen::kingSideCastle) ) <=1
 		)
 	{
 		kingSafety[black] = std::max( evalShieldStorm<black>(G8), kingSafety[black]);
 	}
 
 	if((st.castleRights & bCastleOOO)
-		&& !(attackedSquares[whitePieces] & (bitSet(E8) | bitSet(D8) | bitSet(C8) ))
-		&& bitCnt(getOccupationBitmap() & (bitSet(D8) | bitSet(C8) | bitSet(B8))) <=1
+		&& !(attackedSquares[whitePieces] & (getBitmapFromSquare(E8) | getBitmapFromSquare(D8) | getBitmapFromSquare(C8) ))
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(1, Movegen::queenSideCastle)) <=1
 		)
 	{
 		kingSafety[black] = std::max(evalShieldStorm<black>(C8), kingSafety[black]);

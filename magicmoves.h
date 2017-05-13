@@ -77,20 +77,47 @@
 
 #include "vajolet.h"
 
-extern const U64 magicmoves_r_magics[64];
-extern const U64 magicmoves_r_mask[64];
-extern const U64 magicmoves_b_magics[64];
-extern const U64 magicmoves_b_mask[64];
-extern const unsigned int magicmoves_b_shift[64];
-extern const unsigned int magicmoves_r_shift[64];
+class MagicMove
+{
+#define C64(constantU64) constantU64##ULL
+
+public:
+	static void initmagicmoves(void);
+	static inline bitMap getMagicAttackFromRook(const tSquare& from,const bitMap & occupancy)
+	{
+		return *(magicmoves_r_indices[from]+(((occupancy&magicmoves_r_mask[from])*magicmoves_r_magics[from])>>magicmoves_r_shift[from]));
+	}
+	static inline bitMap getMagicAttackFromBishop(const tSquare& from,const bitMap & occupancy)
+	{
+		return *(magicmoves_b_indices[from]+(((occupancy&magicmoves_b_mask[from])*magicmoves_b_magics[from])>>magicmoves_b_shift[from]));
+	}
+
+private:
+
+	static const unsigned int magicmoves_r_shift[64];
+
+	static const U64 magicmoves_r_magics[64];
+	static const U64 magicmoves_r_mask[64];
+
+	//my original tables for bishops
+	static const unsigned int magicmoves_b_shift[64];
+
+	static const U64 magicmoves_b_magics[64];
+
+	static const U64 magicmoves_b_mask[64];
+
+	static U64 magicmovesbdb[5248];
+	static const U64* magicmoves_b_indices[64];
+
+	static U64 magicmovesrdb[102400];
+	static const U64* magicmoves_r_indices[64];
+
+	static U64 initmagicmoves_occ(const int* squares, const int numSquares, const U64 linocc);
+	static U64 initmagicmoves_Rmoves(const int square, const U64 occ);
+	static U64 initmagicmoves_Bmoves(const int square, const U64 occ);
 
 
+};
 
-
-//extern U64 magicmovesbdb[5248];
-extern const U64* magicmoves_b_indices[64];
-//extern U64 magicmovesrdb[102400];
-extern const U64* magicmoves_r_indices[64];
-void initmagicmoves(void);
 
 #endif //_magicmoveshvesh

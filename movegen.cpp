@@ -42,12 +42,12 @@ bitMap Movegen::castlePath[2][2];
 
 void Movegen::initMovegenConstant(void){
 
-	castlePath[0][kingSideCastle]=bitSet(F1)|bitSet(G1);
-	castlePath[0][queenSideCastle]=bitSet(D1)|bitSet(C1)|bitSet(B1);
-	castlePath[1][kingSideCastle]=bitSet(F8)|bitSet(G8);
-	castlePath[1][queenSideCastle]=bitSet(D8)|bitSet(C8)|bitSet(B8);
+	castlePath[0][kingSideCastle]=getBitmapFromSquare(F1)|getBitmapFromSquare(G1);
+	castlePath[0][queenSideCastle]=getBitmapFromSquare(D1)|getBitmapFromSquare(C1)|getBitmapFromSquare(B1);
+	castlePath[1][kingSideCastle]=getBitmapFromSquare(F8)|getBitmapFromSquare(G8);
+	castlePath[1][queenSideCastle]=getBitmapFromSquare(D8)|getBitmapFromSquare(C8)|getBitmapFromSquare(B8);
 
-	initmagicmoves();
+	MagicMove::initmagicmoves();
 
 
 	for (int square = 0; square < squareNumber; square++)
@@ -64,23 +64,23 @@ void Movegen::initMovegenConstant(void){
 	{
 		int file = FILES[square];
 		int rank = RANKS[square];
-		int tofile = file - 1;
-		int torank = rank + 1;
-		if ((tofile >= 0) & (tofile <= 7) & (torank >= 0) & (torank <= 7)){
-			PAWN_ATTACK[0][square] |= bitSet(BOARDINDEX[tofile][torank]);
+		int toFile = file - 1;
+		int toRank = rank + 1;
+		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7)){
+			PAWN_ATTACK[0][square] |= getBitmapFromSquare(toFile, toRank) ;
 		}
-		tofile = file + 1;
-		torank = rank + 1;
-		if ((tofile >= 0) & (tofile <= 7) & (torank >= 0) & (torank <= 7))
-			PAWN_ATTACK[0][square] |= bitSet(BOARDINDEX[tofile][torank]);
-		tofile = file - 1;
-		torank = rank - 1;
-		if ((tofile >= 0) & (tofile <= 7) & (torank >= 0) & (torank <= 7))
-			PAWN_ATTACK[1][square] |= bitSet(BOARDINDEX[tofile][torank]);
-		tofile = file + 1;
-		torank = rank - 1;
-		if ((tofile >= 0) & (tofile <= 7) & (torank >= 0) & (torank <= 7))
-			PAWN_ATTACK[1][square] |= bitSet(BOARDINDEX[tofile][torank]);
+		toFile = file + 1;
+		toRank = rank + 1;
+		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
+			PAWN_ATTACK[0][square] |= getBitmapFromSquare( toFile, toRank );
+		toFile = file - 1;
+		toRank = rank - 1;
+		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
+			PAWN_ATTACK[1][square] |= getBitmapFromSquare( toFile, toRank );
+		toFile = file + 1;
+		toRank = rank - 1;
+		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
+			PAWN_ATTACK[1][square] |= getBitmapFromSquare( toFile, toRank );
 	}
 
 
@@ -92,28 +92,28 @@ void Movegen::initMovegenConstant(void){
 		int toFile = file - 2;
 		int toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank + 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank + 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 2; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 2; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank - 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank - 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file - 2; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 	}
 
 	// KING attacks;
@@ -124,28 +124,28 @@ void Movegen::initMovegenConstant(void){
 		int toFile = file - 1;
 		int toRank = rank;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= bitSet(BOARDINDEX[toFile][toRank]);
+			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
 	}
 
 	for (unsigned int square = 0; square < squareNumber; square++){
@@ -190,15 +190,12 @@ void Movegen::generateMoves()
 		assert(s.checkers);
 		target = ( s.checkers ) &~ pos.getOurBitmap(Position::Pieces);
 		kingTarget = target | pos.getTheirBitmap(Position::Pieces);
-		//displayBitmap(target);
 	}
 	else if(type==Movegen::quietEvasionMg)
 	{
 		assert(s.checkers);
 		target = ( SQUARES_BETWEEN[kingSquare][firstOne(s.checkers)]) &~ pos.getOurBitmap(Position::Pieces);
 		kingTarget = ~pos.getOccupationBitmap();
-		//displayBitmap(target);
-		//displayBitmap(kingTarget);
 	}
 	else if(type== Movegen::allNonEvasionMg)
 	{
@@ -277,7 +274,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from, to, kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from, to, kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -306,7 +303,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from, to, kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from) || squaresAligned(from, to, kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -335,7 +332,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -360,7 +357,7 @@ void Movegen::generateMoves()
 		assert(from<squareNumber);
 		m.bit.from = from;
 
-		if(!(s.pinnedPieces & bitSet(from)))
+		if(!isSquareInBitmap(s.pinnedPieces, from ) )
 		{
 			moves = attackFromKnight(from) & target;
 			while (moves)
@@ -386,7 +383,6 @@ void Movegen::generateMoves()
 		moves = (s.nextMove? (nonPromotionPawns>>8):(nonPromotionPawns<<8)) & ~occupiedSquares;
 		pawnPushed = moves;
 		moves &= target;
-		//displayBitmap(moves);
 
 		while(moves)
 		{
@@ -396,7 +392,7 @@ void Movegen::generateMoves()
 			m.bit.to= to;
 			m.bit.from = from;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -408,7 +404,6 @@ void Movegen::generateMoves()
 		//double push
 		moves = (s.nextMove? ((pawnPushed & thirdRankMask)>>8):((pawnPushed & thirdRankMask)<<8)) & ~occupiedSquares & target;
 
-		//displayBitmap(moves);
 		while(moves)
 		{
 			tSquare to = iterateBit(moves);
@@ -416,7 +411,7 @@ void Movegen::generateMoves()
 
 			m.bit.to = to;
 			m.bit.from = from;
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from ,to ,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from ,to ,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -439,7 +434,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			tSquare from = (tSquare)(to - delta);
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if(! isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				m.bit.to = to;
 				m.bit.from = from;
@@ -457,7 +452,7 @@ void Movegen::generateMoves()
 			tSquare from = (tSquare)(to -delta);
 
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				m.bit.to = to;
 				m.bit.from = from;
@@ -479,7 +474,7 @@ void Movegen::generateMoves()
 			m.bit.to = to;
 			m.bit.from = from;
 
-			if(!(s.pinnedPieces & bitSet(from)) ||	squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) ||	squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen; prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -505,7 +500,7 @@ void Movegen::generateMoves()
 			m.bit.to=to;
 			m.bit.from=from;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen;prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -527,7 +522,7 @@ void Movegen::generateMoves()
 			m.bit.to=to;
 			m.bit.from=from;
 
-			if(!(s.pinnedPieces & bitSet(from)) || squaresAligned(from,to,kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen;prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -552,7 +547,7 @@ void Movegen::generateMoves()
 				tSquare from = iterateBit(epAttacker);
 
 				bitMap captureSquare= FILEMASK[s.epSquare] & RANKMASK[from];
-				bitMap occ = occupiedSquares^bitSet(from)^bitSet(s.epSquare)^captureSquare;
+				bitMap occ = occupiedSquares ^ getBitmapFromSquare(from) ^ getBitmapFromSquare(s.epSquare) ^ captureSquare;
 
 				if(	!((attackFromRook(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Rooks))) |
 						(Movegen::attackFromBishop(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Bishops))))
