@@ -19,13 +19,30 @@
 #include "bitops.h"
 #include <algorithm>
 
+bitMap bitHelper::BITSET[squareNumber+1];
+tSquare bitHelper::BOARDINDEX[8][8];
+
+void bitHelper::initbitHelper()
+{
+	for(tSquare i=(tSquare)0; i<squareNumber; i++)
+	{
+		BITSET[i] = (1ull) << i;
+	}
+	BITSET[squareNone]=0;
+
+	for(tSquare i = (tSquare)0; i<squareNumber; i++)
+	{
+		BOARDINDEX[i%8][i/8] = i;
+	}
+
+
+}
 //--------------------------------------------------------------
 //	global variables
 //--------------------------------------------------------------
-bitMap BITSET[squareNumber + 1];
-tSquare BOARDINDEX[8][8];	//<! precalculated index of a square given file and rank
 
-const int FILES[squareNumber] = {		//!< precalculated file from square number
+
+const int bitHelper::FILES[squareNumber] = {		//!< precalculated file from square number
 	0, 1, 2, 3, 4, 5, 6, 7,
 	0, 1, 2, 3, 4, 5, 6, 7,
 	0, 1, 2, 3, 4, 5, 6, 7,
@@ -36,7 +53,7 @@ const int FILES[squareNumber] = {		//!< precalculated file from square number
 	0, 1, 2, 3, 4, 5, 6, 7,
 };
 
-const int RANKS[squareNumber] = {		//!< precalculated rank from square number
+const int bitHelper::RANKS[squareNumber] = {		//!< precalculated rank from square number
 	0, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 1, 1, 1, 1, 1,
 	2, 2, 2, 2, 2, 2, 2, 2,
@@ -89,24 +106,18 @@ bitMap bigCenterBitmap;
 */
 void initData(void)
 {
-	for(tSquare i=(tSquare)0; i<squareNumber; i++)
-	{
-		BITSET[i] = (1ull) << i;
-	}
-	BITSET[squareNone]=0;
 
 	for(tSquare i = (tSquare)0; i<squareNumber; i++)
 	{
-		BOARDINDEX[i%8][i/8] = i;
 		DIAGA1H8MASK[i] = 0;
 		DIAGA8H1MASK[i] = 0;
 	}
 
-	centerBitmap = getBitmapFromSquare(E4)|getBitmapFromSquare(E5)|getBitmapFromSquare(D4)|getBitmapFromSquare(D5);
+	centerBitmap = bitHelper::getBitmapFromSquare(E4)|bitHelper::getBitmapFromSquare(E5)|bitHelper::getBitmapFromSquare(D4)|bitHelper::getBitmapFromSquare(D5);
 	bigCenterBitmap =
-			getBitmapFromSquare(C6)|getBitmapFromSquare(D6)|getBitmapFromSquare(E6)|getBitmapFromSquare(F6)|
-			getBitmapFromSquare(C5)|getBitmapFromSquare(C4)|getBitmapFromSquare(F5)|getBitmapFromSquare(F4)|
-			getBitmapFromSquare(C3)|getBitmapFromSquare(D3)|getBitmapFromSquare(E3)|getBitmapFromSquare(F3);
+			bitHelper::getBitmapFromSquare(C6)|bitHelper::getBitmapFromSquare(D6)|bitHelper::getBitmapFromSquare(E6)|bitHelper::getBitmapFromSquare(F6)|
+			bitHelper::getBitmapFromSquare(C5)|bitHelper::getBitmapFromSquare(C4)|bitHelper::getBitmapFromSquare(F5)|bitHelper::getBitmapFromSquare(F4)|
+			bitHelper::getBitmapFromSquare(C3)|bitHelper::getBitmapFromSquare(D3)|bitHelper::getBitmapFromSquare(E3)|bitHelper::getBitmapFromSquare(F3);
 
 
 	for (int file = 0; file < 8; file++)
@@ -117,14 +128,14 @@ void initData(void)
 			//initialize 8-bit rank mask
 			//===========================================================================
 
-			RANKMASK[BOARDINDEX[file][rank]]  = getBitmapFromSquare(BOARDINDEX[0][rank]) | getBitmapFromSquare(BOARDINDEX[1][rank]) | getBitmapFromSquare(BOARDINDEX[2][rank]) | getBitmapFromSquare(BOARDINDEX[3][rank]) ;
-			RANKMASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[4][rank]) | getBitmapFromSquare(BOARDINDEX[5][rank]) | getBitmapFromSquare(BOARDINDEX[6][rank]) | getBitmapFromSquare(BOARDINDEX[7][rank]) ;
+			RANKMASK[ bitHelper::getTsquareFromFileRank( file, rank ) ]  = bitHelper::getBitmapFromSquare( 0, rank ) | bitHelper::getBitmapFromSquare( 1, rank ) | bitHelper::getBitmapFromSquare( 2, rank ) | bitHelper::getBitmapFromSquare( 3, rank ) ;
+			RANKMASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( 4, rank ) | bitHelper::getBitmapFromSquare( 5, rank ) | bitHelper::getBitmapFromSquare( 6, rank ) | bitHelper::getBitmapFromSquare( 7, rank ) ;
 
 			//===========================================================================
 			//initialize 8-bit file mask
 			//===========================================================================
-			FILEMASK[BOARDINDEX[file][rank]]  = getBitmapFromSquare(BOARDINDEX[file][0]) | getBitmapFromSquare(BOARDINDEX[file][1]) | getBitmapFromSquare(BOARDINDEX[file][2]) | getBitmapFromSquare(BOARDINDEX[file][3]) ;
-			FILEMASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[file][4]) | getBitmapFromSquare(BOARDINDEX[file][5]) | getBitmapFromSquare(BOARDINDEX[file][6]) | getBitmapFromSquare(BOARDINDEX[file][7]) ;
+			FILEMASK[ bitHelper::getTsquareFromFileRank( file, rank ) ]  = bitHelper::getBitmapFromSquare( file, 0 ) | bitHelper::getBitmapFromSquare( file, 1 ) | bitHelper::getBitmapFromSquare( file, 2 ) | bitHelper::getBitmapFromSquare( file, 3 ) ;
+			FILEMASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( file, 4 ) | bitHelper::getBitmapFromSquare( file, 5 ) | bitHelper::getBitmapFromSquare( file, 6 ) | bitHelper::getBitmapFromSquare( file, 7 ) ;
 
 			//===========================================================================
 			//Initialize 8-bit diagonal mask
@@ -134,14 +145,14 @@ void initData(void)
 			{
 				for (int square = 0 ; square <= diaga8h1 ; square ++)
 				{
-					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[square][diaga8h1-square]);
+					DIAGA8H1MASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( square, diaga8h1-square);
 				}
 			}
 			else  // upper half, diagonals 8 to 14
 			{
 				for (int square = 0 ; square < 15 - diaga8h1 ; square ++)
 				{
-					DIAGA8H1MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[diaga8h1+square-7][7-square]);
+					DIAGA8H1MASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( diaga8h1 + square-7, 7-square );
 				}
 			}
 
@@ -154,14 +165,14 @@ void initData(void)
 			{
 				for (int square = 0 ; square <= 7 - diaga1h8 ; square ++)
 				{
-					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[diaga1h8 + square][square]);
+					DIAGA1H8MASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( diaga1h8 + square, square );
 				}
 			}
 			else
 			{
 				for (int square = 0 ; square <= 7 + diaga1h8 ; square ++)
 				{
-					DIAGA1H8MASK[BOARDINDEX[file][rank]] |= getBitmapFromSquare(BOARDINDEX[square][square - diaga1h8]);
+					DIAGA1H8MASK[ bitHelper::getTsquareFromFileRank( file, rank ) ] |= bitHelper::getBitmapFromSquare( square, square - diaga1h8 );
 				}
 			}
 
@@ -176,9 +187,9 @@ void initData(void)
 		}
 	}
 
-	for(int square=0; square<squareNumber; square++)
+	for(tSquare square = A1; square<squareNumber; square++)
 	{
-		for(int i=0; i<squareNumber; i++)
+		for(tSquare i = A1; i<squareNumber; i++)
 		{
 			LINES[square][i] =0;
 			SQUARES_BETWEEN[square][i] = 0;
@@ -188,99 +199,99 @@ void initData(void)
 				continue;
 			}
 
-			if(FILES[square] == FILES[i])
+			if(bitHelper::getFile( square ) == bitHelper::getFile( i ) )
 			{
 				// stessa colonna
 
 				LINES[square][i] = FILEMASK[square];
-				if(RANKS[i] > RANKS[square]) // in salita
+				if(bitHelper::getRank( i ) > bitHelper::getRank( square ) ) // in salita
 				{
-					int temp = RANKS[square] + 1;
-					while(temp < RANKS[i])
+					int temp = bitHelper::getRank( square ) + 1;
+					while(temp < bitHelper::getRank( i ) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[FILES[square]][temp]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( bitHelper::getFile( square ) , temp );
 						temp++;
 					}
 				}
-				if(RANKS[i] < RANKS[square]) // in discesa
+				if(bitHelper::getRank( i )  < bitHelper::getRank( square ) ) // in discesa
 				{
-					int temp = RANKS[square] - 1;
-					while(temp > RANKS[i])
+					int temp = bitHelper::getRank( square ) - 1;
+					while(temp > bitHelper::getRank( i) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[FILES[square]][temp]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( bitHelper::getFile( square ), temp );
 						temp--;
 					}
 				}
 			}
-			if(RANKS[square] == RANKS[i]) // stessa riga
+			if(bitHelper::getRank( square ) == bitHelper::getRank( i) ) // stessa riga
 			{
 				LINES[square][i] = RANKMASK[square];
-				if(FILES[i] > FILES[square]) // in salita
+				if( bitHelper::getFile( i ) > bitHelper::getFile( square ) ) // in salita
 				{
-					int temp = FILES[square] + 1;
-					while(temp < FILES[i])
+					int temp = bitHelper::getFile( square)  + 1;
+					while(temp < bitHelper::getFile( i ) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][RANKS[square]]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp, bitHelper::getRank( square ) );
 						temp++;
 					}
 				}
-				if(FILES[i] < FILES[square]) // in discesa
+				if( bitHelper::getFile( i ) < bitHelper::getFile( square ) ) // in discesa
 				{
-					int temp = FILES[square] - 1;
-					while(temp > FILES[i])
+					int temp = bitHelper::getFile( square )  - 1;
+					while(temp > bitHelper::getFile( i ) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][RANKS[square]]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp,bitHelper::getRank( square ) );
 						temp--;
 					}
 				}
 			}
-			if(DIAGA1H8MASK[square] & BITSET[i])
+			if(DIAGA1H8MASK[square] & bitHelper::getBitmapFromSquare((tSquare)i))
 			{
 				LINES[square][i] = DIAGA1H8MASK[square];
-				if(FILES[i] > FILES[square]) // in salita
+				if( bitHelper::getFile( i ) > bitHelper::getFile( square ) ) // in salita
 				{
-					int temp = FILES[square] + 1;
-					int temp2 = RANKS[square] + 1;
-					while(temp < FILES[i])
+					int temp = bitHelper::getFile( square ) + 1;
+					int temp2 = bitHelper::getRank( square) + 1;
+					while(temp < bitHelper::getFile( i ) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp, temp2 );
 						temp++;
 						temp2++;
 					}
 				}
-				if(FILES[i] < FILES[square]) // in discesa
+				if( bitHelper::getFile( i ) < bitHelper::getFile( square ) ) // in discesa
 				{
-					int temp = FILES[square] - 1;
-					int temp2 = RANKS[square] - 1;
-					while(temp > FILES[i])
+					int temp = bitHelper::getFile( square ) - 1;
+					int temp2 = bitHelper::getRank( square ) - 1;
+					while(temp > bitHelper::getFile( i ))
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp, temp2 );
 						temp--;
 						temp2--;
 					}
 				}
 			}
-			if(DIAGA8H1MASK[square] & BITSET[i])
+			if(DIAGA8H1MASK[square] & bitHelper::getBitmapFromSquare((tSquare)i) )
 			{
 				LINES[square][i] = DIAGA8H1MASK[square];
-				if(FILES[i] > FILES[square]) // in salita
+				if(bitHelper::getFile( i ) > bitHelper::getFile( square ) ) // in salita
 				{
-					int temp = FILES[square] + 1;
-					int temp2 = RANKS[square] - 1;
-					while(temp < FILES[i])
+					int temp = bitHelper::getFile( square ) + 1;
+					int temp2 = bitHelper::getRank( square ) - 1;
+					while(temp < bitHelper::getFile( i ) )
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp, temp2 );
 						temp++;
 						temp2--;
 					}
 				}
-				if(FILES[i] < FILES[square]) // in discesa
+				if(bitHelper::getFile( i ) < bitHelper::getFile( square ) ) // in discesa
 				{
-					int temp = FILES[square]-1;
-					int temp2 = RANKS[square]+1;
-					while(temp > FILES[i])
+					int temp = bitHelper::getFile( square ) - 1;
+					int temp2 = bitHelper::getRank( square ) + 1;
+					while(temp > bitHelper::getFile( i ))
 					{
-						SQUARES_BETWEEN[square][i] |= getBitmapFromSquare(BOARDINDEX[temp][temp2]);
+						SQUARES_BETWEEN[square][i] |= bitHelper::getBitmapFromSquare( temp, temp2 );
 						temp--;
 						temp2++;
 					}
@@ -294,41 +305,41 @@ void initData(void)
 	//	PAWN STRUCTURE DATA
 	//
 	//////////////////////////////////////////////////
-	for(int square = 0; square < squareNumber; square++)
+	for(tSquare square = A1; square < squareNumber; square++)
 	{
 		ISOLATED_PAWN[square] = 0;
-		int file = FILES[square];
+		int file = bitHelper::getFile( square );
 
 		if(file>0)
 		{
-			ISOLATED_PAWN[square] |= FILEMASK[BOARDINDEX[file-1][0]];
+			ISOLATED_PAWN[square] |= FILEMASK[ bitHelper::getTsquareFromFileRank( file - 1, 0 ) ];
 		}
 		if(file<7)
 		{
-			ISOLATED_PAWN[square] |= FILEMASK[BOARDINDEX[file+1][0]];
+			ISOLATED_PAWN[square] |= FILEMASK[ bitHelper::getTsquareFromFileRank( file + 1, 0 ) ];
 		}
 	}
 
-	for(int square = 0; square < squareNumber; square++)
+	for(tSquare square = A1; square < squareNumber; square++)
 	{
 		PASSED_PAWN[0][square] = 0;
 		PASSED_PAWN[1][square] = 0;
 		SQUARES_IN_FRONT_OF[0][square] = 0;
 		SQUARES_IN_FRONT_OF[1][square] = 0;
-		int file = FILES[square];
-		int rank = RANKS[square];
+		int file = bitHelper::getFile( square );
+		int rank = bitHelper::getRank( square );
 
 		for(int i=rank+1; i<8; i++)
 		{
 			if(file>0)
 			{
-				PASSED_PAWN[0][square] |= BITSET[BOARDINDEX[file-1][i]];
+				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file-1, i );
 			}
-			PASSED_PAWN[0][square] |= BITSET[BOARDINDEX[file][i]];
-			SQUARES_IN_FRONT_OF[0][square] |= BITSET[BOARDINDEX[file][i]];
+			PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file, i );
+			SQUARES_IN_FRONT_OF[0][square] |= bitHelper::getBitmapFromSquare( file, i );
 			if(file<7)
 			{
-				PASSED_PAWN[0][square] |= BITSET[BOARDINDEX[file+1][i]];
+				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file+1, i );
 			}
 		}
 
@@ -336,37 +347,37 @@ void initData(void)
 		{
 			if(file>0)
 			{
-				PASSED_PAWN[1][square] |= BITSET[BOARDINDEX[file-1][i]];
+				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file-1, i );
 			}
-			PASSED_PAWN[1][square] |= BITSET[BOARDINDEX[file][i]];
-			SQUARES_IN_FRONT_OF[1][square] |= BITSET[BOARDINDEX[file][i]];
+			PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file, i );
+			SQUARES_IN_FRONT_OF[1][square] |= bitHelper::getBitmapFromSquare( file, i );
 			if(file<7)
 			{
-				PASSED_PAWN[1][square] |= BITSET[BOARDINDEX[file+1][i]];
+				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file+1, i );
 			}
 		}
 	}
 
-	for(int square = 0; square < squareNumber; square++)
+	for(tSquare square = A1; square < squareNumber; square++)
 	{
-		for(int square2 = 0; square2 < squareNumber; square2++){
+		for(tSquare square2 = A1; square2 < squareNumber; square2++){
 
-			SQUARE_DISTANCE[square][square2] = std::max(std::abs(FILES[square]-FILES[square2]), std::abs(RANKS[square]-RANKS[square2]));
+			SQUARE_DISTANCE[square][square2] = std::max(std::abs(bitHelper::getFile( square ) - bitHelper::getFile( square2 ) ), std::abs(bitHelper::getRank( square ) - bitHelper::getRank( square2 ) ) );
 		}
 	}
 
 	BITMAP_COLOR[0] = 0;
 	BITMAP_COLOR[1] = 0;
 
-	for(int square = 0; square < squareNumber; square++)
+	for(tSquare square = A1; square < squareNumber; square++)
 	{
 		if(SQUARE_COLOR[square])
 		{
-			BITMAP_COLOR[1] |= BITSET[square];
+			BITMAP_COLOR[1] |= bitHelper::getBitmapFromSquare(square);
 		}
 		else
 		{
-			BITMAP_COLOR[0] |= BITSET[square];
+			BITMAP_COLOR[0] |= bitHelper::getBitmapFromSquare(square);
 		}
 	}
 }

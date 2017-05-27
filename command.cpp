@@ -463,13 +463,13 @@ std::string displayUci(const Move & m){
 	}
 
 	//from
-	s += char('a'+FILES[m.bit.from]);
-	s += char('1'+RANKS[m.bit.from]);
+	s += char( 'a' + bitHelper::getFile( (tSquare)m.bit.from ) );
+	s += char( '1' + bitHelper::getRank( (tSquare)m.bit.from ) );
 
 
 	//to
-	s += char('a'+FILES[m.bit.to]);
-	s += char('1'+RANKS[m.bit.to]);
+	s += char('a' + bitHelper::getFile( (tSquare)m.bit.to ) );
+	s += char('1' + bitHelper::getRank( (tSquare)m.bit.to ) );
 	//promotion
 	if(m.bit.flags == Move::fpromotion)
 	{
@@ -525,11 +525,11 @@ std::string displayMove(const Position& pos, const Move & m)
 			if( pos.getPieceAt((tSquare)mm.bit.from) == piece && (mm.bit.to == m.bit.to) && (mm.bit.from != m.bit.from))
 			{
 				disambigusFlag = true;
-				if(FILES[mm.bit.from] == FILES[m.bit.from])
+				if( bitHelper::getFile((tSquare) mm.bit.from ) == bitHelper::getFile( (tSquare)m.bit.from ) )
 				{
 					rankFlag = true;
 				}
-				if(RANKS[mm.bit.from] == RANKS[m.bit.from])
+				if( bitHelper::getRank( (tSquare)mm.bit.from)  == bitHelper::getRank( (tSquare)m.bit.from ) )
 				{
 					fileFlag = true;
 				}
@@ -568,11 +568,11 @@ std::string displayMove(const Position& pos, const Move & m)
 	}
 	if( fileFlag )
 	{
-		s += char('a'+FILES[ m.bit.from ]);
+		s += char('a' + bitHelper::getFile( (tSquare)m.bit.from ) );
 	}
 	if( rankFlag )
 	{
-		s += char('1'+RANKS[ m.bit.from ]);
+		s += char('1' + bitHelper::getRank( (tSquare)m.bit.from ) );
 	}
 
 
@@ -581,14 +581,14 @@ std::string displayMove(const Position& pos, const Move & m)
 	{
 		if(pawnMove)
 		{
-			s+=char('a'+FILES[m.bit.from]);
+			s+=char('a' + bitHelper::getFile( (tSquare)m.bit.from ) );
 		}
 		// capture add x before to square
 		s+="x";
 	}
 	// to square
-	s += char('a'+FILES[ m.bit.to ]);
-	s += char('1'+RANKS[ m.bit.to ]);
+	s += char('a' + bitHelper::getFile( (tSquare)m.bit.to ) );
+	s += char('1' + bitHelper::getRank( (tSquare)m.bit.to ) );
 	// add en passant info
 	if ( isEnPassant )
 	{

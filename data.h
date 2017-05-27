@@ -32,10 +32,57 @@
 //------------------------------------------------
 //	extern variables
 //------------------------------------------------
-extern bitMap BITSET[squareNumber+1];
-extern tSquare BOARDINDEX[8][8];
-extern const int FILES[squareNumber];
-extern const int RANKS[squareNumber];
+
+class bitHelper
+{
+private:
+	static bitMap BITSET[squareNumber+1];
+	static tSquare BOARDINDEX[8][8];
+	static  const int FILES[squareNumber];
+	static  const int RANKS[squareNumber];
+public:
+	static void initbitHelper(void);
+	/*	\brief set the Nth bit to 1
+		\author Marco Belli
+		\version 1.0
+		\date 08/11/2013
+	*/
+	static inline bitMap getBitmapFromSquare(const tSquare n)
+	{
+		assert(n < squareNumber+1);
+		return BITSET[n];
+	}
+
+	/*	\brief get a tSquare from file and rank
+		\author Marco Belli
+		\version 1.0
+		\date 13/05/2017
+	*/
+	static inline tSquare getTsquareFromFileRank(const unsigned int file, const unsigned int rank)
+	{
+		assert(file < 8);
+		assert(rank < 8);
+		return BOARDINDEX[file][rank];
+	}
+
+	static inline bitMap getBitmapFromSquare(const unsigned int file, const unsigned int rank)
+	{
+		return getBitmapFromSquare( getTsquareFromFileRank( file, rank ) );
+	}
+
+	static inline int getFile(const tSquare n)
+	{
+		assert(n < squareNumber+1);
+		return FILES[n];
+	}
+	static inline int getRank(const tSquare n)
+	{
+		assert(n < squareNumber+1);
+		return RANKS[n];
+	}
+};
+
+
 extern bitMap RANKMASK[squareNumber];
 extern bitMap FILEMASK[squareNumber];
 extern bitMap DIAGA1H8MASK[squareNumber];

@@ -100,8 +100,8 @@ void Position::initPstValues(void)
 			assert(s<squareNumber);
 			nonPawnValue[piece] = simdScore{0,0,0,0};
 			pstValue[piece][s] = simdScore{0,0,0,0};
-			int rank = RANKS[s];
-			int file = FILES[s];
+			int rank = bitHelper::getRank( s );
+			int file = bitHelper::getFile( s );
 
 			if(piece > occupiedSquares && piece < whitePieces )
 			{
@@ -196,7 +196,7 @@ void Position::initPstValues(void)
 				int r=7-rank;
 				int f =7-file;
 				//int f =file;
-				pstValue[piece][s] =- pstValue[ piece - separationBitmap ][getTsquareFromFileRank(f,r)];
+				pstValue[piece][s] =- pstValue[ piece - separationBitmap ][bitHelper::getTsquareFromFileRank(f,r)];
 
 				if( !isPawn((bitboardIndex)piece) && !isKing((bitboardIndex)piece))
 				{
@@ -453,7 +453,7 @@ void Position::display()const
 			std::cout << rank+1 <<  " |";
 			for (file = 0; file <= 7; file++)
 			{
-				std::cout << " " << PIECE_NAMES_FEN[squares[getTsquareFromFileRank(file,rank)]] << " |";
+				std::cout << " " << PIECE_NAMES_FEN[squares[bitHelper::getTsquareFromFileRank(file,rank)]] << " |";
 			}
 			std::cout << std::endl;
 		}
@@ -473,8 +473,8 @@ void Position::display()const
 	std::cout <<"epsquare ";
 
 	if(st.epSquare!=squareNone){
-		std::cout<<char('a'+FILES[st.epSquare]);
-		std::cout<<char('1'+RANKS[st.epSquare]);
+		std::cout<<char('a' + bitHelper::getFile( st.epSquare ) );
+		std::cout<<char('1' + bitHelper::getRank( st.epSquare ) );
 	}else{
 		std::cout<<'-';
 	}
@@ -505,14 +505,14 @@ std::string  Position::getFen() const {
 		emptyFiles = 0;
 		for (file = 0; file <= 7; file++)
 		{
-			if(squares[getTsquareFromFileRank(file,rank)] != 0)
+			if(squares[bitHelper::getTsquareFromFileRank(file,rank)] != 0)
 			{
 				if(emptyFiles!=0)
 				{
 					s+=std::to_string(emptyFiles);
 				}
 				emptyFiles=0;
-				s += PIECE_NAMES_FEN[squares[getTsquareFromFileRank(file,rank)]];
+				s += PIECE_NAMES_FEN[squares[bitHelper::getTsquareFromFileRank(file,rank)]];
 			}
 			else
 			{
@@ -561,8 +561,8 @@ std::string  Position::getFen() const {
 	s += ' ';
 	if(st.epSquare != squareNone)
 	{
-		s += char('a'+FILES[st.epSquare]);
-		s += char('1'+RANKS[st.epSquare]);
+		s += char('a' + bitHelper::getFile( st.epSquare ) );
+		s += char('1' + bitHelper::getRank( st.epSquare ) );
 	}
 	else
 	{
@@ -588,14 +588,14 @@ std::string Position::getSymmetricFen() const {
 		emptyFiles=0;
 		for (file = 0; file <=7; file++)
 		{
-			if(squares[getTsquareFromFileRank(file,rank)]!=0)
+			if(squares[bitHelper::getTsquareFromFileRank(file,rank)]!=0)
 			{
 				if(emptyFiles!=0)
 				{
 					s += std::to_string(emptyFiles);
 				}
 				emptyFiles = 0;
-				bitboardIndex xx = squares[getTsquareFromFileRank(file,rank)];
+				bitboardIndex xx = squares[bitHelper::getTsquareFromFileRank(file,rank)];
 				if(xx >= separationBitmap)
 				{
 					xx = (bitboardIndex)(xx - separationBitmap);
@@ -653,8 +653,8 @@ std::string Position::getSymmetricFen() const {
 	s += ' ';
 	if(st.epSquare!=squareNone)
 	{
-		s += char('a'+FILES[st.epSquare]);
-		s += char('1'+RANKS[st.epSquare]);
+		s += char('a' + bitHelper::getFile( st.epSquare ) );
+		s += char('1' + bitHelper::getRank( st.epSquare ) );
 	}
 	else
 	{
@@ -1003,7 +1003,7 @@ void Position::doMove(const Move & m){
 		{
 			if(  isSquareInBitmap( x.checkingSquares[piece], to ) ) // should be old state, but checkingSquares has not been changed so far
 			{
-				x.checkers |= getBitmapFromSquare(to);
+				x.checkers |= bitHelper::getBitmapFromSquare(to);
 			}
 			if(x.hiddenCheckersCandidate && ( isSquareInBitmap( x.hiddenCheckersCandidate, from) ) )	// should be old state, but hiddenCheckersCandidate has not been changed so far
 			{
@@ -1510,7 +1510,7 @@ bool Position::moveGivesCheck(const Move& m)const
 		{
 			return true;
 		}
-		bitMap occ= bitBoard[occupiedSquares] ^ getBitmapFromSquare(from);
+		bitMap occ= bitBoard[occupiedSquares] ^ bitHelper::getBitmapFromSquare(from);
 		assert((bitboardIndex)(whiteQueens+m.bit.promotion)<lastBitboard);
 		switch(m.bit.promotion)
 		{
@@ -1540,7 +1540,7 @@ bool Position::moveGivesCheck(const Move& m)const
 		assert(rFrom<squareNumber);
 		assert(rTo<squareNumber);
 
-		bitMap occ = (bitBoard[occupiedSquares] ^ getBitmapFromSquare(kFrom) ^ getBitmapFromSquare(rFrom)) | getBitmapFromSquare(rTo) | getBitmapFromSquare(kTo);
+		bitMap occ = (bitBoard[occupiedSquares] ^ bitHelper::getBitmapFromSquare(kFrom) ^ bitHelper::getBitmapFromSquare(rFrom)) | bitHelper::getBitmapFromSquare(rTo) | bitHelper::getBitmapFromSquare(kTo);
 		return   ( isSquareInBitmap( Movegen::getRookPseudoAttack(rTo), kingSquare ) )
 			     && (  isSquareInBitmap( Movegen::attackFrom<Position::whiteRooks>(rTo,occ), kingSquare ) );
 	}
@@ -1548,7 +1548,7 @@ bool Position::moveGivesCheck(const Move& m)const
 	case Move::fenpassant:
 	{
 		bitMap captureSquare = FILEMASK[m.bit.to] & RANKMASK[m.bit.from];
-		bitMap occ = bitBoard[occupiedSquares]^getBitmapFromSquare((tSquare)m.bit.from)^getBitmapFromSquare((tSquare)m.bit.to)^captureSquare;
+		bitMap occ = bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare((tSquare)m.bit.to)^captureSquare;
 		return
 				(Movegen::attackFrom<Position::whiteRooks>(kingSquare, occ) & (Us[Queens] |Us[Rooks]))
 			   | (Movegen::attackFrom<Position::whiteBishops>(kingSquare, occ) & (Us[Queens] |Us[Bishops]));
@@ -1708,7 +1708,7 @@ bool Position::isMoveLegal(const Move &m)const
 
 
 	// promozione impossibile!!
-	if(m.bit.flags==Move::fpromotion && ((RANKS[m.bit.from]!=(s.nextMove?1:6)) || !(isPawn(piece))))
+	if(m.bit.flags==Move::fpromotion && ((bitHelper::getRank( (tSquare)m.bit.from )!=(s.nextMove?1:6)) || !(isPawn(piece))))
 	{
 		return false;
 	}
@@ -1721,7 +1721,7 @@ bool Position::isMoveLegal(const Move &m)const
 	//arrocco impossibile
 	if( isCastleMove(m) )
 	{
-		if(!isKing(piece) || (FILES[m.bit.from]!=FILES[E1]) || (abs(m.bit.from-m.bit.to)!=2 ) || (RANKS[m.bit.from]!=RANKS[A1] && RANKS[m.bit.from]!=RANKS[A8]))
+		if(!isKing(piece) || ( bitHelper::getFile( (tSquare)m.bit.from ) != bitHelper::getFile( E1 ) ) || (abs(m.bit.from-m.bit.to)!=2 ) || ( bitHelper::getRank( (tSquare)m.bit.from ) != bitHelper::getRank( A1 ) && bitHelper::getRank( (tSquare)m.bit.from ) != bitHelper::getRank( A8 ) ) )
 		{
 			return false;
 		}
@@ -1834,20 +1834,20 @@ bool Position::isMoveLegal(const Move &m)const
 				// not valid pawn push
 				(m.bit.from+pawnPush(s.nextMove)!= m.bit.to || isSquareInBitmap(bitBoard[occupiedSquares], (tSquare)m.bit.to))
 				// not valid pawn double push
-				&& ((m.bit.from+2*pawnPush(s.nextMove)!= m.bit.to) || (RANKS[m.bit.from]!=1) || ((getBitmapFromSquare((tSquare)m.bit.to) | getBitmapFromSquare((tSquare)(m.bit.to-8)))&bitBoard[occupiedSquares]))
+				&& ((m.bit.from+2*pawnPush(s.nextMove)!= m.bit.to) || (bitHelper::getRank( (tSquare)m.bit.from ) != 1 ) || ((bitHelper::getBitmapFromSquare((tSquare)m.bit.to) | bitHelper::getBitmapFromSquare((tSquare)(m.bit.to-8)))&bitBoard[occupiedSquares]))
 				// not valid pawn attack
-				&& (!isSquareInBitmap( Movegen::attackFrom<Position::whitePawns>((tSquare)m.bit.from), (tSquare)m.bit.to) || !isSquareInBitmap(Them[Pieces]|getBitmapFromSquare(s.epSquare), (tSquare)m.bit.to))
+				&& (!isSquareInBitmap( Movegen::attackFrom<Position::whitePawns>((tSquare)m.bit.from), (tSquare)m.bit.to) || !isSquareInBitmap(Them[Pieces]|bitHelper::getBitmapFromSquare(s.epSquare), (tSquare)m.bit.to))
 			){
 				return false;
 			}
-			if(RANKS[m.bit.from]==6 && m.bit.flags!=Move::fpromotion){
+			if( bitHelper::getRank( (tSquare)m.bit.from ) == 6 && m.bit.flags!=Move::fpromotion){
 				return false;
 
 			}
 			if( isEnPassantMove(m) ){
 
 				bitMap captureSquare= FILEMASK[s.epSquare] & RANKMASK[m.bit.from];
-				bitMap occ= bitBoard[occupiedSquares]^getBitmapFromSquare((tSquare)m.bit.from)^getBitmapFromSquare(s.epSquare)^captureSquare;
+				bitMap occ= bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare(s.epSquare)^captureSquare;
 				tSquare kingSquare=pieceList[Position::whiteKing+s.nextMove][0];
 				assert(kingSquare<squareNumber);
 				if((Movegen::attackFrom<Position::whiteRooks>(kingSquare, occ) & (Them[Position::Queens] | Them[Position::Rooks]))|
@@ -1863,20 +1863,20 @@ bool Position::isMoveLegal(const Move &m)const
 				// not valid pawn push
 				(m.bit.from+pawnPush(s.nextMove)!= m.bit.to || isSquareInBitmap(bitBoard[occupiedSquares], (tSquare)m.bit.to))
 				// not valid pawn double push
-				&& ((m.bit.from+2*pawnPush(s.nextMove)!= m.bit.to) || (RANKS[m.bit.from]!=6) || ((getBitmapFromSquare((tSquare)m.bit.to) | getBitmapFromSquare((tSquare)(m.bit.to+8)))&bitBoard[occupiedSquares]))
+				&& ((m.bit.from+2*pawnPush(s.nextMove)!= m.bit.to) || ( bitHelper::getRank( (tSquare)m.bit.from ) != 6 ) || ((bitHelper::getBitmapFromSquare((tSquare)m.bit.to) | bitHelper::getBitmapFromSquare((tSquare)(m.bit.to+8)))&bitBoard[occupiedSquares]))
 				// not valid pawn attack
-				&& (!isSquareInBitmap( Movegen::attackFrom<Position::blackPawns>((tSquare)m.bit.from), (tSquare)m.bit.to) || !isSquareInBitmap( Them[Position::Pieces]| getBitmapFromSquare(s.epSquare), (tSquare)m.bit.to))
+				&& (!isSquareInBitmap( Movegen::attackFrom<Position::blackPawns>((tSquare)m.bit.from), (tSquare)m.bit.to) || !isSquareInBitmap( Them[Position::Pieces]| bitHelper::getBitmapFromSquare(s.epSquare), (tSquare)m.bit.to))
 			){
 				return false;
 			}
 
-			if(RANKS[m.bit.from]==1 && m.bit.flags!=Move::fpromotion){
+			if(bitHelper::getRank( (tSquare)m.bit.from ) == 1 && m.bit.flags!=Move::fpromotion){
 				return false;
 
 			}
 			if( isEnPassantMove(m) ){
 				bitMap captureSquare = FILEMASK[s.epSquare] & RANKMASK[m.bit.from];
-				bitMap occ = bitBoard[occupiedSquares]^getBitmapFromSquare((tSquare)m.bit.from)^getBitmapFromSquare(s.epSquare)^captureSquare;
+				bitMap occ = bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare(s.epSquare)^captureSquare;
 				tSquare kingSquare = pieceList[Position::whiteKing+s.nextMove][0];
 				assert(kingSquare<squareNumber);
 				if((Movegen::attackFrom<Position::whiteRooks>(kingSquare, occ) & (Them[Queens] | Them[Rooks]))|

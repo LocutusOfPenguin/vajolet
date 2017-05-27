@@ -42,10 +42,10 @@ bitMap Movegen::castlePath[2][2];
 
 void Movegen::initMovegenConstant(void){
 
-	castlePath[0][kingSideCastle]=getBitmapFromSquare(F1)|getBitmapFromSquare(G1);
-	castlePath[0][queenSideCastle]=getBitmapFromSquare(D1)|getBitmapFromSquare(C1)|getBitmapFromSquare(B1);
-	castlePath[1][kingSideCastle]=getBitmapFromSquare(F8)|getBitmapFromSquare(G8);
-	castlePath[1][queenSideCastle]=getBitmapFromSquare(D8)|getBitmapFromSquare(C8)|getBitmapFromSquare(B8);
+	castlePath[0][kingSideCastle]=bitHelper::getBitmapFromSquare(F1)|bitHelper::getBitmapFromSquare(G1);
+	castlePath[0][queenSideCastle]=bitHelper::getBitmapFromSquare(D1)|bitHelper::getBitmapFromSquare(C1)|bitHelper::getBitmapFromSquare(B1);
+	castlePath[1][kingSideCastle]=bitHelper::getBitmapFromSquare(F8)|bitHelper::getBitmapFromSquare(G8);
+	castlePath[1][queenSideCastle]=bitHelper::getBitmapFromSquare(D8)|bitHelper::getBitmapFromSquare(C8)|bitHelper::getBitmapFromSquare(B8);
 
 	MagicMove::initmagicmoves();
 
@@ -60,92 +60,92 @@ void Movegen::initMovegenConstant(void){
 	}
 
 	// pawn attacks
-	for (int square = 0; square < squareNumber; square++)
+	for (tSquare square = A1; square < squareNumber; square++)
 	{
-		int file = FILES[square];
-		int rank = RANKS[square];
+		int file = bitHelper::getFile( square );
+		int rank = bitHelper::getRank( square );
 		int toFile = file - 1;
 		int toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7)){
-			PAWN_ATTACK[0][square] |= getBitmapFromSquare(toFile, toRank) ;
+			PAWN_ATTACK[0][square] |= bitHelper::getBitmapFromSquare(toFile, toRank) ;
 		}
 		toFile = file + 1;
 		toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			PAWN_ATTACK[0][square] |= getBitmapFromSquare( toFile, toRank );
+			PAWN_ATTACK[0][square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1;
 		toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			PAWN_ATTACK[1][square] |= getBitmapFromSquare( toFile, toRank );
+			PAWN_ATTACK[1][square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1;
 		toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			PAWN_ATTACK[1][square] |= getBitmapFromSquare( toFile, toRank );
+			PAWN_ATTACK[1][square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 	}
 
 
 	// KNIGHT attacks;
-	for (int square = 0; square < squareNumber; square++)
+	for (tSquare square = A1; square < squareNumber; square++)
 	{
-		int file = FILES[square];
-		int rank = RANKS[square];
+		int file = bitHelper::getFile( square );
+		int rank = bitHelper::getRank( square );
 		int toFile = file - 2;
 		int toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank + 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank + 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 2; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 2; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank - 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank - 2;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 2; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KNIGHT_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KNIGHT_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 	}
 
 	// KING attacks;
-	for (int square = 0; square < squareNumber; square++)
+	for (tSquare square = A1; square < squareNumber; square++)
 	{
-		int file = FILES[square];
-		int rank = RANKS[square];
+		int file = bitHelper::getFile( square );
+		int rank = bitHelper::getRank( square );
 		int toFile = file - 1;
 		int toRank = rank;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank + 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file + 1; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 		toFile = file - 1; toRank = rank - 1;
 		if ((toFile >= 0) & (toFile <= 7) & (toRank >= 0) & (toRank <= 7))
-			KING_MOVE[square] |= getBitmapFromSquare( toFile, toRank );
+			KING_MOVE[square] |= bitHelper::getBitmapFromSquare( toFile, toRank );
 	}
 
 	for (unsigned int square = 0; square < squareNumber; square++){
@@ -547,7 +547,7 @@ void Movegen::generateMoves()
 				tSquare from = iterateBit(epAttacker);
 
 				bitMap captureSquare= FILEMASK[s.epSquare] & RANKMASK[from];
-				bitMap occ = occupiedSquares ^ getBitmapFromSquare(from) ^ getBitmapFromSquare(s.epSquare) ^ captureSquare;
+				bitMap occ = occupiedSquares ^ bitHelper::getBitmapFromSquare(from) ^ bitHelper::getBitmapFromSquare(s.epSquare) ^ captureSquare;
 
 				if(	!((attackFromRook(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Rooks))) |
 						(Movegen::attackFromBishop(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Bishops))))

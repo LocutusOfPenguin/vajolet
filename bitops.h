@@ -63,30 +63,7 @@ static inline tSquare iterateBit(bitMap & b)
 
 
 
-/*	\brief get a tSquare from file and rank
-	\author Marco Belli
-	\version 1.0
-	\date 13/05/2017
-*/
-static inline tSquare getTsquareFromFileRank(const unsigned int file, const unsigned int rank)
-{
-	return BOARDINDEX[file][rank];
-}
 
-/*	\brief set the Nth bit to 1
-	\author Marco Belli
-	\version 1.0
-	\date 08/11/2013
-*/
-inline bitMap getBitmapFromSquare(const tSquare n)
-{
-	return BITSET[n];
-}
-
-inline bitMap getBitmapFromSquare(const unsigned int file, const unsigned int rank)
-{
-	return getBitmapFromSquare(getTsquareFromFileRank(file,rank));
-}
 
 /*	\brief tell wheter a square is present in a bitmap
 	\author Marco Belli
@@ -95,7 +72,7 @@ inline bitMap getBitmapFromSquare(const unsigned int file, const unsigned int ra
 */
 static inline bool isSquareInBitmap(const bitMap b, const tSquare sq)
 {
-	return b & getBitmapFromSquare(sq);
+	return b & bitHelper::getBitmapFromSquare(sq);
 }
 /*	\brief tell wheter a square defined by file and rank is present in a bitmap
 	\author Marco Belli
@@ -104,7 +81,7 @@ static inline bool isSquareInBitmap(const bitMap b, const tSquare sq)
 */
 static inline bool isSquareInBitmap(const bitMap b, const unsigned int file, const unsigned int rank)
 {
-	return b & getBitmapFromSquare(file,rank);
+	return b & bitHelper::getBitmapFromSquare(file,rank);
 }
 
 
@@ -126,7 +103,7 @@ inline bool moreThanOneBit(const bitMap b)
 */
 inline bool squaresAligned(tSquare s1, tSquare s2, tSquare s3)
 {
-	return LINES[s1][s2] & getBitmapFromSquare(s3);
+	return LINES[s1][s2] & bitHelper::getBitmapFromSquare(s3);
 	/*return  (SQUARES_BETWEEN[s1][s2] | SQUARES_BETWEEN[s1][s3] | SQUARES_BETWEEN[s2][s3])
 			& (     bitSet(s1) |        bitSet(s2) |        bitSet(s3));*/
 }

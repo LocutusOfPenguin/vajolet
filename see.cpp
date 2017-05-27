@@ -45,8 +45,8 @@ Score Position::see(const Move& m) const
 	assert(m.packed);
 
 	tSquare from = (tSquare)m.bit.from, to = (tSquare)m.bit.to;
-	const int relativeRank = getNextTurn() ? 7-RANKS[to] : RANKS[to];
-	bitMap occupied = getOccupationBitmap() ^ getBitmapFromSquare(from);
+	const int relativeRank = getNextTurn() ? 7 - bitHelper::getRank( to ) : bitHelper::getRank( to );
+	bitMap occupied = getOccupationBitmap() ^ bitHelper::getBitmapFromSquare(from);
 	eNextMove color = getPieceAt(from) > separationBitmap ? blackTurn : whiteTurn;
 
 	Score swapList[64];

@@ -652,7 +652,7 @@ private:
 		assert(s<squareNumber);
 		assert(piece<lastBitboard);
 		bitboardIndex color = piece > separationBitmap ? blackPieces : whitePieces;
-		bitMap b=getBitmapFromSquare(s);
+		bitMap b = bitHelper::getBitmapFromSquare(s);
 
 		assert(squares[s]==empty);
 
@@ -679,7 +679,7 @@ private:
 		// as index[] is accessed just by known occupied squares.
 		assert(squares[from]!=empty);
 		assert(squares[to]==empty);
-		bitMap fromTo = getBitmapFromSquare(from) ^ getBitmapFromSquare(to);
+		bitMap fromTo = bitHelper::getBitmapFromSquare(from) ^ bitHelper::getBitmapFromSquare(to);
 		bitboardIndex color = piece > separationBitmap ? blackPieces : whitePieces;
 		bitBoard[occupiedSquares] ^= fromTo;
 		bitBoard[piece] ^= fromTo;
@@ -710,7 +710,7 @@ private:
 		// the list and not in its original place, it means index[] and pieceList[]
 		// are not guaranteed to be invariant to a do_move() + undo_move() sequence.
 		bitboardIndex color = piece  > separationBitmap ? blackPieces : whitePieces;
-		bitMap b = getBitmapFromSquare(s);
+		bitMap b = bitHelper::getBitmapFromSquare(s);
 		bitBoard[occupiedSquares] ^= b;
 		bitBoard[piece] ^= b;
 		bitBoard[color] ^= b;
