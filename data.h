@@ -90,16 +90,16 @@ public:
 		assert( n < squareNumber );
 		return SQUARE_COLOR[n];
 	}
-	static inline int getCenterBitmap(void)
+	static inline bitMap getCenterBitmap(void)
 	{
 		return centerBitmap;
 	}
-	static inline int getExtCenterBitmap(void)
+	static inline bitMap getExtCenterBitmap(void)
 	{
 		return bigCenterBitmap;
 	}
 
-	static inline int getBigCenterBitmap(void)
+	static inline bitMap getBigCenterBitmap(void)
 	{
 		return centerBitmap | bigCenterBitmap;
 	}
