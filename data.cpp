@@ -35,6 +35,11 @@ void bitHelper::initbitHelper()
 		BOARDINDEX[i%8][i/8] = i;
 	}
 
+	centerBitmap = getBitmapFromSquare(E4) | getBitmapFromSquare(E5) | getBitmapFromSquare(D4) | getBitmapFromSquare(D5);
+	bigCenterBitmap =
+				getBitmapFromSquare(C6) | getBitmapFromSquare(D6) | getBitmapFromSquare(E6) | getBitmapFromSquare(F6)|
+				getBitmapFromSquare(C5) | getBitmapFromSquare(C4) | getBitmapFromSquare(F5) | getBitmapFromSquare(F4)|
+				getBitmapFromSquare(C3) | getBitmapFromSquare(D3) | getBitmapFromSquare(E3) | getBitmapFromSquare(F3);
 
 }
 //--------------------------------------------------------------
@@ -92,8 +97,8 @@ bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
 
 int SQUARE_DISTANCE[squareNumber][squareNumber];
 
-bitMap centerBitmap;
-bitMap bigCenterBitmap;
+bitMap bitHelper::centerBitmap;
+bitMap bitHelper::bigCenterBitmap;
 
 //--------------------------------------------------------------
 //	function bodies
@@ -113,11 +118,8 @@ void initData(void)
 		DIAGA8H1MASK[i] = 0;
 	}
 
-	centerBitmap = bitHelper::getBitmapFromSquare(E4)|bitHelper::getBitmapFromSquare(E5)|bitHelper::getBitmapFromSquare(D4)|bitHelper::getBitmapFromSquare(D5);
-	bigCenterBitmap =
-			bitHelper::getBitmapFromSquare(C6)|bitHelper::getBitmapFromSquare(D6)|bitHelper::getBitmapFromSquare(E6)|bitHelper::getBitmapFromSquare(F6)|
-			bitHelper::getBitmapFromSquare(C5)|bitHelper::getBitmapFromSquare(C4)|bitHelper::getBitmapFromSquare(F5)|bitHelper::getBitmapFromSquare(F4)|
-			bitHelper::getBitmapFromSquare(C3)|bitHelper::getBitmapFromSquare(D3)|bitHelper::getBitmapFromSquare(E3)|bitHelper::getBitmapFromSquare(F3);
+
+
 
 
 	for (int file = 0; file < 8; file++)

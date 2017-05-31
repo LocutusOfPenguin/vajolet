@@ -41,6 +41,8 @@ private:
 	static  const int FILES[squareNumber];
 	static  const int RANKS[squareNumber];
 	static const int SQUARE_COLOR[squareNumber];
+	static bitMap centerBitmap;
+	static bitMap bigCenterBitmap;
 public:
 	static void initbitHelper(void);
 	/*	\brief set the Nth bit to 1
@@ -88,6 +90,19 @@ public:
 		assert( n < squareNumber );
 		return SQUARE_COLOR[n];
 	}
+	static inline int getCenterBitmap(void)
+	{
+		return centerBitmap;
+	}
+	static inline int getExtCenterBitmap(void)
+	{
+		return bigCenterBitmap;
+	}
+
+	static inline int getBigCenterBitmap(void)
+	{
+		return centerBitmap | bigCenterBitmap;
+	}
 };
 
 
@@ -103,8 +118,7 @@ extern bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
 
 extern bitMap BITMAP_COLOR[2];
 extern int SQUARE_DISTANCE[squareNumber][squareNumber];
-extern bitMap centerBitmap;
-extern bitMap bigCenterBitmap;
+
 
 
 

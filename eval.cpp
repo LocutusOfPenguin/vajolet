@@ -1060,13 +1060,13 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 		/////////////////////////////////////////
 		// center control
 		/////////////////////////////////////////
-		if(attack & centerBitmap)
+		if(attack & bitHelper::getCenterBitmap() )
 		{
-			res += bitCnt(attack & centerBitmap) * piecesCenterControl;
+			res += bitCnt(attack & bitHelper::getCenterBitmap() ) * piecesCenterControl;
 		}
-		if(attack & bigCenterBitmap)
+		if(attack & bitHelper::getExtCenterBitmap())
 		{
-			res += bitCnt(attack & bigCenterBitmap) * piecesBigCenterControl;
+			res += bitCnt(attack & bitHelper::getExtCenterBitmap()) * piecesBigCenterControl;
 		}
 
 		switch(piece)
@@ -1184,7 +1184,7 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 				{
 					res -= bitCnt(blockingPawns) * badBishop2;
 				}
-				blockingPawns &= (centerBitmap | bigCenterBitmap);
+				blockingPawns &= ( bitHelper::getBigCenterBitmap() );
 				if( moreThanOneBit(blockingPawns) )
 				{
 					res -= bitCnt(blockingPawns) * badBishop1;
@@ -1690,22 +1690,22 @@ Score Position::eval(void)
 	// center control
 	//---------------------------------------------
 
-	if( attackedSquares[whitePawns] & centerBitmap )
+	if( attackedSquares[whitePawns] & bitHelper::getCenterBitmap() )
 	{
-		pawnResult += bitCnt( attackedSquares[whitePawns] & centerBitmap ) * pawnCenterControl;
+		pawnResult += bitCnt( attackedSquares[whitePawns] & bitHelper::getCenterBitmap() ) * pawnCenterControl;
 	}
-	if( attackedSquares[whitePawns] & bigCenterBitmap )
+	if( attackedSquares[whitePawns] & bitHelper::getExtCenterBitmap() )
 	{
-		pawnResult += bitCnt( attackedSquares[whitePawns] & bigCenterBitmap )* pawnBigCenterControl;
+		pawnResult += bitCnt( attackedSquares[whitePawns] & bitHelper::getExtCenterBitmap() )* pawnBigCenterControl;
 	}
 
-	if( attackedSquares[blackPawns] & centerBitmap )
+	if( attackedSquares[blackPawns] & bitHelper::getCenterBitmap() )
 	{
-		pawnResult -= bitCnt( attackedSquares[blackPawns] & centerBitmap ) * pawnCenterControl;
+		pawnResult -= bitCnt( attackedSquares[blackPawns] & bitHelper::getCenterBitmap() ) * pawnCenterControl;
 	}
-	if( attackedSquares[blackPawns] & bigCenterBitmap )
+	if( attackedSquares[blackPawns] & bitHelper::getExtCenterBitmap() )
 	{
-		pawnResult -= bitCnt( attackedSquares[blackPawns] & bigCenterBitmap ) * pawnBigCenterControl;
+		pawnResult -= bitCnt( attackedSquares[blackPawns] & bitHelper::getExtCenterBitmap() ) * pawnBigCenterControl;
 	}
 
 	res += pawnResult;
