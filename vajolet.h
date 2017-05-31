@@ -116,6 +116,7 @@ enum tSquare								/*!< square name and directions*/
 
 ENABLE_OPERATORS_ON(tSquare)
 
+
 typedef int simdScore __attribute__ ((vector_size (16)));
 typedef signed int Score;					/*!< score saved as a single signed int value*/
 

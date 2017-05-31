@@ -40,6 +40,7 @@ private:
 	static tSquare BOARDINDEX[8][8];
 	static  const int FILES[squareNumber];
 	static  const int RANKS[squareNumber];
+	static const int SQUARE_COLOR[squareNumber];
 public:
 	static void initbitHelper(void);
 	/*	\brief set the Nth bit to 1
@@ -49,7 +50,7 @@ public:
 	*/
 	static inline bitMap getBitmapFromSquare(const tSquare n)
 	{
-		assert(n < squareNumber+1);
+		assert( n < squareNumber+1 );
 		return BITSET[n];
 	}
 
@@ -60,25 +61,32 @@ public:
 	*/
 	static inline tSquare getTsquareFromFileRank(const unsigned int file, const unsigned int rank)
 	{
-		assert(file < 8);
-		assert(rank < 8);
+		assert( file < 8 );
+		assert( rank < 8 );
 		return BOARDINDEX[file][rank];
 	}
 
 	static inline bitMap getBitmapFromSquare(const unsigned int file, const unsigned int rank)
 	{
+		assert(file < 8);
+		assert(rank < 8);
 		return getBitmapFromSquare( getTsquareFromFileRank( file, rank ) );
 	}
 
 	static inline int getFile(const tSquare n)
 	{
-		assert(n < squareNumber+1);
+		assert( n < squareNumber );
 		return FILES[n];
 	}
 	static inline int getRank(const tSquare n)
 	{
-		assert(n < squareNumber+1);
+		assert( n < squareNumber );
 		return RANKS[n];
+	}
+	static inline int getSquareColor(const tSquare n)
+	{
+		assert( n < squareNumber );
+		return SQUARE_COLOR[n];
 	}
 };
 
@@ -92,7 +100,7 @@ extern bitMap LINES[squareNumber][squareNumber];
 extern bitMap ISOLATED_PAWN[squareNumber];
 extern bitMap PASSED_PAWN[2][squareNumber];
 extern bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
-extern const int SQUARE_COLOR[squareNumber];
+
 extern bitMap BITMAP_COLOR[2];
 extern int SQUARE_DISTANCE[squareNumber][squareNumber];
 extern bitMap centerBitmap;
@@ -105,6 +113,7 @@ extern bitMap bigCenterBitmap;
 //------------------------------------------------
 
 
+inline bitMap operator += (bitMap& b, const tSquare sq) { b = b | bitHelper::getBitmapFromSquare(sq); return b; }
 
 
 //------------------------------------------------

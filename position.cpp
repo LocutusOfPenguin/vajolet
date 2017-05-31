@@ -1003,7 +1003,7 @@ void Position::doMove(const Move & m){
 		{
 			if(  isSquareInBitmap( x.checkingSquares[piece], to ) ) // should be old state, but checkingSquares has not been changed so far
 			{
-				x.checkers |= bitHelper::getBitmapFromSquare(to);
+				x.checkers += to;
 			}
 			if(x.hiddenCheckersCandidate && ( isSquareInBitmap( x.hiddenCheckersCandidate, from) ) )	// should be old state, but hiddenCheckersCandidate has not been changed so far
 			{

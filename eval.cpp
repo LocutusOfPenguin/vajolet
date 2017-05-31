@@ -96,7 +96,8 @@ simdScore KnightAttackingWeakPawn= {300,300,0,0};
 simdScore bishopOnOutpost= {-1020,810,0,0};
 simdScore bishopOnOutpostSupported= {3600,270,0,0};
 simdScore bishopOnHole= {590,-730,0,0};
-simdScore badBishop= {-200,1530,0,0};
+simdScore badBishop1= {-200,0,0,0};
+simdScore badBishop2= {0,1530,0,0};
 
 simdScore tempo= {530,480,0,0};
 simdScore bishopPair ={3260,4690,0,0};
@@ -168,7 +169,7 @@ bool Position::evalKBPvsK(Score& res)
 		if( pawnFile ==0 || pawnFile ==7 )
 		{
 			bishopSquare = getSquareOfThePiece(whiteBishops);
-			if( SQUARE_COLOR[ bitHelper::getTsquareFromFileRank( pawnFile, 7)] != SQUARE_COLOR[bishopSquare])
+			if( bitHelper::getSquareColor( bitHelper::getTsquareFromFileRank( pawnFile, 7) ) != bitHelper::getSquareColor( bishopSquare ) )
 			{
 				tSquare kingSquare = getSquareOfThePiece(blackKing);
 				if(bitHelper::getRank( kingSquare ) >= 6  && abs( pawnFile - bitHelper::getFile( kingSquare ) ) <= 1 )
@@ -186,7 +187,7 @@ bool Position::evalKBPvsK(Score& res)
 		if( pawnFile==0 || pawnFile == 7 )
 		{
 			bishopSquare = getSquareOfThePiece(blackBishops);
-			if( SQUARE_COLOR[ bitHelper::getTsquareFromFileRank( pawnFile, 0)] != SQUARE_COLOR[ bishopSquare ])
+			if( bitHelper::getSquareColor( bitHelper::getTsquareFromFileRank( pawnFile, 0) ) != bitHelper::getSquareColor( bishopSquare ) )
 			{
 				tSquare kingSquare = getSquareOfThePiece(whiteKing);
 				if( bitHelper::getRank( kingSquare ) <= 1  && abs(pawnFile - bitHelper::getFile( kingSquare ) ) <= 1)
@@ -310,7 +311,7 @@ bool Position::evalKBNvsK( Score& res)
 		enemySquare = getSquareOfThePiece(whiteKing);
 	}
 
-	int mateColor = SQUARE_COLOR[bishopSquare];
+	int mateColor = bitHelper::getSquareColor( bishopSquare );
 	if(mateColor == 0)
 	{
 		mateSquare1 = A1;
@@ -579,7 +580,7 @@ bool Position::evalKPvsK(Score& res)
 
 bool Position::evalOppositeBishopEndgame(Score& res)
 {
-	if(SQUARE_COLOR[getSquareOfThePiece(blackBishops)] != SQUARE_COLOR[ getSquareOfThePiece(whiteBishops)])
+	if( bitHelper::getSquareColor( getSquareOfThePiece(blackBishops) ) != bitHelper::getSquareColor( getSquareOfThePiece(whiteBishops) ) )
 	{
 		unsigned int pawnCount = 0;
 		int pawnDifference = 0;
@@ -923,7 +924,7 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 		{
 			res -= isolatedPawnPenalty;
 		}
-		weakPawns |= bitHelper::getBitmapFromSquare( sq );
+		weakPawns += sq;
 	}
 
     if( doubled )
@@ -941,7 +942,7 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 		{
 			res -= backwardPawnPenalty;
 		}
-		weakPawns |= bitHelper::getBitmapFromSquare( sq );
+		weakPawns += sq;
 	}
 
     if(chain)
@@ -950,14 +951,14 @@ simdScore Position::evalPawn(tSquare sq, bitMap& weakPawns, bitMap& passedPawns)
 	}
 	else
 	{
-		weakPawns |= bitHelper::getBitmapFromSquare( sq );
+		weakPawns += sq;
 	}
 
 
 	//passed pawn
 	if( passed && !doubled )
 	{
-		passedPawns |= bitHelper::getBitmapFromSquare( sq );
+		passedPawns += sq;
 	}
 
 	if ( !passed && !isolated && !doubled && !opposed && bitCnt( PASSED_PAWN[c][sq] & theirPawns ) < bitCnt(PASSED_PAWN[c][sq-pawnPush(c)] & ourPawns ) )
@@ -1177,11 +1178,16 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 			}
 			// alfiere cattivo
 			{
-				int color = SQUARE_COLOR[sq];
-				bitMap blockingPawns = ourPieces & blockedPawns & BITMAP_COLOR[color];
+				int color = bitHelper::getSquareColor( sq );
+				bitMap blockingPawns = ourPieces & blockedPawns & BITMAP_COLOR[color] ;
 				if( moreThanOneBit(blockingPawns) )
 				{
-					res -= bitCnt(blockingPawns) * badBishop;
+					res -= bitCnt(blockingPawns) * badBishop2;
+				}
+				blockingPawns &= (centerBitmap | bigCenterBitmap);
+				if( moreThanOneBit(blockingPawns) )
+				{
+					res -= bitCnt(blockingPawns) * badBishop1;
 				}
 			}
 
@@ -1550,20 +1556,14 @@ Score Position::eval(void)
 	//	bishop pair
 
 	simdScore imbalances= {0};
-	if( getPieceCount(whiteBishops) >= 2 )
+	if( (getBitmap(whiteBishops) & BITMAP_COLOR[0]) && (getBitmap(whiteBishops) & BITMAP_COLOR[1]) )
 	{
-		if(getPieceCount(whiteBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(whiteBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(whiteBishops, 1) ] )
-		{
-			imbalances += bishopPair;
-		}
+		imbalances += bishopPair;
 	}
 
-	if( getPieceCount(blackBishops) >= 2 )
+	if( (getBitmap(blackBishops) & BITMAP_COLOR[0]) && (getBitmap(blackBishops) & BITMAP_COLOR[1]) )
 	{
-		if(getPieceCount(blackBishops) != 2 || SQUARE_COLOR[ getSquareOfThePiece(blackBishops) ] != SQUARE_COLOR[ getSquareOfThePiece(blackBishops, 1) ] )
-		{
-			imbalances -= bishopPair;
-		}
+		imbalances -= bishopPair;
 	}
 	if( getPieceCount(blackPawns) + getPieceCount(whitePawns) == 0 )
 	{

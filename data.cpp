@@ -64,7 +64,7 @@ const int bitHelper::RANKS[squareNumber] = {		//!< precalculated rank from squar
 	7, 7, 7, 7, 7, 7, 7, 7,
 };
 
-const int SQUARE_COLOR[squareNumber]=
+const int bitHelper::SQUARE_COLOR[squareNumber]=
 {
 	0,1,0,1,0,1,0,1,
 	1,0,1,0,1,0,1,0,
@@ -329,31 +329,31 @@ void initData(void)
 		int file = bitHelper::getFile( square );
 		int rank = bitHelper::getRank( square );
 
-		for(int i=rank+1; i<8; i++)
+		for(int i = rank + 1; i < 8; i++)
 		{
 			if(file>0)
 			{
-				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file-1, i );
+				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file + ovest, i );
 			}
 			PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file, i );
 			SQUARES_IN_FRONT_OF[0][square] |= bitHelper::getBitmapFromSquare( file, i );
 			if(file<7)
 			{
-				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file+1, i );
+				PASSED_PAWN[0][square] |= bitHelper::getBitmapFromSquare( file + est , i );
 			}
 		}
 
-		for(int i=rank-1; i>=0; i--)
+		for(int i = rank - 1; i >= 0; i--)
 		{
 			if(file>0)
 			{
-				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file-1, i );
+				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file + ovest, i );
 			}
 			PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file, i );
 			SQUARES_IN_FRONT_OF[1][square] |= bitHelper::getBitmapFromSquare( file, i );
 			if(file<7)
 			{
-				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file+1, i );
+				PASSED_PAWN[1][square] |= bitHelper::getBitmapFromSquare( file + est, i );
 			}
 		}
 	}
@@ -371,7 +371,7 @@ void initData(void)
 
 	for(tSquare square = A1; square < squareNumber; square++)
 	{
-		if(SQUARE_COLOR[square])
+		if( bitHelper::getSquareColor( square ) )
 		{
 			BITMAP_COLOR[1] |= bitHelper::getBitmapFromSquare(square);
 		}

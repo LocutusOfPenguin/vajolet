@@ -167,8 +167,8 @@ void Movegen::generateMoves()
 	const bitMap& occupiedSquares = pos.getOccupationBitmap();
 
 	//divide pawns
-	const bitMap& thirdRankMask = RANKMASK[ s.nextMove ? A6:A3];
-	const bitMap& seventhRankMask = RANKMASK[ s.nextMove ? A2:A7];
+	const bitMap& thirdRankMask = RANKMASK[ s.nextMove ? A6 : A3 ];
+	const bitMap& seventhRankMask = RANKMASK[ s.nextMove ? A2 : A7 ];
 
 	bitMap promotionPawns =  pos.getOurBitmap(Position::Pawns) & seventhRankMask ;
 	bitMap nonPromotionPawns =  pos.getOurBitmap(Position::Pawns)^ promotionPawns;
@@ -546,7 +546,7 @@ void Movegen::generateMoves()
 			{
 				tSquare from = iterateBit(epAttacker);
 
-				bitMap captureSquare= FILEMASK[s.epSquare] & RANKMASK[from];
+				bitMap captureSquare = FILEMASK[s.epSquare] & RANKMASK[from];
 				bitMap occ = occupiedSquares ^ bitHelper::getBitmapFromSquare(from) ^ bitHelper::getBitmapFromSquare(s.epSquare) ^ captureSquare;
 
 				if(	!((attackFromRook(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Rooks))) |
