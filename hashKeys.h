@@ -29,13 +29,32 @@
 //---------------------------------
 struct HashKeys
 {
+private:
 	static U64 keys[squareNumber][30];	// position, piece (not all the keys are used)
 	static U64 side;					// side to move (black)
 	static U64 ep[squareNumber];		// ep targets (only 16 used)
 	static U64 castlingRight[16];		// white king-side castling right
 	static U64 exclusion;
 
-
+public:
+	static inline U64 getKeys(const tSquare sq, const int index)
+	{
+		assert(sq<squareNumber);
+		assert(index<30);
+		return keys[sq][index];
+	}
+	static inline U64 getSide(){ return side;}
+	static inline U64 getEp(const tSquare sq)
+	{
+		assert(sq<squareNumber);
+		return ep[sq];
+	}
+	static inline U64 getCastlingRight(const int c)
+	{
+		assert( c <169);
+		return castlingRight[c];
+	}
+	static inline U64 getExclusion(){ return exclusion;}
 	static void init();       // initialize the random data
 };
 

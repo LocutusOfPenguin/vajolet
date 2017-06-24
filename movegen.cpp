@@ -167,8 +167,8 @@ void Movegen::generateMoves()
 	const bitMap& occupiedSquares = pos.getOccupationBitmap();
 
 	//divide pawns
-	const bitMap& thirdRankMask = RANKMASK[ s.nextMove ? A6 : A3 ];
-	const bitMap& seventhRankMask = RANKMASK[ s.nextMove ? A2 : A7 ];
+	const bitMap& thirdRankMask = bitHelper::getRankMask( s.nextMove ? A6 : A3 );
+	const bitMap& seventhRankMask = bitHelper::getRankMask( s.nextMove ? A2 : A7 );
 
 	bitMap promotionPawns =  pos.getOurBitmap(Position::Pawns) & seventhRankMask ;
 	bitMap nonPromotionPawns =  pos.getOurBitmap(Position::Pawns)^ promotionPawns;
@@ -182,7 +182,7 @@ void Movegen::generateMoves()
 	if(type==Movegen::allEvasionMg)
 	{
 		assert(s.checkers);
-		target = ( s.checkers | SQUARES_BETWEEN[kingSquare][firstOne(s.checkers)]) &~ pos.getOurBitmap(Position::Pieces);
+		target = ( s.checkers | bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) &~ pos.getOurBitmap(Position::Pieces);
 		kingTarget = ~pos.getOurBitmap(Position::Pieces);
 	}
 	else if(type==Movegen::captureEvasionMg)
@@ -194,7 +194,7 @@ void Movegen::generateMoves()
 	else if(type==Movegen::quietEvasionMg)
 	{
 		assert(s.checkers);
-		target = ( SQUARES_BETWEEN[kingSquare][firstOne(s.checkers)]) &~ pos.getOurBitmap(Position::Pieces);
+		target = ( bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) &~ pos.getOurBitmap(Position::Pieces);
 		kingTarget = ~pos.getOccupationBitmap();
 	}
 	else if(type== Movegen::allNonEvasionMg)
@@ -274,7 +274,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from, to, kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from, to, kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -303,7 +303,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if( !isSquareInBitmap( s.pinnedPieces, from) || squaresAligned(from, to, kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from) || bitHelper::squaresAligned(from, to, kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -332,7 +332,7 @@ void Movegen::generateMoves()
 			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
-			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -392,7 +392,7 @@ void Movegen::generateMoves()
 			m.bit.to= to;
 			m.bit.from = from;
 
-			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -411,7 +411,7 @@ void Movegen::generateMoves()
 
 			m.bit.to = to;
 			m.bit.from = from;
-			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from ,to ,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from ,to ,kingSquare))
 			{
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
@@ -428,13 +428,13 @@ void Movegen::generateMoves()
 		//left capture
 		delta = s.nextMove?-9:7;
 
-		moves = (s.nextMove?(nonPromotionPawns&(~FILEMASK[A1]))>>9:(nonPromotionPawns&(~FILEMASK[A1]))<<7) & enemy & target;
+		moves = (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(A1)))>>9:(nonPromotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target;
 		while(moves)
 		{
 			tSquare to = iterateBit(moves);
 			tSquare from = (tSquare)(to - delta);
 
-			if(! isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if(! isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				m.bit.to = to;
 				m.bit.from = from;
@@ -445,14 +445,14 @@ void Movegen::generateMoves()
 		//right capture
 		delta=s.nextMove?-7:9;
 
-		moves = (s.nextMove?(nonPromotionPawns&(~FILEMASK[H1]))>>7:(nonPromotionPawns&(~FILEMASK[H1]))<<9) & enemy & target;
+		moves = (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(H1)))>>7:(nonPromotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target;
 		while(moves)
 		{
 			tSquare to = iterateBit(moves);
 			tSquare from = (tSquare)(to -delta);
 
 
-			if(!isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				m.bit.to = to;
 				m.bit.from = from;
@@ -474,7 +474,7 @@ void Movegen::generateMoves()
 			m.bit.to = to;
 			m.bit.from = from;
 
-			if(!isSquareInBitmap( s.pinnedPieces, from ) ||	squaresAligned(from,to,kingSquare))
+			if(!isSquareInBitmap( s.pinnedPieces, from ) ||	bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen; prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -491,7 +491,7 @@ void Movegen::generateMoves()
 	{
 		//left capture
 		delta = s.nextMove?-9:7;
-		moves = (s.nextMove?(promotionPawns&(~FILEMASK[A1]))>>9:(promotionPawns&(~FILEMASK[A1]))<<7) & enemy & target;
+		moves = (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(A1)))>>9:(promotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target;
 		while(moves)
 		{
 			tSquare to = iterateBit(moves);
@@ -500,7 +500,7 @@ void Movegen::generateMoves()
 			m.bit.to=to;
 			m.bit.from=from;
 
-			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen;prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -512,7 +512,7 @@ void Movegen::generateMoves()
 
 		//right capture
 		delta=s.nextMove?-7:9;
-		moves = (s.nextMove?(promotionPawns&(~FILEMASK[H1]))>>7:(promotionPawns&(~FILEMASK[H1]))<<9) & enemy & target;
+		moves = (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(H1)))>>7:(promotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target;
 		while(moves)
 		{
 
@@ -522,7 +522,7 @@ void Movegen::generateMoves()
 			m.bit.to=to;
 			m.bit.from=from;
 
-			if( !isSquareInBitmap( s.pinnedPieces, from ) || squaresAligned(from,to,kingSquare))
+			if( !isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
 			{
 				for(Move::epromotion prom=Move::promQueen;prom<= Move::promKnight; prom=(Move::epromotion)(prom+1))
 				{
@@ -546,7 +546,7 @@ void Movegen::generateMoves()
 			{
 				tSquare from = iterateBit(epAttacker);
 
-				bitMap captureSquare = FILEMASK[s.epSquare] & RANKMASK[from];
+				bitMap captureSquare = bitHelper::getFileMask(s.epSquare) & bitHelper::getRankMask( from );
 				bitMap occ = occupiedSquares ^ bitHelper::getBitmapFromSquare(from) ^ bitHelper::getBitmapFromSquare(s.epSquare) ^ captureSquare;
 
 				if(	!((attackFromRook(kingSquare, occ) & (pos.getTheirBitmap(Position::Queens) | pos.getTheirBitmap(Position::Rooks))) |
@@ -763,11 +763,11 @@ Move Movegen::getNextMove()
 			{
 				FindNextBestMove();
 
-				if(moveList[moveListPosition].m != ttMove && !isKillerMove(moveList[moveListPosition].m) && moveList[moveListPosition].m != counterMoves[0] &&  moveList[moveListPosition].m != counterMoves[1])
+				if(moveList[moveListPosition] != ttMove && !isKillerMove(moveList[moveListPosition]) && moveList[moveListPosition] != counterMoves[0] &&  moveList[moveListPosition] != counterMoves[1])
 				{
 					//if(moveList[moveListPosition].score > 0 || this->depth >= 3* ONE_PLY )
 					//{
-						return moveList[moveListPosition++].m;
+						return moveList[moveListPosition++];
 					//}
 					//else
 					//{
@@ -789,9 +789,9 @@ Move Movegen::getNextMove()
 			if(moveListPosition < moveListSize)
 			{
 				FindNextBestMove();
-				if(moveList[moveListPosition].m != ttMove)
+				if(moveList[moveListPosition] != ttMove)
 				{
-					return moveList[moveListPosition++].m;
+					return moveList[moveListPosition++];
 				}
 				moveListPosition++;
 			}
@@ -804,9 +804,9 @@ Move Movegen::getNextMove()
 		if(moveListPosition < moveListSize)
 		{
 			FindNextBestMove();
-			if(moveList[moveListPosition].m != ttMove)
+			if(moveList[moveListPosition] != ttMove)
 			{
-				return moveList[moveListPosition++].m;
+				return moveList[moveListPosition++];
 			}
 			moveListPosition++;
 		}
@@ -820,9 +820,9 @@ Move Movegen::getNextMove()
 			{
 				FindNextBestMove();
 
-				if(moveList[moveListPosition].m != ttMove)
+				if(moveList[moveListPosition] != ttMove)
 				{
-					return moveList[moveListPosition++].m;
+					return moveList[moveListPosition++];
 				}
 				else
 				{
@@ -841,16 +841,16 @@ Move Movegen::getNextMove()
 			{
 				FindNextBestMove();
 
-				if(moveList[moveListPosition].m != ttMove)
+				if(moveList[moveListPosition] != ttMove)
 				{
-					if((pos.seeSign(moveList[moveListPosition].m)>=0) || (pos.moveGivesSafeDoubleCheck(moveList[moveListPosition].m)))
+					if((pos.seeSign(moveList[moveListPosition])>=0) || (pos.moveGivesSafeDoubleCheck(moveList[moveListPosition])))
 					{
-						return moveList[moveListPosition++].m;
+						return moveList[moveListPosition++];
 					}
 					else
 					{
 						assert(badCaptureSize<MAX_BAD_MOVE_PER_POSITION);
-						badCaptureList[badCaptureSize++].m = moveList[moveListPosition++].m;
+						badCaptureList[badCaptureSize++] = moveList[moveListPosition++];
 					}
 				}
 				else
@@ -885,11 +885,11 @@ Move Movegen::getNextMove()
 			{
 				FindNextBestMove();
 
-				if(moveList[moveListPosition].m != ttMove)
+				if(moveList[moveListPosition] != ttMove)
 				{
-					if(pos.see(moveList[moveListPosition].m) >= captureThreshold)
+					if(pos.see(moveList[moveListPosition]) >= captureThreshold)
 					{
-						return moveList[moveListPosition++].m;
+						return moveList[moveListPosition++];
 					}
 					moveListPosition++;
 				}
@@ -907,7 +907,7 @@ Move Movegen::getNextMove()
 		case iterateBadCaptureMoves:
 			if(badCapturePosition < badCaptureSize)
 			{
-				return badCaptureList[badCapturePosition++].m;
+				return badCaptureList[badCapturePosition++];
 			}
 			else{
 				stagedGeneratorState=(eStagedGeneratorState)(stagedGeneratorState+1);
@@ -921,9 +921,9 @@ Move Movegen::getNextMove()
 			{
 				FindNextBestMove();
 
-				if(moveList[moveListPosition].m != ttMove)
+				if(moveList[moveListPosition] != ttMove)
 				{
-					return moveList[moveListPosition++].m;
+					return moveList[moveListPosition++];
 				}
 				else
 				{

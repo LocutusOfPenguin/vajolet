@@ -23,8 +23,6 @@
 //enum
 //------------------------------------------------
 
-
-
 //------------------------------------------------
 //	const
 //------------------------------------------------
@@ -33,6 +31,7 @@
 //	extern variables
 //------------------------------------------------
 
+
 class bitHelper
 {
 private:
@@ -40,9 +39,18 @@ private:
 	static tSquare BOARDINDEX[8][8];
 	static  const int FILES[squareNumber];
 	static  const int RANKS[squareNumber];
-	static const int SQUARE_COLOR[squareNumber];
+	static const Color SQUARE_COLOR[squareNumber];
 	static bitMap centerBitmap;
 	static bitMap bigCenterBitmap;
+	static bitMap BITMAP_COLOR[2];
+	static bitMap RANKMASK[squareNumber];
+	static bitMap FILEMASK[squareNumber];
+	static bitMap SQUARES_BETWEEN[squareNumber][squareNumber];
+	static bitMap LINES[squareNumber][squareNumber];
+	static unsigned int SQUARE_DISTANCE[squareNumber][squareNumber];
+	static bitMap ISOLATED_PAWN[squareNumber];
+	static bitMap PASSED_PAWN[2][squareNumber];
+	static bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
 public:
 	static void initbitHelper(void);
 	/*	\brief set the Nth bit to 1
@@ -85,7 +93,7 @@ public:
 		assert( n < squareNumber );
 		return RANKS[n];
 	}
-	static inline int getSquareColor(const tSquare n)
+	static inline Color getSquareColor(const tSquare n)
 	{
 		assert( n < squareNumber );
 		return SQUARE_COLOR[n];
@@ -103,21 +111,107 @@ public:
 	{
 		return centerBitmap | bigCenterBitmap;
 	}
+
+	static inline bitMap getBitmapSquareColor(const Color color)
+	{
+		assert(color < 2);
+		return BITMAP_COLOR[color];
+	}
+
+	static inline bitMap getRankMask(const tSquare n)
+	{
+		assert( n < squareNumber );
+		return RANKMASK[n];
+	}
+
+	static inline bitMap getFileMask(const tSquare n)
+	{
+		assert( n < squareNumber );
+		return FILEMASK[n];
+	}
+
+/*	static inline bitMap getLine(const tSquare a,const tSquare b)
+	{
+		assert(a < squareNumber);
+		assert(b < squareNumber);
+		return LINES[a][b];
+	}*/
+
+	static inline bitMap getSquareBetween(const tSquare a,const tSquare b)
+	{
+		assert(a < squareNumber);
+		assert(b < squareNumber);
+		return SQUARES_BETWEEN[a][b];
+	}
+
+	/*	\brief return true if the 3 squares are aligned
+		\author Marco Belli
+		\version 1.0
+		\date 08/11/2013
+	*/
+	static inline bool squaresAligned(const tSquare s1, const tSquare s2, const tSquare s3)
+	{
+		assert(s1 < squareNumber);
+		assert(s2 < squareNumber);
+		assert(s3 < squareNumber);
+		return LINES[s1][s2] & bitHelper::getBitmapFromSquare(s3);
+	}
+
+	static inline unsigned int getSquareDistance(const tSquare s1, const tSquare s2)
+	{
+		assert(s1 < squareNumber);
+		assert(s2 < squareNumber);
+		return SQUARE_DISTANCE[s1][s2];
+	}
+
+	static inline bitMap getIsolatedBitmap(const tSquare s1)
+	{
+		assert(s1 < squareNumber);
+		return ISOLATED_PAWN[s1];
+	}
+
+	/*static inline bitMap isIsolated(const tSquare s1, const bitMap b)
+	{
+		assert(s1 < squareNumber);
+		return b & ISOLATED_PAWN[s1];
+	}*/
+
+	static inline bitMap getPassedPawnBitmap(const Color c, const tSquare s1)
+	{
+		assert(s1 < squareNumber);
+		assert(c <= black);
+		return PASSED_PAWN[c][s1];
+
+	}
+
+	static inline bool isBitmapPreventingPassedPawn(const bitMap b, const Color c, const tSquare s1)
+	{
+		assert(s1 < squareNumber);
+		assert(c <= black);
+		return b & PASSED_PAWN[c][s1];
+
+	}
+
+
+
+	static inline bitMap getSquaresInFrontBitmap(const Color c, const tSquare s1)
+	{
+		assert(s1 < squareNumber);
+		assert(c <= black);
+		return SQUARES_IN_FRONT_OF[c][s1];
+
+	}
+
+
+
+
+
 };
 
 
-extern bitMap RANKMASK[squareNumber];
-extern bitMap FILEMASK[squareNumber];
-extern bitMap DIAGA1H8MASK[squareNumber];
-extern bitMap DIAGA8H1MASK[squareNumber];
-extern bitMap SQUARES_BETWEEN[squareNumber][squareNumber];
-extern bitMap LINES[squareNumber][squareNumber];
-extern bitMap ISOLATED_PAWN[squareNumber];
-extern bitMap PASSED_PAWN[2][squareNumber];
-extern bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
 
-extern bitMap BITMAP_COLOR[2];
-extern int SQUARE_DISTANCE[squareNumber][squareNumber];
+
+
 
 
 
@@ -129,10 +223,5 @@ extern int SQUARE_DISTANCE[squareNumber][squareNumber];
 
 inline bitMap operator += (bitMap& b, const tSquare sq) { b = b | bitHelper::getBitmapFromSquare(sq); return b; }
 
-
-//------------------------------------------------
-//	function prototype
-//------------------------------------------------
-void initData(void);
 
 #endif /* DATA_H_ */

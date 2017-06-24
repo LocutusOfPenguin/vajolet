@@ -114,6 +114,12 @@ enum tSquare								/*!< square name and directions*/
 	square0=0
 };
 
+typedef enum
+{
+	white = 0,
+	black = 1
+}Color;
+
 ENABLE_OPERATORS_ON(tSquare)
 
 

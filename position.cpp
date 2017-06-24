@@ -677,24 +677,24 @@ U64 Position::calcKey(void) const
 	U64 hash = 0;
 	state& st =getActualState();
 
-	for (int i = 0; i < squareNumber; i++)
+	for (tSquare i = A1; i < squareNumber; i++)
 	{
 		if(squares[i]!=empty)
 		{
-			hash ^=HashKeys::keys[i][squares[i]];
+			hash ^=HashKeys::getKeys( i, squares[i] );
 		}
 	}
 
 	if(st.nextMove==blackTurn)
 	{
-		hash ^= HashKeys::side;
+		hash ^= HashKeys::getSide();
 	}
-	hash ^= HashKeys::castlingRight[st.castleRights];
+	hash ^= HashKeys::getCastlingRight(st.castleRights);
 
 
 	if(st.epSquare != squareNone)
 	{
-		hash ^= HashKeys::ep[st.epSquare];
+		hash ^= HashKeys::getEp(st.epSquare);
 	}
 
 	return hash;
@@ -708,11 +708,11 @@ U64 Position::calcKey(void) const
 U64 Position::calcPawnKey(void) const
 {
 	U64 hash = 1;
-	for (int i = 0; i < squareNumber; i++)
+	for (tSquare i = A1; i < squareNumber; i++)
 	{
 		if(squares[i] == whitePawns || squares[i] == blackPawns)
 		{
-			hash ^= HashKeys::keys[i][squares[i]];
+			hash ^= HashKeys::getKeys( i, squares[i]);
 		}
 	}
 
@@ -731,7 +731,7 @@ U64 Position::calcMaterialKey(void) const
 	{
 		for (unsigned int cnt = 0; cnt < pieceCount[i]; cnt++)
 		{
-			hash ^= HashKeys::keys[i][cnt];
+			hash ^= HashKeys::getKeys( (tSquare)cnt , i );
 		}
 	}
 
@@ -800,10 +800,10 @@ void Position::doNullMove(void)
 	if(x.epSquare != squareNone)
 	{
 		assert(x.epSquare<squareNumber);
-		x.key ^= HashKeys::ep[x.epSquare];
+		x.key ^= HashKeys::getEp(x.epSquare);
 		x.epSquare = squareNone;
 	}
-	x.key ^= HashKeys::side;
+	x.key ^= HashKeys::getSide();
 	x.fiftyMoveCnt++;
 	x.pliesFromNull = 0;
 	x.nextMove = (eNextMove)(blackTurn-x.nextMove);
@@ -862,7 +862,7 @@ void Position::doMove(const Move & m){
 
 
 	// change side
-	x.key ^= HashKeys::side;
+	x.key ^= HashKeys::getSide();
 	x.ply++;
 
 	// update counter
@@ -873,7 +873,7 @@ void Position::doMove(const Move & m){
 	if(x.epSquare!=squareNone)
 	{
 		assert(x.epSquare<squareNumber);
-		x.key ^= HashKeys::ep[x.epSquare];
+		x.key ^= HashKeys::getEp(x.epSquare);
 		x.epSquare = squareNone;
 	}
 
@@ -893,8 +893,8 @@ void Position::doMove(const Move & m){
 
 		//npm+=nonPawnValue[rook][rTo]-nonPawnValue[rook][rFrom];
 
-		x.key ^= HashKeys::keys[rFrom][rook];
-		x.key ^= HashKeys::keys[rTo][rook];
+		x.key ^= HashKeys::getKeys( rFrom, rook);
+		x.key ^= HashKeys::getKeys (rTo, rook);
 
 	}
 
@@ -909,7 +909,7 @@ void Position::doMove(const Move & m){
 				captureSquare-=pawnPush(x.nextMove);
 			}
 			assert(captureSquare<squareNumber);
-			x.pawnKey ^= HashKeys::keys[captureSquare][capture];
+			x.pawnKey ^= HashKeys::getKeys( captureSquare, capture);
 		}
 		x.nonPawnMaterial -= nonPawnValue[capture]/*[captureSquare]*/;
 
@@ -920,16 +920,16 @@ void Position::doMove(const Move & m){
 		x.material -= pstValue[capture][captureSquare];
 
 		// update keys
-		x.key ^= HashKeys::keys[captureSquare][capture];
+		x.key ^= HashKeys::getKeys( captureSquare, capture );
 		assert(pieceCount[capture]<30);
-		x.materialKey ^= HashKeys::keys[capture][pieceCount[capture]]; // ->after removing the piece
+		x.materialKey ^= HashKeys::getKeys( (tSquare)pieceCount[capture], capture ); // ->after removing the piece
 
 		// reset fifty move counter
 		x.fiftyMoveCnt = 0;
 	}
 
 	// update hashKey
-	x.key ^= HashKeys::keys[from][piece] ^ HashKeys::keys[to][piece];
+	x.key ^= HashKeys::getKeys( from, piece)  ^ HashKeys::getKeys( to, piece );
 	movePiece(piece,from,to);
 
 	x.material += pstValue[piece][to] - pstValue[piece][from];
@@ -944,7 +944,7 @@ void Position::doMove(const Move & m){
 	{
 		int cr = castleRightsMask[from] | castleRightsMask[to];
 		assert((x.castleRights & cr)<16);
-		x.key ^= HashKeys::castlingRight[x.castleRights & cr];
+		x.key ^= HashKeys::getCastlingRight(x.castleRights & cr);
 		x.castleRights = (eCastle)(x.castleRights &(~cr));
 	}
 
@@ -959,7 +959,7 @@ void Position::doMove(const Move & m){
 		{
 			x.epSquare = (tSquare)((from+to)>>1);
 			assert(x.epSquare<squareNumber);
-			x.key ^= HashKeys::ep[x.epSquare];
+			x.key ^= HashKeys::getEp(x.epSquare);
 		}
 		if( isPromotionMove(m) )
 		{
@@ -972,11 +972,11 @@ void Position::doMove(const Move & m){
 			x.nonPawnMaterial += nonPawnValue[promotedPiece]/*[to]*/;
 
 
-			x.key ^= HashKeys::keys[to][piece]^ HashKeys::keys[to][promotedPiece];
-			x.pawnKey ^= HashKeys::keys[to][piece];
-			x.materialKey ^= HashKeys::keys[promotedPiece][pieceCount[promotedPiece]-1] ^ HashKeys::keys[piece][pieceCount[piece]];
+			x.key ^= HashKeys::getKeys( to, piece) ^ HashKeys::getKeys( to, promotedPiece);
+			x.pawnKey ^= HashKeys::getKeys( to, piece );
+			x.materialKey ^= HashKeys::getKeys( (tSquare)(pieceCount[promotedPiece]-1), promotedPiece  )  ^ HashKeys::getKeys( (tSquare)pieceCount[piece], piece );
 		}
-		x.pawnKey ^= HashKeys::keys[from][piece] ^ HashKeys::keys[to][piece];
+		x.pawnKey ^= HashKeys::getKeys( from, piece) ^ HashKeys::getKeys( to, piece);
 		x.fiftyMoveCnt = 0;
 	}
 
@@ -1426,7 +1426,7 @@ bitMap Position::getHiddenCheckers(const tSquare kingSquare,const eNextMove next
 
 	while(pinners)
 	{
-		bitMap b = SQUARES_BETWEEN[kingSquare][iterateBit(pinners)] & bitBoard[occupiedSquares];
+		bitMap b = bitHelper::getSquareBetween( kingSquare, iterateBit(pinners) ) & bitBoard[occupiedSquares];
 		if ( !moreThanOneBit(b) )
 		{
 			result |= b & bitBoard[(bitboardIndex)(whitePieces+ getNextTurn())];
@@ -1490,7 +1490,7 @@ bool Position::moveGivesCheck(const Move& m)const
 	{
 		// For pawn and king moves we need to verify also direction
 		assert(pieceList[blackKing-s.nextMove][0]<squareNumber);
-		if ( (!isPawn(piece)&& !isKing(piece)) || !squaresAligned(from, to, pieceList[blackKing-s.nextMove][0]))
+		if ( (!isPawn(piece)&& !isKing(piece)) || !bitHelper::squaresAligned(from, to, pieceList[blackKing-s.nextMove][0]))
 			return true;
 	}
 	if(m.bit.flags == Move::fnone)
@@ -1547,7 +1547,7 @@ bool Position::moveGivesCheck(const Move& m)const
 		break;
 	case Move::fenpassant:
 	{
-		bitMap captureSquare = FILEMASK[m.bit.to] & RANKMASK[m.bit.from];
+		bitMap captureSquare = bitHelper::getFileMask( (tSquare)m.bit.to ) & bitHelper::getRankMask( (tSquare)m.bit.from );
 		bitMap occ = bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare((tSquare)m.bit.to)^captureSquare;
 		return
 				(Movegen::attackFrom<Position::whiteRooks>(kingSquare, occ) & (Us[Queens] |Us[Rooks]))
@@ -1693,7 +1693,7 @@ bool Position::isMoveLegal(const Move &m)const
 			if( !isKing(piece)
 				&& !(
 					isSquareInBitmap( s.checkers, (tSquare)(m.bit.to-( isEnPassantMove(m) ? pawnPush(s.nextMove) : 0) ) )
-					|| ( isSquareInBitmap( SQUARES_BETWEEN[pieceList[Position::whiteKing+s.nextMove][0]][firstOne(s.checkers)] & ~Us[Pieces], (tSquare)m.bit.to ) )
+					|| ( isSquareInBitmap( bitHelper::getSquareBetween( pieceList[Position::whiteKing+s.nextMove][0], firstOne(s.checkers) ) & ~Us[Pieces], (tSquare)m.bit.to ) )
 				)
 			)
 			{
@@ -1701,7 +1701,7 @@ bool Position::isMoveLegal(const Move &m)const
 			}
 		}
 	}
-	if( ( isSquareInBitmap( s.pinnedPieces,(tSquare)m.bit.from ) && !squaresAligned((tSquare)m.bit.from,(tSquare)m.bit.to,pieceList[Position::whiteKing+s.nextMove][0])))
+	if( ( isSquareInBitmap( s.pinnedPieces,(tSquare)m.bit.from ) && !bitHelper::squaresAligned((tSquare)m.bit.from,(tSquare)m.bit.to,pieceList[Position::whiteKing+s.nextMove][0])))
 	{
 		return false;
 	}
@@ -1846,7 +1846,7 @@ bool Position::isMoveLegal(const Move &m)const
 			}
 			if( isEnPassantMove(m) ){
 
-				bitMap captureSquare= FILEMASK[s.epSquare] & RANKMASK[m.bit.from];
+				bitMap captureSquare= bitHelper::getFileMask(s.epSquare) & bitHelper::getRankMask( (tSquare)m.bit.from );
 				bitMap occ= bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare(s.epSquare)^captureSquare;
 				tSquare kingSquare=pieceList[Position::whiteKing+s.nextMove][0];
 				assert(kingSquare<squareNumber);
@@ -1875,7 +1875,7 @@ bool Position::isMoveLegal(const Move &m)const
 
 			}
 			if( isEnPassantMove(m) ){
-				bitMap captureSquare = FILEMASK[s.epSquare] & RANKMASK[m.bit.from];
+				bitMap captureSquare = bitHelper::getFileMask( (tSquare)s.epSquare ) & bitHelper::getRankMask( (tSquare)m.bit.from );
 				bitMap occ = bitBoard[occupiedSquares]^bitHelper::getBitmapFromSquare((tSquare)m.bit.from)^bitHelper::getBitmapFromSquare(s.epSquare)^captureSquare;
 				tSquare kingSquare = pieceList[Position::whiteKing+s.nextMove][0];
 				assert(kingSquare<squareNumber);

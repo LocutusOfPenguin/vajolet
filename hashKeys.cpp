@@ -27,11 +27,11 @@
 //	global static hashKeys
 //---------------------------------
 
-U64  HashKeys::keys[squareNumber][30];  	// position, piece (not all the keys are used)
-U64  HashKeys::side;          				// side to move (black)
-U64  HashKeys::ep[squareNumber];        	// ep targets (only 16 used)
-U64  HashKeys::castlingRight[16];			// white king-side castling right
-U64  HashKeys::exclusion;					// position with an exluded move
+U64 HashKeys::keys[squareNumber][30];  	// position, piece (not all the keys are used)
+U64 HashKeys::side;          			// side to move (black)
+U64 HashKeys::ep[squareNumber];        	// ep targets (only 16 used)
+U64 HashKeys::castlingRight[16];		// white king-side castling right
+U64 HashKeys::exclusion;				// position with an exluded move
 
 /*!	\brief init the hashkeys
     \author Marco Belli
@@ -41,18 +41,20 @@ U64  HashKeys::exclusion;					// position with an exluded move
 void HashKeys::init()
 {
 	// initialize all random 64-bit numbers
-	int i,j;
-	U64 temp[16];
+	U64 temp[4];
 	std::mt19937_64 rnd;
 	std::uniform_int_distribution<uint64_t> uint_dist;
 
-	// use current time (in seconds) as random seed:
+	// use my birthday as fixed seed:
 	rnd.seed(19091979);
 
-	for (auto & val :ep){
+	// populate ep values
+	for (auto & val :ep)
+	{
 		val = uint_dist(rnd);
 	}
 
+	// populate keys values
 	for(auto & outerArray :keys)
 	{
 		for(auto & val :outerArray)
@@ -65,19 +67,25 @@ void HashKeys::init()
 	side = uint_dist(rnd);
 	exclusion=uint_dist(rnd);
 
-	for(auto & val :castlingRight ){
-		val=0;
+	// caclulate castlright values
+	for(auto & val :castlingRight )
+	{
+		val = 0;
 	}
 
 
-	for(auto & val :temp){
-		val=uint_dist(rnd);
+	for(auto & val :temp)
+	{
+		val = uint_dist(rnd);
 	}
 
-	for(i=0;i<16;i++){
-		for(j=0;j<4;j++){
-			if(i&(1<<j)){
-				castlingRight[i]^=temp[j];
+	for(int i=0; i<16; i++)
+	{
+		for(int j=0; j<4; j++)
+		{
+			if(i & (1<<j) )
+			{
+				castlingRight[i] ^= temp[j];
 			}
 		}
 	}

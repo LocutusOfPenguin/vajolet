@@ -30,11 +30,7 @@
 
 
 
-typedef enum
-{
-	white = 0,
-	black = 1
-}Color;
+
 
 //---------------------------------------------------
 //	class
@@ -429,7 +425,7 @@ public:
 
 	U64 getExclusionKey(void) const
 	{
-		return getActualState().key^HashKeys::exclusion;
+		return getActualState().key ^ HashKeys::getExclusion();
 	}
 
 	U64 getPawnKey(void) const
@@ -616,10 +612,10 @@ public:
 	{
 		if(isPawn(getPieceAt((tSquare)m.bit.from)))
 		{
-			bool color = squares[m.bit.from] >= separationBitmap;
+			Color color = (Color)(squares[m.bit.from] >= separationBitmap);
 			bitMap theirPawns = color? bitBoard[whitePawns]:bitBoard[blackPawns];
 			bitMap ourPawns = color? bitBoard[blackPawns]:bitBoard[whitePawns];
-			return !(theirPawns & PASSED_PAWN[color][m.bit.from]) && !(ourPawns & SQUARES_IN_FRONT_OF[color][m.bit.from]);
+			return !bitHelper::isBitmapPreventingPassedPawn(theirPawns, color, (tSquare)(m.bit.from))  && !(ourPawns & bitHelper::getSquaresInFrontBitmap( color, (tSquare)(m.bit.from) ) );
 		}
 		return false;
 	}

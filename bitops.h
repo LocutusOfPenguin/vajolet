@@ -88,25 +88,16 @@ static inline bool isSquareInBitmap(const bitMap b, const unsigned int file, con
 
 /*	\brief return true if the bitmap has more than one bit set
 	\author Marco Belli
-	\version 1.0
-	\date 08/11/2013
+	\version 1.1
+	\date 17/06/2017
 */
 inline bool moreThanOneBit(const bitMap b)
 {
-  return b & (b - 1);
+	return bitCnt(b)>1;
+	//return b & (b - 1); // old code, now a simply bitcount seems faster
 }
 
-/*	\brief return true if the 3 squares are aligned
-	\author Marco Belli
-	\version 1.0
-	\date 08/11/2013
-*/
-inline bool squaresAligned(tSquare s1, tSquare s2, tSquare s3)
-{
-	return LINES[s1][s2] & bitHelper::getBitmapFromSquare(s3);
-	/*return  (SQUARES_BETWEEN[s1][s2] | SQUARES_BETWEEN[s1][s3] | SQUARES_BETWEEN[s2][s3])
-			& (     bitSet(s1) |        bitSet(s2) |        bitSet(s3));*/
-}
+
 
 //-----------------------------------------------------------------------------
 //	function prototype

@@ -52,7 +52,6 @@ int main()
 	std::cout.rdbuf()->pubsetbuf( 0, 0 );
 	std::cin.rdbuf()->pubsetbuf( 0, 0 );
 	bitHelper::initbitHelper();
-	initData();
 	HashKeys::init();
 	Position::initScoreValues();
 	Position::initCastleRightsMask();

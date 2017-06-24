@@ -25,8 +25,9 @@
 	\version 1.0
 	\date 08/11/2013
  */
-struct Move
+class Move
 {
+public:
 	Move(){}
 	Move(const Move& m): packed(m.packed){}
 	Move(const Move&& m):packed(m.packed){}
@@ -68,8 +69,11 @@ struct Move
 
 };
 
-struct extMove{
-	Move m;
+class extMove : public Move
+{
+public:
+	inline bool operator != (const Move& d1) const { return packed != d1.packed;}
+	inline Move& operator = (const Move&m){ packed = m.packed; return *this;}
 	Score score;
 
 	extMove(){};

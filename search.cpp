@@ -847,7 +847,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&&  alpha >= -SCORE_INFINITE+razorMargin(depth,type==CUT_NODE)
 			//&&  abs(alpha) < SCORE_MATE_IN_MAX_PLY // implicito nell riga precedente
 			&&  ((!ttMove.packed ) || type == ALL_NODE)
-			//&& !((pos.getNextTurn() && (pos.getBitmap(Position::blackPawns) & RANKMASK[A2])) || (!pos.getNextTurn() && (pos.getBitmap(Position::whitePawns) & RANKMASK[A7]) ) )
+			//&& !((pos.getNextTurn() && (pos.getBitmap(Position::blackPawns) & bitHelper::getRankMask( A2 ))) || (!pos.getNextTurn() && (pos.getBitmap(Position::whitePawns) & bitHelper::getRankMask(A7 )) ) )
 		)
 		{
 			Score ralpha = alpha - razorMargin(depth,type==CUT_NODE);
@@ -1071,7 +1071,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		}
 
 		bool moveGivesCheck = pos.moveGivesCheck(m);
-		bool isDangerous = moveGivesCheck || pos.isCastleMove(m) || pos.isPassedPawnMove(m);
+		bool isDangerous = ( moveGivesCheck && pos.seeSign(m) >= 0 )|| pos.isCastleMove(m) || pos.isPassedPawnMove(m);
 
 		int ext = 0;
 		if(PVnode && isDangerous)
@@ -1329,6 +1329,10 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				}
 
 			}
+			/*else if(bestMove == Movegen::NOMOVE)
+			{
+				bestMove = m;
+			}*/
 		}
 	}
 
@@ -1671,6 +1675,10 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 					return bestScore;
 				}
 			}
+			/*else if(bestMove == Movegen::NOMOVE)
+			{
+				bestMove = m;
+			}*/
 		}
 	}
 

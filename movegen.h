@@ -119,14 +119,14 @@ private:
 	void insertMove(const Move& m)
 	{
 		assert(moveListSize<MAX_MOVE_PER_POSITION);
-		moveList[moveListSize++].m=m;
+		moveList[moveListSize++] = m;
 	}
 
 	inline void scoreCaptureMoves()
 	{
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
-			moveList[i].score = pos.getMvvLvaScore(moveList[i].m);
+			moveList[i].score = pos.getMvvLvaScore(moveList[i]);
 		}
 	}
 
@@ -134,7 +134,7 @@ private:
 	{
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
-			moveList[i].score = src.getHistory().getValue(pos.getPieceAt((tSquare)moveList[i].m.bit.from),(tSquare)moveList[i].m.bit.to);
+			moveList[i].score = src.getHistory().getValue(pos.getPieceAt((tSquare)moveList[i].bit.from), (tSquare)moveList[i].bit.to);
 		}
 	}
 	inline void resetMoveList()
@@ -175,7 +175,7 @@ public:
 		return m == killerMoves[0] || m == killerMoves[1];
 	}
 
-	Move getMoveFromMoveList(unsigned int n) const {	return moveList[n].m; }
+	Move getMoveFromMoveList(unsigned int n) const {	return moveList[n]; }
 
 	Move getNextMove(void);
 
