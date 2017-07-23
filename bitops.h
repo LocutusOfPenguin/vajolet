@@ -34,7 +34,7 @@
 */
 static inline unsigned int bitCnt(const bitMap bitmap)
 {
-	return __builtin_popcountll(bitmap);
+	return (__builtin_popcountll(bitmap));
 }
 
 
@@ -45,7 +45,7 @@ static inline unsigned int bitCnt(const bitMap bitmap)
 */
 static inline tSquare firstOne(const bitMap bitmap)
 {
-	return (tSquare)__builtin_ctzll(bitmap);
+	return ((tSquare)__builtin_ctzll(bitmap));
 }
 
 /*	\brief get the index of the rightmost one bit and clear the bit in the bitmap
@@ -57,7 +57,7 @@ static inline tSquare iterateBit(bitMap & b)
 {
 	const tSquare t = firstOne(b);
 	b &= ( b - 1 );
-	return t;
+	return (t);
 
 }
 
@@ -72,7 +72,7 @@ static inline tSquare iterateBit(bitMap & b)
 */
 static inline bool isSquareInBitmap(const bitMap b, const tSquare sq)
 {
-	return b & bitHelper::getBitmapFromSquare(sq);
+	return (b & bitHelper::getBitmapFromSquare(sq));
 }
 /*	\brief tell wheter a square defined by file and rank is present in a bitmap
 	\author Marco Belli
@@ -81,7 +81,7 @@ static inline bool isSquareInBitmap(const bitMap b, const tSquare sq)
 */
 static inline bool isSquareInBitmap(const bitMap b, const unsigned int file, const unsigned int rank)
 {
-	return b & bitHelper::getBitmapFromSquare(file,rank);
+	return (b & bitHelper::getBitmapFromSquare(file,rank));
 }
 
 
@@ -91,9 +91,9 @@ static inline bool isSquareInBitmap(const bitMap b, const unsigned int file, con
 	\version 1.1
 	\date 17/06/2017
 */
-inline bool moreThanOneBit(const bitMap b)
+static inline bool moreThanOneBit(const bitMap b)
 {
-	return bitCnt(b)>1;
+	return (bitCnt(b)>1);
 	//return b & (b - 1); // old code, now a simply bitcount seems faster
 }
 

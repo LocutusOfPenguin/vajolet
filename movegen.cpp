@@ -42,10 +42,10 @@ bitMap Movegen::castlePath[2][2];
 
 void Movegen::initMovegenConstant(void){
 
-	castlePath[0][kingSideCastle]=bitHelper::getBitmapFromSquare(F1)|bitHelper::getBitmapFromSquare(G1);
-	castlePath[0][queenSideCastle]=bitHelper::getBitmapFromSquare(D1)|bitHelper::getBitmapFromSquare(C1)|bitHelper::getBitmapFromSquare(B1);
-	castlePath[1][kingSideCastle]=bitHelper::getBitmapFromSquare(F8)|bitHelper::getBitmapFromSquare(G8);
-	castlePath[1][queenSideCastle]=bitHelper::getBitmapFromSquare(D8)|bitHelper::getBitmapFromSquare(C8)|bitHelper::getBitmapFromSquare(B8);
+	castlePath[Color::white][kingSideCastle]=bitHelper::getBitmapFromSquare(F1)|bitHelper::getBitmapFromSquare(G1);
+	castlePath[Color::white][queenSideCastle]=bitHelper::getBitmapFromSquare(D1)|bitHelper::getBitmapFromSquare(C1)|bitHelper::getBitmapFromSquare(B1);
+	castlePath[Color::black][kingSideCastle]=bitHelper::getBitmapFromSquare(F8)|bitHelper::getBitmapFromSquare(G8);
+	castlePath[Color::black][queenSideCastle]=bitHelper::getBitmapFromSquare(D8)|bitHelper::getBitmapFromSquare(C8)|bitHelper::getBitmapFromSquare(B8);
 
 	MagicMove::initmagicmoves();
 
@@ -170,8 +170,8 @@ void Movegen::generateMoves()
 	const bitMap& thirdRankMask = bitHelper::getRankMask( s.nextMove ? A6 : A3 );
 	const bitMap& seventhRankMask = bitHelper::getRankMask( s.nextMove ? A2 : A7 );
 
-	bitMap promotionPawns =  pos.getOurBitmap(Position::Pawns) & seventhRankMask ;
-	bitMap nonPromotionPawns =  pos.getOurBitmap(Position::Pawns)^ promotionPawns;
+	const bitMap promotionPawns =  pos.getOurBitmap(Position::Pawns) & seventhRankMask ;
+	const bitMap nonPromotionPawns =  pos.getOurBitmap(Position::Pawns)^ promotionPawns;
 
 	const tSquare kingSquare = pos.getSquareOfThePiece((Position::bitboardIndex)(Position::whiteKing+s.nextMove),0);
 	assert(kingSquare<squareNumber);
@@ -182,19 +182,19 @@ void Movegen::generateMoves()
 	if(type==Movegen::allEvasionMg)
 	{
 		assert(s.checkers);
-		target = ( s.checkers | bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) &~ pos.getOurBitmap(Position::Pieces);
+		target = ( s.checkers | bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) & ~pos.getOurBitmap(Position::Pieces);
 		kingTarget = ~pos.getOurBitmap(Position::Pieces);
 	}
 	else if(type==Movegen::captureEvasionMg)
 	{
 		assert(s.checkers);
-		target = ( s.checkers ) &~ pos.getOurBitmap(Position::Pieces);
+		target = ( s.checkers ) & ~pos.getOurBitmap(Position::Pieces);
 		kingTarget = target | pos.getTheirBitmap(Position::Pieces);
 	}
 	else if(type==Movegen::quietEvasionMg)
 	{
 		assert(s.checkers);
-		target = ( bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) &~ pos.getOurBitmap(Position::Pieces);
+		target = ( bitHelper::getSquareBetween( kingSquare, firstOne(s.checkers) ) ) & ~pos.getOurBitmap(Position::Pieces);
 		kingTarget = ~pos.getOccupationBitmap();
 	}
 	else if(type== Movegen::allNonEvasionMg)
@@ -579,7 +579,7 @@ void Movegen::generateMoves()
 				for( tSquare x = (tSquare)1; x<3; x++)
 				{
 					assert(kingSquare+x<squareNumber);
-					if(pos.getAttackersTo(kingSquare+x,pos.getOccupationBitmap()) & pos.getTheirBitmap(Position::Pieces))
+					if(pos.getAttackersTo(kingSquare+x,pos.getOccupationBitmap()) & enemy)
 					{
 						castleDenied = true;
 						break;
@@ -604,7 +604,7 @@ void Movegen::generateMoves()
 				for( tSquare x = (tSquare)1 ;x<3 ;x++)
 				{
 					assert(kingSquare-x<squareNumber);
-					if(pos.getAttackersTo(kingSquare-x, pos.getOccupationBitmap()) & pos.getTheirBitmap(Position::Pieces))
+					if(pos.getAttackersTo(kingSquare-x, pos.getOccupationBitmap()) & enemy)
 					{
 						castleDenied = true;
 						break;
@@ -876,7 +876,7 @@ Move Movegen::getNextMove()
 					counterMoves[1] = NOMOVE;
 				}
 
-				killerPos = 0;
+				killerPos = 0u;
 				stagedGeneratorState = (eStagedGeneratorState)(stagedGeneratorState+1);
 			}
 			break;
@@ -936,7 +936,7 @@ Move Movegen::getNextMove()
 			}
 			break;
 		case getKillers:
-			if(killerPos < 2)
+			if(killerPos < 2u)
 			{
 				Move& t = killerMoves[killerPos++];
 
@@ -947,12 +947,12 @@ Move Movegen::getNextMove()
 			}
 			else
 			{
-				killerPos = 0;
+				killerPos = 0u;
 				stagedGeneratorState = (eStagedGeneratorState)(stagedGeneratorState+1);
 			}
 			break;
 		case getCounters:
-			if(killerPos < 2)
+			if(killerPos < 2u)
 			{
 				Move& t = counterMoves[killerPos++];
 

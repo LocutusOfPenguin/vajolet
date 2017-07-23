@@ -1954,7 +1954,7 @@ Score Position::eval(void)
 
 	if((st.castleRights & wCastleOO)
 		&& !(attackedSquares[blackPieces] & (bitHelper::getBitmapFromSquare(E1) | bitHelper::getBitmapFromSquare(F1) | bitHelper::getBitmapFromSquare(G1) ))
-		&& bitCnt(getOccupationBitmap() &  Movegen::getCastlePath(0, Movegen::kingSideCastle) ) <= 1
+		&& bitCnt(getOccupationBitmap() &  Movegen::getCastlePath( Color::white, Movegen::kingSideCastle) ) <= 1
 		)
 	{
 		kingSafety[white] = std::max( evalShieldStorm<white>(G1), kingSafety[white]);
@@ -1962,7 +1962,7 @@ Score Position::eval(void)
 
 	if((st.castleRights & wCastleOOO)
 		&& !(attackedSquares[blackPieces] & (bitHelper::getBitmapFromSquare(E1) | bitHelper::getBitmapFromSquare(D1) | bitHelper::getBitmapFromSquare(C1) ))
-		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(0, Movegen::queenSideCastle) ) <=1
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath( Color::white, Movegen::queenSideCastle) ) <=1
 		)
 	{
 		kingSafety[white] = std::max( evalShieldStorm<white>(C1), kingSafety[white]);
@@ -1976,7 +1976,7 @@ Score Position::eval(void)
 
 	if((st.castleRights & bCastleOO)
 		&& !(attackedSquares[whitePieces] & (bitHelper::getBitmapFromSquare(E8) | bitHelper::getBitmapFromSquare(F8) | bitHelper::getBitmapFromSquare(G8) ))
-		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(1, Movegen::kingSideCastle) ) <=1
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath( Color::black, Movegen::kingSideCastle) ) <=1
 		)
 	{
 		kingSafety[black] = std::max( evalShieldStorm<black>(G8), kingSafety[black]);
@@ -1984,7 +1984,7 @@ Score Position::eval(void)
 
 	if((st.castleRights & bCastleOOO)
 		&& !(attackedSquares[whitePieces] & (bitHelper::getBitmapFromSquare(E8) | bitHelper::getBitmapFromSquare(D8) | bitHelper::getBitmapFromSquare(C8) ))
-		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(1, Movegen::queenSideCastle)) <=1
+		&& bitCnt(getOccupationBitmap() & Movegen::getCastlePath(Color::black, Movegen::queenSideCastle)) <=1
 		)
 	{
 		kingSafety[black] = std::max(evalShieldStorm<black>(C8), kingSafety[black]);

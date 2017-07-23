@@ -47,7 +47,7 @@ private:
 
 	const Position &pos;
 	const Search &src;
-	unsigned int ply;
+	const unsigned int ply;
 	Move ttMove;
 
 	Move killerMoves[2];
@@ -124,6 +124,8 @@ private:
 
 	inline void scoreCaptureMoves()
 	{
+		assert(moveListSize < MAX_MOVE_PER_POSITION);
+		assert(moveListPosition < MAX_MOVE_PER_POSITION);
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
 			moveList[i].score = pos.getMvvLvaScore(moveList[i]);
@@ -132,6 +134,8 @@ private:
 
 	inline void scoreQuietMoves()
 	{
+		assert(moveListSize < MAX_MOVE_PER_POSITION);
+		assert(moveListPosition < MAX_MOVE_PER_POSITION);
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
 			moveList[i].score = src.getHistory().getValue(pos.getPieceAt((tSquare)moveList[i].bit.from), (tSquare)moveList[i].bit.to);
@@ -140,10 +144,12 @@ private:
 
 	inline void scoreQuietEvasion()
 	{
+		assert(moveListSize < MAX_MOVE_PER_POSITION);
+		assert(moveListPosition < MAX_MOVE_PER_POSITION);
 		for(unsigned int i = moveListPosition; i < moveListSize; i++)
 		{
 			moveList[i].score = - (pos.getPieceAt((tSquare)moveList[i].bit.from));
-			if(pos.getPieceAt((tSquare)moveList[i].bit.from)== Position::King)
+			if(pos.getPieceAt((tSquare)moveList[i].bit.from) == Position::King)
 			{
 				moveList[i].score = 10;
 			}
@@ -152,16 +158,17 @@ private:
 
 	inline void resetMoveList()
 	{
-		moveListPosition = 0;
-		moveListSize = 0;
+		moveListPosition = 0u;
+		moveListSize = 0u;
 	}
 
 
 	inline void FindNextBestMove()
 	{
-		Score bestScore = -SCORE_INFINITE;
+		Score bestScore = moveList[moveListPosition].score;
 		unsigned int bestIndex = moveListPosition;
-		for(unsigned int i = moveListPosition; i < moveListSize; i++) // itera sulle mosse rimanenti
+
+		for(unsigned int i = moveListPosition + 1; i < moveListSize; i++) // itera sulle mosse rimanenti
 		{
 			Score res = moveList[i].score;
 			if(res > bestScore)
@@ -181,14 +188,14 @@ public:
 	const static Move NOMOVE;
 	unsigned int getNumberOfLegalMoves();
 
-	inline unsigned int getGeneratedMoveNumber(void)const { return moveListSize;}
+	inline unsigned int getGeneratedMoveNumber(void)const { return (moveListSize);}
 
 	bool isKillerMove(Move &m) const
 	{
-		return m == killerMoves[0] || m == killerMoves[1];
+		return ( (m == killerMoves[0]) || (m == killerMoves[1]));
 	}
 
-	Move getMoveFromMoveList(unsigned int n) const {	return moveList[n]; }
+	Move getMoveFromMoveList(unsigned int n) const {	return (moveList[n]); }
 
 	Move getNextMove(void);
 
@@ -207,10 +214,10 @@ public:
 		{
 			stagedGeneratorState = getTT;
 		}
-		moveListPosition = 0;
-		moveListSize = 0;
-		badCaptureSize = 0;
-		badCapturePosition = 0;
+		moveListPosition = 0u;
+		moveListSize = 0u;
+		badCaptureSize = 0u;
+		badCapturePosition = 0u;
 
 	}
 
@@ -224,14 +231,14 @@ public:
 		if(inCheck)
 		{
 			stagedGeneratorState = getTTevasion;
-			return (-1*ONE_PLY);
+			return (-1 * ONE_PLY);
 		}
 		else
 		{
 			if(depth >= (0*ONE_PLY))
 			{
 				stagedGeneratorState = getQsearchTTquiet;
-				return -1*ONE_PLY;
+				return (-1 * ONE_PLY);
 			}
 			else
 			{
@@ -240,7 +247,7 @@ public:
 				{
 					ttMove = NOMOVE;
 				}
-				return (-2*ONE_PLY);
+				return (-2 * ONE_PLY);
 			}
 		}
 	}
@@ -322,9 +329,10 @@ public:
 		assert(from<squareNumber);
 		return BISHOP_PSEUDO_ATTACK[from];
 	}
-	inline static const bitMap& getCastlePath(const int x, const int y)
+	inline static const bitMap& getCastlePath(const Color c, const CastleSide y)
 	{
-		return castlePath[x][y];
+		assert(c == Color::white || c == Color::black);
+		return castlePath[c][y];
 	}
 
 private:

@@ -33,7 +33,6 @@
 
 #define PROGRAM_NAME	"Vajolet2"
 #define VERSION			"2.3.1"
-#define HW_BITCOUNT
 
 
 //---------------------------------------------
@@ -44,25 +43,27 @@
 //#define ENABLE_CHECK_CONSISTENCY
 
 
-#define MAX_MOVE_PER_POSITION (250)
-#define MAX_BAD_MOVE_PER_POSITION (32)
-#define ONE_PLY		(16)
-#define ONE_PLY_SHIFT (4)
-#define STATE_INFO_LENGTH (800)
+static const unsigned int MAX_MOVE_PER_POSITION = 250u;
+static const unsigned int MAX_BAD_MOVE_PER_POSITION = 32u;
+static const int ONE_PLY = 16;
+static const unsigned int ONE_PLY_SHIFT = 4u;
+static const unsigned int STATE_INFO_LENGTH = 800u;
 
 //---------------------------------------------
 //SCORE DEFINITION
 //---------------------------------------------
+typedef int simdScore __attribute__ ((vector_size (16)));
+typedef signed int Score;					/*!< score saved as a single signed int value*/
 
-#define SCORE_NONE				(2000000001)
-#define SCORE_INFINITE			(2000000000)
-#define SCORE_MATE				(1999999990)
-#define SCORE_MATED				(-SCORE_MATE)
-#define SCORE_MATE_IN_MAX_PLY	(1999990000)
-#define SCORE_KNOWN_WIN			(1000000000)
-#define SCORE_MATED_IN_MAX_PLY	(-SCORE_MATE_IN_MAX_PLY)
-#define SCORE_MAX_OUTPUT_VALUE	(360000)
-#define SCORE_MIN_OUTPUT_VALUE	(-SCORE_MAX_OUTPUT_VALUE)
+static const Score SCORE_NONE = 			(2000000001);
+static const Score SCORE_INFINITE =			(2000000000);
+static const Score SCORE_MATE =				(1999999990);
+static const Score SCORE_MATED =			(-SCORE_MATE);
+static const Score SCORE_MATE_IN_MAX_PLY =	(1999990000);
+static const Score SCORE_KNOWN_WIN =		(1000000000);
+static const Score SCORE_MATED_IN_MAX_PLY =	(-SCORE_MATE_IN_MAX_PLY);
+static const Score SCORE_MAX_OUTPUT_VALUE =	(360000);
+static const Score SCORE_MIN_OUTPUT_VALUE =	(-SCORE_MAX_OUTPUT_VALUE);
 
 //---------------------------------------------
 //
@@ -123,8 +124,7 @@ typedef enum
 ENABLE_OPERATORS_ON(tSquare)
 
 
-typedef int simdScore __attribute__ ((vector_size (16)));
-typedef signed int Score;					/*!< score saved as a single signed int value*/
+
 
 
 

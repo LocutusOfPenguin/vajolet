@@ -27,7 +27,7 @@
 //---------------------------------
 //	structure
 //---------------------------------
-struct HashKeys
+class HashKeys
 {
 private:
 	static U64 keys[squareNumber][30];	// position, piece (not all the keys are used)

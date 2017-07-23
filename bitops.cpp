@@ -30,7 +30,7 @@ std::string displayBitmap(const bitMap b)
 
 	for (int rank = 7 ; rank >= 0; rank--)
 	{
-		s += std::to_string(rank +1) + " ";
+		s += std::to_string(rank + 1) + " ";
 		for (int file = 0 ; file <= 7; file++)
 		{
 
@@ -47,7 +47,7 @@ std::string displayBitmap(const bitMap b)
 		s += "\n";
 	}
 	s +=  "  abcdefgh";
-	return s;
+	return (s);
 }
 
 

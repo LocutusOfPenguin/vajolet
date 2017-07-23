@@ -108,9 +108,9 @@ private:
 	static int globalReduction;
 	bool useTBresult;
 	static const unsigned int LmrLimit = 32;
-	static Score futility[8];
-	static Score futilityMargin[7];
-	static unsigned int FutilityMoveCounts[11];
+	static constexpr Score futility[8] = {0,6000,12000,18000,24000,30000,36000,42000};
+	static constexpr Score futilityMargin[7] = {0,10000,20000,30000,40000,50000,60000};
+	static constexpr unsigned int FutilityMoveCounts[11] = {5,10,17,26,37,50,66,85,105,130,151};
 	static Score PVreduction[LmrLimit*ONE_PLY][64];
 	static Score nonPVreduction[LmrLimit*ONE_PLY][64];
 

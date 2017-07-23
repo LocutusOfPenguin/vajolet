@@ -45,10 +45,6 @@ std::atomic<unsigned long long> Search::visitedNodes;
 std::atomic<unsigned long long> Search::tbHits;
 int Search::globalReduction =0;
 
-
-Score Search::futility[8] = {0,6000,12000,18000,24000,30000,36000,42000};
-Score Search::futilityMargin[7] = {0,10000,20000,30000,40000,50000,60000};
-unsigned int Search::FutilityMoveCounts[11] = {5,10,17,26,37,50,66,85,105,130,151};
 Score Search::PVreduction[LmrLimit*ONE_PLY][64];
 Score Search::nonPVreduction[LmrLimit*ONE_PLY][64];
 unsigned int Search::threads = 1;

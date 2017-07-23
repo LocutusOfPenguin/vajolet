@@ -1749,9 +1749,9 @@ bool Position::isMoveLegal(const Move &m)const
 		{
 			if( isCastleMove(m) )
 			{
-				int color = s.nextMove?1:0;
+				Color color = s.nextMove?Color::black: Color::white;
 				if(!isSquareInBitmap(s.castleRights, (tSquare)(((m.bit.from-m.bit.to)>0)+2*color))
-					|| (Movegen::getCastlePath(color,(m.bit.from-m.bit.to)>0) & bitBoard[occupiedSquares])
+					|| (Movegen::getCastlePath(color, (Movegen::CastleSide)((m.bit.from-m.bit.to) > 0)) & bitBoard[occupiedSquares])
 				)
 				{
 					return false;
