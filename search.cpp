@@ -62,7 +62,7 @@ bool Search::Syzygy50MoveRule= true;
 
 
 
-void Search::reloadPv( unsigned int i )
+/*void Search::reloadPv( unsigned int i )
 {
 	if( rootMoves[i].PV.size() > 0)
 	{
@@ -93,9 +93,9 @@ void Search::reloadPv( unsigned int i )
 			pos.undoMove();
 		}
 	}
-}
+}*/
 
-void Search::verifyPv(std::list<Move> &newPV, Score res)
+/*void Search::verifyPv(std::list<Move> &newPV, Score res)
 {
 
 	unsigned int n = 0;
@@ -124,7 +124,7 @@ void Search::verifyPv(std::list<Move> &newPV, Score res)
 		pos.undoMove();
 	}
 
-}
+}*/
 
 startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 {
@@ -135,8 +135,8 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 	Score res = 0;
 	Score TBres = 0;
 
-
 	TT.newSearch();
+
 	history.clear();
 	counterMoves.clear();
 	cleanData();
@@ -371,10 +371,12 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 			//----------------------------------
 			// reload the last PV in the transposition table
 			//----------------------------------
-			for(unsigned int i = 0; i<=indexPV; i++)
+/*			for(unsigned int i = 0; i<=indexPV; i++)
 			{
 				reloadPv(i);
-			}
+			}*/
+			PV = rootMoves[indexPV].PV;
+			followPV = true;
 
 
 			globalReduction = 0;
@@ -401,6 +403,8 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 				{
 					helperSearch[i].stop = false;
 					helperSearch[i].pos = pos;
+					helperSearch[i].PV = PV;
+					helperSearch[i].followPV = followPV;
 					helperThread.push_back( std::thread(&Search::alphaBeta<Search::nodeType::HELPER_ROOT_NODE>, &helperSearch[i], 0, (depth-globalReduction+((i+1)%2))*ONE_PLY, alpha, beta, std::ref(pvl2[i])));
 				}
 
@@ -698,6 +702,23 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 		return ttValue;
 	}
 
+	if (PVnode && followPV)
+	{
+		if(ply >= PV.size())
+		{
+			followPV = false;
+		}
+		else
+		{
+			std::list<Move>::iterator it = PV.begin();
+			std::advance(it, ply);
+			ttMove = *it;
+			if(ply >= PV.size() - 1)
+			{
+				followPV = false;
+			}
+		}
+	}
 
 	//Tablebase probe
 	if (type != Search::nodeType::ROOT_NODE  && type != Search::nodeType::HELPER_ROOT_NODE && TB_LARGEST)
@@ -1480,6 +1501,26 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 		return ttValue;
 	}
 
+	if (PVnode && followPV)
+	{
+		if(ply >= PV.size())
+		{
+			followPV = false;
+		}
+		else
+		{
+			std::list<Move>::iterator it = PV.begin();
+			std::advance(it, ply);
+
+			ttMove = *it;
+
+			if(ply >= PV.size() - 1)
+			{
+				followPV = false;
+			}
+		}
+	}
+
 	ttType TTtype = typeScoreLowerThanAlpha;
 
 
@@ -1587,7 +1628,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 			// at very deep search allow only recapture
 			if(depth < -7 * ONE_PLY && st.currentMove.bit.to != m.bit.to)
 			{
-					continue;
+				continue;
 			}
 
 			//----------------------------
@@ -1615,7 +1656,7 @@ template<Search::nodeType type> Score Search::qsearch(unsigned int ply, int dept
 						bestScore = std::max(bestScore, futilityValue);
 						continue;
 					}
-					if (futilityBase < beta && pos.seeSign(m) <= 0)
+					else if (futilityBase < beta && pos.seeSign(m) <= 0)
 					{
 						bestScore = std::max(bestScore, futilityBase);
 						continue;

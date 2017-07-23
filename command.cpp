@@ -437,6 +437,46 @@ void uciLoop()
 		{
 			thr->ponderHit();
 		}
+		else if(token== "read")
+		{
+			is >> token;
+			std::string type = token;
+			is >> token;
+			unsigned long long addr = std::stoull(token, nullptr, 16);
+			is >> token;
+			int x = std::stoi(token, nullptr, 10);
+
+			if( type == "simd")
+			{
+				if( x < 0 ) x = 0;
+				if( x > 3 ) x = 3;
+				simdScore& ref = *((simdScore*)addr);
+				sync_cout<<ref[x]<<sync_endl;
+			}
+		}
+		else if(token== "write")
+		{
+			is >> token;
+			std::string type = token;
+
+			is >> token;
+			unsigned long long addr = std::stoull(token, nullptr, 16);
+
+			is >> token;
+			int x = std::stoi(token, nullptr, 10);
+
+			is >> token;
+			int val = std::stoi(token, nullptr, 10);
+
+			if( type == "simd")
+			{
+				if( x < 0 ) x = 0;
+				if( x > 3 ) x = 3;
+				simdScore& ref = *((simdScore*)addr);
+				ref[x] = val;
+			}
+
+		}
 		else
 		{
 			sync_cout << "unknown command" << sync_endl;

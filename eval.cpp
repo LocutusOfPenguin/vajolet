@@ -47,7 +47,35 @@ simdScore queenMobilityPars={5,5,20,335};
 simdScore rookMobilityPars={5,5,215,230};
 simdScore bishopMobilityPars={4,4,283,318};
 simdScore knightMobilityPars={3,3,280,220};
-simdScore mobilityBonus[Position::separationBitmap][32];
+simdScore mobilityBonus[Position::separationBitmap][32] =
+{
+		{0},
+		{0},
+		// queen
+		{
+				{-2100,-2675},{-80,-1340}, {-60,-1005}, {-40,-670}, {-20,-335}, {0,0},      {20,335},   {40,670},
+				{60,1005},    {80,1340},   {100,1675},  {120,2010}, {140,2345}, {160,2680}, {180,3015}, {200,3350},
+				{220,3685},   {240,4020},  {260,4355},  {280,4690}, {300,5025}, {320,5360}, {340,5695}, {360,6030},
+				{380,6365},   {400,6700},  {420,7035},  {440,7370}, {460,7705}, {480,8040}, {500,8375}, {520,8710}
+		},
+		// rook
+		{
+				{-3075, -3150}, {-860, -920}, {-645, -690}, {-430, -460}, {-215, -230},{0,0},        {215, 230},   {430, 460},
+				{645, 690},    {860, 920},   {1075, 1150}, {1290, 1380}, {1505, 1610}, {1720, 1840}, {1935, 2070}, {2150, 2300}
+		},
+		// bishop
+		{
+				{-3132, -3272}, {-849, -954}, {-566, -636}, {-283, -318}, {0, 0},       {283, 318},    {566, 636},   {849, 954},
+				{1132, 1272},   {1415, 1590}, {1698, 1908}, {1981, 2226}, {2264, 2544}, {2547, 2862 }, {2830, 3180}, {3113, 3498}
+		},
+		// knight
+		{
+				{-4000, -3660}, {-1000, -440}, {-500, -220}, {0, 0}, {280, 220}, {600, 440}, {900, 660}, {1300, 880}, {1400, 1100}
+		},
+		{0},
+		{0}
+
+};
 
 
 //------------------------------------------------
@@ -641,48 +669,6 @@ bool Position::evalKNNvsK(Score& res)
 {
 	res = 10;
 	return true;
-}
-
-
-
-void initMobilityBonus(void)
-{
-
-	for(int i=0;i<Position::separationBitmap;i++)
-	{
-		for(int n=0;n<32;n++)
-		{
-			mobilityBonus[i][n] = simdScore{0,0,0,0};
-		}
-	}
-	for(int n=0;n<32;n++)
-	{
-		mobilityBonus[Position::Queens][n] =simdScore{queenMobilityPars[2]*(n-queenMobilityPars[0]),queenMobilityPars[3]*(n-queenMobilityPars[1]),0,0};
-	}
-	for(int n=0;n<32;n++)
-	{
-		mobilityBonus[Position::Rooks][n] =simdScore{rookMobilityPars[2]*(n-rookMobilityPars[0]),rookMobilityPars[3]*(n-rookMobilityPars[1]),0,0};
-	}
-	for(int n=0;n<32;n++)
-	{
-		mobilityBonus[Position::Bishops][n] =simdScore{bishopMobilityPars[2]*(n-bishopMobilityPars[0]),bishopMobilityPars[3]*(n-bishopMobilityPars[1]),0,0};
-	}
-	for(int n=0;n<32;n++)
-	{
-		mobilityBonus[Position::Knights][n] =simdScore{knightMobilityPars[2]*(n-knightMobilityPars[0]),knightMobilityPars[3]*(n-knightMobilityPars[1]),0,0};
-	}
-
-	mobilityBonus[Position::Knights][0][0] = -4000;
-	mobilityBonus[Position::Knights][1][0] = -1000;
-	mobilityBonus[Position::Knights][2][0] = -500;
-	mobilityBonus[Position::Knights][3][0] = 0;
-	mobilityBonus[Position::Knights][4][0] = 280;
-	mobilityBonus[Position::Knights][5][0] = 600;
-	mobilityBonus[Position::Knights][6][0] = 900;
-	mobilityBonus[Position::Knights][7][0] = 1300;
-	mobilityBonus[Position::Knights][8][0] = 1400;
-
-
 }
 
 void Position::initMaterialKeys(void)

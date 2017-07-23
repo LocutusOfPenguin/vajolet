@@ -137,6 +137,19 @@ private:
 			moveList[i].score = src.getHistory().getValue(pos.getPieceAt((tSquare)moveList[i].bit.from), (tSquare)moveList[i].bit.to);
 		}
 	}
+
+	inline void scoreQuietEvasion()
+	{
+		for(unsigned int i = moveListPosition; i < moveListSize; i++)
+		{
+			moveList[i].score = - (pos.getPieceAt((tSquare)moveList[i].bit.from));
+			if(pos.getPieceAt((tSquare)moveList[i].bit.from)== Position::King)
+			{
+				moveList[i].score = 10;
+			}
+		}
+	}
+
 	inline void resetMoveList()
 	{
 		moveListPosition = 0;

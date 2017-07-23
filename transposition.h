@@ -105,7 +105,7 @@ public:
 		}
 	}
 
-	void newSearch() { generation++; usedElements=0; }
+	void newSearch() { generation++; usedElements = 0u; }
 	void setSize(unsigned long int mbSize);
 	void clear();
 

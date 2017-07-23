@@ -104,6 +104,7 @@ public:
 class Search
 {
 private:
+	bool followPV;
 	static int globalReduction;
 	bool useTBresult;
 	static const unsigned int LmrLimit = 32;
@@ -165,12 +166,13 @@ private:
 
 	unsigned int maxPlyReached;
 
-	void reloadPv(unsigned int i);
-	void verifyPv(std::list<Move> &newPV, Score res);
+//	void reloadPv(unsigned int i);
+//	void verifyPv(std::list<Move> &newPV, Score res);
 
 public:
 	static std::atomic<unsigned long long> tbHits;
 	static std::vector<rootMove> rootMoves;
+	std::list<Move> PV;
 	searchLimits limits;
 	Position pos;
 
