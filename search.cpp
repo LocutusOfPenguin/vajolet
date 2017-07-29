@@ -511,7 +511,7 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 			}while(!stop);
 
-			if((!stop || validIteration) && linesToBeSearched>1)
+			if((!stop || validIteration) && (linesToBeSearched>1 || depth == 1) )
 			{
 
 				// Sort the PV lines searched so far and update the GUI
@@ -1331,13 +1331,13 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 					pvLine.clear();
 					pvLine.push_back(bestMove);
 					pvLine.splice(pvLine.end(),childPV);
-					if(type == Search::nodeType::ROOT_NODE && Search::multiPVLines==1)
+					if(type == Search::nodeType::ROOT_NODE && Search::multiPVLines==1 )
 					{
 						/*if(moveNumber!=1)
 						{
 							sync_cout<<"info string NUOVA MOSSA"<<sync_endl;
 						}*/
-						if(val < beta)
+						if(val < beta && depth > 1*ONE_PLY)
 						{
 							printPV(val, depth/ONE_PLY+globalReduction, maxPlyReached, -SCORE_INFINITE, SCORE_INFINITE, getElapsedTime(), indexPV, pvLine, visitedNodes,tbHits);
 						}
