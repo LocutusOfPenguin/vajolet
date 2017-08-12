@@ -37,22 +37,18 @@
 U64 PolyglotBook::polyglotKey(const Position& pos) const
 {
 	U64 k = 0;
-	bitMap b = pos.getOccupationBitmap();
 
-	while (b)
+	for(const tSquare& s : bitmap2( pos.getOccupationBitmap() ) )
 	{
-		tSquare s = iterateBit(b);
 		Position::bitboardIndex p = pos.getPieceAt(s);
 
 		// PolyGlot pieces are: BP = 0, WP = 1, BN = 2, ... BK = 10, WK = 11
 		k ^= PG.Zobrist.psq[pieceMapping[p]][s];
 	}
 
-	b = pos.getCastleRights();
-
-	while(b)
+	for(const tSquare& s : bitmap2( pos.getCastleRights() ) )
 	{
-		k ^= PG.Zobrist.castle[iterateBit(b)];
+		k ^= PG.Zobrist.castle[s];
 	}
 
 	if (pos.getEpSquare() != squareNone)

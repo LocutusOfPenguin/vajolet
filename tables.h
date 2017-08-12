@@ -26,11 +26,11 @@ class pawnEntry
 {
 public:
 	U64 key;
-	bitMap weakPawns;
-	bitMap passedPawns;
-	bitMap pawnAttacks[2];
-	bitMap weakSquares[2];
-	bitMap holes[2];
+	bitmap2 weakPawns;
+	bitmap2 passedPawns;
+	bitmap2 pawnAttacks[2];
+	bitmap2 weakSquares[2];
+	bitmap2 holes[2];
 	Score res[2];
 };
 
@@ -38,7 +38,7 @@ class pawnTable
 {
 static const int size = 8192;
 public:
-	void insert(U64 key,simdScore res,bitMap weak, bitMap passed,bitMap whiteAttack, bitMap blackAttack, bitMap weakSquareWhite,bitMap weakSquareBlack, bitMap whiteHoles, bitMap blackHoles){
+	void insert(U64 key,simdScore res,bitmap2 weak, bitmap2 passed, bitmap2 whiteAttack, bitmap2 blackAttack, bitmap2 weakSquareWhite, bitmap2 weakSquareBlack, bitmap2 whiteHoles, bitmap2 blackHoles){
 		pawnEntry& x=pawnTable[((unsigned int)key) %size];
 
 		x.key=key;

@@ -1145,9 +1145,9 @@ bool Position::checkPosConsistency(int nn)
 	if((bitBoard[whitePieces] | bitBoard[blackPieces]) !=bitBoard[occupiedSquares])
 	{
 		display();
-		displayBitmap(bitBoard[whitePieces]);
-		displayBitmap(bitBoard[blackPieces]);
-		displayBitmap(bitBoard[occupiedSquares]);
+		//displayBitmap(bitBoard[whitePieces]);
+		//displayBitmap(bitBoard[blackPieces]);
+		//displayBitmap(bitBoard[occupiedSquares]);
 
 		sync_cout<<"all piece problem"<<sync_endl;
 		sync_cout<<(nn?"DO error":"undoError") <<sync_endl;
@@ -1424,9 +1424,9 @@ bitMap Position::getHiddenCheckers(const tSquare kingSquare,const eNextMove next
 	bitMap pinners = Movegen::getBishopPseudoAttack(kingSquare) &(bitBoard[(bitboardIndex)(whiteBishops+next)]| bitBoard[(bitboardIndex)(whiteQueens+next)]);
 	pinners |= Movegen::getRookPseudoAttack(kingSquare) &(bitBoard[(bitboardIndex)(whiteRooks+next)]| bitBoard[(bitboardIndex)(whiteQueens+next)]);
 
-	while(pinners)
+	for(const tSquare& s : bitmap2( pinners ) )
 	{
-		bitMap b = bitHelper::getSquareBetween( kingSquare, iterateBit(pinners) ) & bitBoard[occupiedSquares];
+		bitMap b = bitHelper::getSquareBetween( kingSquare, s ) & bitBoard[occupiedSquares];
 		if ( !moreThanOneBit(b) )
 		{
 			result |= b & bitBoard[(bitboardIndex)(whitePieces+ getNextTurn())];

@@ -615,12 +615,10 @@ bool Position::evalOppositeBishopEndgame(Score& res)
 		int pawnDifference = 0;
 		unsigned int freePawn = 0;
 
-		bitMap pawns= getBitmap(whitePawns);
-		while(pawns)
+		for(const tSquare& pawn : bitmap2( getBitmap(whitePawns) ) )
 		{
 			pawnCount++;
 			pawnDifference++;
-			tSquare pawn = iterateBit(pawns);
 			if( !bitHelper::isBitmapPreventingPassedPawn(getBitmap(blackPawns), white, pawn ) )
 			{
 				if(!(Movegen::getBishopPseudoAttack(getSquareOfThePiece(blackBishops)) & bitHelper::getSquaresInFrontBitmap( white, pawn ) ) )
@@ -631,13 +629,11 @@ bool Position::evalOppositeBishopEndgame(Score& res)
 			}
 		}
 
-		pawns= getBitmap(blackPawns);
-		while(pawns)
+
+		for(const tSquare& pawn : bitmap2( getBitmap(blackPawns) ) )
 		{
 			pawnCount++;
 			pawnDifference--;
-
-			tSquare pawn = iterateBit(pawns);
 			if( !bitHelper::isBitmapPreventingPassedPawn(getBitmap(whitePawns), black, pawn ) )
 			{
 				if(!(Movegen::getBishopPseudoAttack(getSquareOfThePiece(whiteBishops)) & bitHelper::getSquaresInFrontBitmap( black, pawn ) ) )
@@ -978,9 +974,9 @@ simdScore Position::evalPieces(const bitMap * const weakSquares,  bitMap * const
 
 	(void)theirPawns;
 
-	while(tempPieces)
+	for(const tSquare& sq : bitmap2( tempPieces ) )
 	{
-		tSquare sq = iterateBit(tempPieces);
+
 		unsigned int relativeRank =(piece > separationBitmap) ? 7 - bitHelper::getRank( sq ) : bitHelper::getRank( sq );
 
 		//---------------------------
@@ -1238,9 +1234,8 @@ Score Position::evalShieldStorm(tSquare ksq) const
 	{
 		ks += bitCnt(pawnFarShield) * kingFarShieldBonus;
 	}
-	while(pawnStorm)
+	for(const tSquare& p : bitmap2( pawnStorm ) )
 	{
-		tSquare p = iterateBit(pawnStorm);
 		ks -= ( 7 - bitHelper::getSquareDistance( p, ksq ) ) * kingStormBonus;
 	}
 	return ks;
@@ -1259,17 +1254,15 @@ simdScore Position::evalPassedPawn(bitMap pp, bitMap* attackedSquares) const
 	state st = getActualState();
 
 	simdScore score = {0,0,0,0};
-	while(pp)
+	for(const tSquare& ppSq : bitmap2( pp ) )
 	{
-		simdScore passedPawnsBonus;
-		tSquare ppSq = iterateBit(pp);
 
 		unsigned int relativeRank = c ? 7 - bitHelper::getRank( ppSq ) : bitHelper::getRank( ppSq );
 
 		int r = relativeRank - 1;
 		int rr =  r * ( r - 1 );
 
-		passedPawnsBonus = simdScore{ passedPawnBonus[0] * rr, passedPawnBonus[1] * ( rr + r + 1 ), 0, 0};
+		simdScore passedPawnsBonus = simdScore{ passedPawnBonus[0] * rr, passedPawnBonus[1] * ( rr + r + 1 ), 0, 0};
 
 		if(rr)
 		{
@@ -1598,33 +1591,27 @@ Score Position::eval(void)
 	if( probePawn.key == pawnKey)
 	{
 		pawnResult = simdScore{probePawn.res[0], probePawn.res[1], 0, 0};
-		weakPawns = probePawn.weakPawns;
-		passedPawns = probePawn.passedPawns;
-		attackedSquares[whitePawns] = probePawn.pawnAttacks[0];
-		attackedSquares[blackPawns] = probePawn.pawnAttacks[1];
-		weakSquares[white] = probePawn.weakSquares[0];
-		weakSquares[black] = probePawn.weakSquares[1];
-		holes[white] = probePawn.holes[0];
-		holes[black] = probePawn.holes[1];
+		weakPawns = probePawn.weakPawns.getBitmap();
+		passedPawns = probePawn.passedPawns.getBitmap();
+		attackedSquares[whitePawns] = probePawn.pawnAttacks[white].getBitmap();
+		attackedSquares[blackPawns] = probePawn.pawnAttacks[black].getBitmap();
+		weakSquares[white] = probePawn.weakSquares[white].getBitmap();
+		weakSquares[black] = probePawn.weakSquares[black].getBitmap();
+		holes[white] = probePawn.holes[white].getBitmap();
+		holes[black] = probePawn.holes[black].getBitmap();
 	}
 	else
 	{
 
 
 		pawnResult = simdScore{0,0,0,0};
-		bitMap pawns = getBitmap(whitePawns);
-
-		while(pawns)
+		for(const tSquare& sq : bitmap2( getBitmap(whitePawns) ) )
 		{
-			tSquare sq = iterateBit(pawns);
 			pawnResult += evalPawn<white>(sq, weakPawns, passedPawns);
 		}
 
-		pawns = getBitmap(blackPawns);
-
-		while(pawns)
+		for(const tSquare& sq : bitmap2( getBitmap(blackPawns) ) )
 		{
-			tSquare sq = iterateBit(pawns);
 			pawnResult -= evalPawn<black>(sq, weakPawns, passedPawns);
 		}
 
@@ -1867,10 +1854,8 @@ Score Position::eval(void)
 	wScore = simdScore{0,0,0,0};
 	bScore = simdScore{0,0,0,0};
 
-	bitMap pawnAttackedPieces = getBitmap( whitePieces ) & attackedSquares[ blackPawns ];
-	while(pawnAttackedPieces)
+	for(const tSquare& attacked : bitmap2( getBitmap( whitePieces ) & attackedSquares[ blackPawns ] ) )
 	{
-		tSquare attacked = iterateBit( pawnAttackedPieces );
 		wScore -= attackedByPawnPenalty[ getPieceAt(attacked) % separationBitmap ];
 	}
 
@@ -1881,11 +1866,9 @@ Score Position::eval(void)
 	{
 		wScore -= undefendedMinorPenalty;
 	}
-	bitMap weakPieces = getBitmap(whitePieces) & attackedSquares[blackPieces] & ~attackedSquares[whitePawns];
-	while(weakPieces)
-	{
-		tSquare p = iterateBit(weakPieces);
 
+	for(const tSquare& p : bitmap2( getBitmap(whitePieces) & attackedSquares[blackPieces] & ~attackedSquares[whitePawns] ) )
+	{
 		bitboardIndex attackedPiece = getPieceAt(p);
 		bitboardIndex attackingPiece = blackPawns;
 		for(; attackingPiece >= blackKing; attackingPiece = (bitboardIndex)(attackingPiece - 1) )
@@ -1899,10 +1882,8 @@ Score Position::eval(void)
 
 	}
 
-	pawnAttackedPieces = getBitmap( blackPieces ) & attackedSquares[ whitePawns ];
-	while(pawnAttackedPieces)
+	for(const tSquare& attacked : bitmap2( getBitmap( blackPieces ) & attackedSquares[ whitePawns ] ) )
 	{
-		tSquare attacked = iterateBit( pawnAttackedPieces );
 		bScore -= attackedByPawnPenalty[ getPieceAt(attacked) % separationBitmap ];
 	}
 
@@ -1911,10 +1892,9 @@ Score Position::eval(void)
 	{
 		bScore -= undefendedMinorPenalty;
 	}
-	weakPieces = getBitmap(blackPieces) & attackedSquares[whitePieces] & ~attackedSquares[blackPawns];
-	while(weakPieces)
+
+	for(const tSquare& p : bitmap2( getBitmap(blackPieces) & attackedSquares[whitePieces] & ~attackedSquares[blackPawns] ) )
 	{
-		tSquare p = iterateBit(weakPieces);
 
 		bitboardIndex attackedPiece = getPieceAt(p);
 		bitboardIndex attackingPiece = whitePawns;

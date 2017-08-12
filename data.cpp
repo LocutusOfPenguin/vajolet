@@ -16,37 +16,31 @@
 */
 
 #include "data.h"
-#include "bitops.h"
+#include "bitmap.h"
 #include <algorithm>
 
-bitMap bitHelper::BITSET[squareNumber+1];
+bitmap2 bitHelper::BITSET[squareNumber+1];
 tSquare bitHelper::BOARDINDEX[8][8];
 
 void bitHelper::initbitHelper()
 {
-	bitMap DIAGA1H8MASK[squareNumber];		//!< bitmask of a diagonal given a square on the diagonal
-	bitMap DIAGA8H1MASK[squareNumber];		//!< bitmask of a diagonal given a square on the diagonal
+	bitmap2 DIAGA1H8MASK[squareNumber];		//!< bitmask of a diagonal given a square on the diagonal
+	bitmap2 DIAGA8H1MASK[squareNumber];		//!< bitmask of a diagonal given a square on the diagonal
 
-
-
-	for(int square=0; square<squareNumber; square++)
-	{
-
-	}
 
 	for(tSquare i = A1; i < squareNumber; i++)
 	{
 		BITSET[i] = (1ull) << i;
 		BOARDINDEX[i%8][i/8] = i;
-		DIAGA1H8MASK[i] = 0;
-		DIAGA8H1MASK[i] = 0;
+		DIAGA1H8MASK[i] = 0ull;
+		DIAGA8H1MASK[i] = 0ull;
 
 		for(tSquare square = A1; square < squareNumber; square++)
 		{
-			SQUARES_BETWEEN[square][i] = 0;
+			SQUARES_BETWEEN[square][i] = 0ull;
 		}
 	}
-	BITSET[squareNone]=0;
+	BITSET[squareNone] = 0ull;
 
 
 	centerBitmap = getBitmapFromSquare(E4) | getBitmapFromSquare(E5) | getBitmapFromSquare(D4) | getBitmapFromSquare(D5);
@@ -55,8 +49,8 @@ void bitHelper::initbitHelper()
 				getBitmapFromSquare(C5) | getBitmapFromSquare(C4) | getBitmapFromSquare(F5) | getBitmapFromSquare(F4)|
 				getBitmapFromSquare(C3) | getBitmapFromSquare(D3) | getBitmapFromSquare(E3) | getBitmapFromSquare(F3);
 
-	BITMAP_COLOR[0] = 0;
-	BITMAP_COLOR[1] = 0;
+	BITMAP_COLOR[0] = 0ull;
+	BITMAP_COLOR[1] = 0ull;
 
 	for(tSquare square = A1; square < squareNumber; square++)
 	{
@@ -186,9 +180,9 @@ void bitHelper::initbitHelper()
 					}
 				}
 			}
-			if(DIAGA1H8MASK[square] & getBitmapFromSquare((tSquare)i))
+			if( (DIAGA1H8MASK[square] & getBitmapFromSquare((tSquare)i) ).getBitmap())
 			{
-				LINES[square][i] = DIAGA1H8MASK[square];
+				LINES[square][i] = DIAGA1H8MASK[square].getBitmap();
 				if( getFile( i ) > getFile( square ) ) // in salita
 				{
 					int temp = getFile( square ) + 1;
@@ -212,9 +206,9 @@ void bitHelper::initbitHelper()
 					}
 				}
 			}
-			if(DIAGA8H1MASK[square] & getBitmapFromSquare((tSquare)i) )
+			if( (DIAGA8H1MASK[square] & getBitmapFromSquare((tSquare)i) ).getBitmap())
 			{
-				LINES[square][i] = DIAGA8H1MASK[square];
+				LINES[square][i] = DIAGA8H1MASK[square].getBitmap();
 				if(getFile( i ) > getFile( square ) ) // in salita
 				{
 					int temp = getFile( square ) + 1;
@@ -256,7 +250,7 @@ void bitHelper::initbitHelper()
 	//////////////////////////////////////////////////
 	for(tSquare square = A1; square < squareNumber; square++)
 	{
-		ISOLATED_PAWN[square] = 0;
+		ISOLATED_PAWN[square] = 0ull;
 		int file = getFile( square );
 
 		if(file>0)
@@ -271,10 +265,10 @@ void bitHelper::initbitHelper()
 
 	for(tSquare square = A1; square < squareNumber; square++)
 	{
-		PASSED_PAWN[white][square] = 0;
-		PASSED_PAWN[black][square] = 0;
-		SQUARES_IN_FRONT_OF[white][square] = 0;
-		SQUARES_IN_FRONT_OF[black][square] = 0;
+		PASSED_PAWN[white][square] = 0ull;
+		PASSED_PAWN[black][square] = 0ull;
+		SQUARES_IN_FRONT_OF[white][square] = 0ull;
+		SQUARES_IN_FRONT_OF[black][square] = 0ull;
 		int file = bitHelper::getFile( square );
 		int rank = bitHelper::getRank( square );
 
@@ -348,21 +342,21 @@ const Color bitHelper::SQUARE_COLOR[squareNumber]=
 	Color::black, Color::white, Color::black, Color::white, Color::black, Color::white, Color::black, Color::white
 };
 
-bitMap bitHelper::BITMAP_COLOR[2];
+bitmap2 bitHelper::BITMAP_COLOR[2];
 
-bitMap bitHelper::RANKMASK[squareNumber];			//!< bitmask of a rank given a square on the rank
-bitMap bitHelper::FILEMASK[squareNumber];			//!< bitmask of a file given a square on the rank
+bitmap2 bitHelper::RANKMASK[squareNumber];			//!< bitmask of a rank given a square on the rank
+bitmap2 bitHelper::FILEMASK[squareNumber];			//!< bitmask of a file given a square on the rank
 
 
-bitMap bitHelper::SQUARES_BETWEEN[squareNumber][squareNumber];		//bitmask with the squares btween 2 alinged squares, 0 otherwise
-bitMap bitHelper::LINES[squareNumber][squareNumber];
+bitmap2 bitHelper::SQUARES_BETWEEN[squareNumber][squareNumber];		//bitmask with the squares btween 2 alinged squares, 0 otherwise
+bitmap2 bitHelper::LINES[squareNumber][squareNumber];
 
-bitMap bitHelper::ISOLATED_PAWN[squareNumber];
-bitMap bitHelper::PASSED_PAWN[2][squareNumber];
-bitMap bitHelper::SQUARES_IN_FRONT_OF[2][squareNumber];
+bitmap2 bitHelper::ISOLATED_PAWN[squareNumber];
+bitmap2 bitHelper::PASSED_PAWN[2][squareNumber];
+bitmap2 bitHelper::SQUARES_IN_FRONT_OF[2][squareNumber];
 
 unsigned int bitHelper::SQUARE_DISTANCE[squareNumber][squareNumber];
 
-bitMap bitHelper::centerBitmap;
-bitMap bitHelper::bigCenterBitmap;
+bitmap2 bitHelper::centerBitmap;
+bitmap2 bitHelper::bigCenterBitmap;
 

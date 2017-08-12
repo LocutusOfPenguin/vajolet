@@ -116,7 +116,8 @@ private:
 
 	static Score mateIn(int ply) { return SCORE_MATE - ply; }
 	static Score matedIn(int ply) { return SCORE_MATED + ply; }
-	bool validIteration =false;
+	bool validIteration = false;
+	Score ExpectedValue = 0;
 
 	unsigned int indexPV = 0;
 	History history;

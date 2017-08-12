@@ -15,6 +15,7 @@
     along with Vajolet.  If not, see <http://www.gnu.org/licenses/>
 */
 #include "bitops.h"
+#include "bitmap.h"
 
 
 
@@ -24,7 +25,7 @@
 	\version 1.0
 	\date 21/10/2013
 */
-std::string displayBitmap(const bitMap b)
+std::string bitmap2::displayBitmap() const
 {
 	std::string s;
 

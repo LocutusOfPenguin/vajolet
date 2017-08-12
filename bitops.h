@@ -45,24 +45,9 @@ static inline unsigned int bitCnt(const bitMap bitmap)
 */
 static inline tSquare firstOne(const bitMap bitmap)
 {
+	assert(bitmap);
 	return ((tSquare)__builtin_ctzll(bitmap));
 }
-
-/*	\brief get the index of the rightmost one bit and clear the bit in the bitmap
-	\author Marco Belli
-	\version 1.0
-	\date 22/10/2013
-*/
-static inline tSquare iterateBit(bitMap & b)
-{
-	const tSquare t = firstOne(b);
-	b &= ( b - 1 );
-	return (t);
-
-}
-
-
-
 
 
 /*	\brief tell wheter a square is present in a bitmap
@@ -102,7 +87,7 @@ static inline bool moreThanOneBit(const bitMap b)
 //-----------------------------------------------------------------------------
 //	function prototype
 //-----------------------------------------------------------------------------
-std::string displayBitmap(const bitMap b);
+
 
 
 #endif /* BITOPS_H_ */

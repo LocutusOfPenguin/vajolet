@@ -219,7 +219,6 @@ void Movegen::generateMoves()
 	}
 
 
-	bitMap moves;
 	Move m(NOMOVE);
 	//------------------------------------------------------
 	// king
@@ -231,11 +230,8 @@ void Movegen::generateMoves()
 	{
 		m.bit.from = kingSquare;
 
-		moves = attackFromKing(kingSquare) & kingTarget;
-
-		while(moves)
+		for(const tSquare& to : bitmap2( attackFromKing(kingSquare) & kingTarget ) )
 		{
-			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
 			if( !(pos.getAttackersTo(to, pos.getOccupationBitmap() & ~pos.getOurBitmap(Position::King)) & enemy) )
@@ -267,11 +263,8 @@ void Movegen::generateMoves()
 		assert(from < squareNumber);
 		m.bit.from = from;
 
-		moves = attackFromQueen(from,occupiedSquares) & target;
-
-		while(moves)
+		for(const tSquare& to : bitmap2(attackFromQueen(from,occupiedSquares) & target ))
 		{
-			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
 			if( !isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from, to, kingSquare))
@@ -296,11 +289,8 @@ void Movegen::generateMoves()
 		assert(from < squareNumber);
 		m.bit.from = from;
 
-		moves = attackFromRook(from,occupiedSquares) & target;
-
-		while(moves)
+		for(const tSquare& to : bitmap2( attackFromRook(from,occupiedSquares) & target ))
 		{
-			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
 			if( !isSquareInBitmap( s.pinnedPieces, from) || bitHelper::squaresAligned(from, to, kingSquare))
@@ -325,11 +315,8 @@ void Movegen::generateMoves()
 		assert(from < squareNumber);
 		m.bit.from = from;
 
-		moves = attackFromBishop(from,occupiedSquares) & target;
-
-		while (moves)
+		for(const tSquare& to : bitmap2( attackFromBishop(from,occupiedSquares) & target ))
 		{
-			tSquare to = iterateBit(moves);
 			m.bit.to = to;
 
 			if(!isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
@@ -359,11 +346,10 @@ void Movegen::generateMoves()
 
 		if(!isSquareInBitmap(s.pinnedPieces, from ) )
 		{
-			moves = attackFromKnight(from) & target;
-			while (moves)
-			{
-				m.bit.to=iterateBit(moves);
 
+			for(const tSquare& to : bitmap2( attackFromKnight(from) & target ))
+			{
+				m.bit.to = to;
 				if(type !=Movegen::quietChecksMg || pos.moveGivesCheck(m))
 				{
 					insertMove(m);
@@ -380,13 +366,14 @@ void Movegen::generateMoves()
 	{
 		bitMap pawnPushed;
 		//push
-		moves = (s.nextMove? (nonPromotionPawns>>8):(nonPromotionPawns<<8)) & ~occupiedSquares;
-		pawnPushed = moves;
-		moves &= target;
+		bitMap mov = (s.nextMove? (nonPromotionPawns>>8):(nonPromotionPawns<<8)) & ~occupiedSquares;
+		pawnPushed = mov;
+		mov &= target;
 
-		while(moves)
+
+
+		for(const tSquare& to : bitmap2(mov))
 		{
-			tSquare to = iterateBit(moves);
 			tSquare from = to - pawnPush(s.nextMove);
 
 			m.bit.to= to;
@@ -402,11 +389,10 @@ void Movegen::generateMoves()
 		}
 
 		//double push
-		moves = (s.nextMove? ((pawnPushed & thirdRankMask)>>8):((pawnPushed & thirdRankMask)<<8)) & ~occupiedSquares & target;
 
-		while(moves)
+
+		for(const tSquare& to : bitmap2( (s.nextMove? ((pawnPushed & thirdRankMask)>>8):((pawnPushed & thirdRankMask)<<8)) & ~occupiedSquares & target ))
 		{
-			tSquare to = iterateBit(moves);
 			tSquare from = to - 2*pawnPush(s.nextMove);
 
 			m.bit.to = to;
@@ -428,10 +414,8 @@ void Movegen::generateMoves()
 		//left capture
 		delta = s.nextMove?-9:7;
 
-		moves = (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(A1)))>>9:(nonPromotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target;
-		while(moves)
+		for(const tSquare& to : bitmap2( (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(A1)))>>9:(nonPromotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target ))
 		{
-			tSquare to = iterateBit(moves);
 			tSquare from = (tSquare)(to - delta);
 
 			if(! isSquareInBitmap( s.pinnedPieces, from ) || bitHelper::squaresAligned(from,to,kingSquare))
@@ -445,10 +429,10 @@ void Movegen::generateMoves()
 		//right capture
 		delta=s.nextMove?-7:9;
 
-		moves = (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(H1)))>>7:(nonPromotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target;
-		while(moves)
+
+
+		for(const tSquare& to : bitmap2( (s.nextMove?(nonPromotionPawns&(~bitHelper::getFileMask(H1)))>>7:(nonPromotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target ))
 		{
-			tSquare to = iterateBit(moves);
 			tSquare from = (tSquare)(to -delta);
 
 
@@ -459,16 +443,16 @@ void Movegen::generateMoves()
 				insertMove(m);
 			}
 		}
+
 	}
 
 	// PROMOTIONS
 	m.bit.flags = Move::fpromotion;
 	if(type != Movegen::captureMg && type != Movegen::captureEvasionMg)
 	{
-		moves = (s.nextMove? (promotionPawns>>8):(promotionPawns<<8))& ~occupiedSquares & target;
-		while(moves)
+
+		for(const tSquare& to : bitmap2( (s.nextMove? (promotionPawns>>8):(promotionPawns<<8))& ~occupiedSquares & target ))
 		{
-			tSquare to = iterateBit(moves);
 			tSquare from = to - pawnPush(s.nextMove);
 
 			m.bit.to = to;
@@ -491,11 +475,10 @@ void Movegen::generateMoves()
 	{
 		//left capture
 		delta = s.nextMove?-9:7;
-		moves = (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(A1)))>>9:(promotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target;
-		while(moves)
+
+		for(const tSquare& to : bitmap2(  (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(A1)))>>9:(promotionPawns&(~bitHelper::getFileMask(A1)))<<7) & enemy & target ))
 		{
-			tSquare to = iterateBit(moves);
-			tSquare from = (tSquare)(to -delta);
+			tSquare from = (tSquare)(to - delta);
 
 			m.bit.to=to;
 			m.bit.from=from;
@@ -511,13 +494,11 @@ void Movegen::generateMoves()
 		}
 
 		//right capture
-		delta=s.nextMove?-7:9;
-		moves = (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(H1)))>>7:(promotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target;
-		while(moves)
-		{
+		delta = s.nextMove?-7:9;
 
-			tSquare to = iterateBit(moves);
-			tSquare from = (tSquare)(to -delta);
+		for(const tSquare& to : bitmap2( (s.nextMove?(promotionPawns&(~bitHelper::getFileMask(H1)))>>7:(promotionPawns&(~bitHelper::getFileMask(H1)))<<9) & enemy & target))
+		{
+			tSquare from = (tSquare)(to - delta);
 
 			m.bit.to=to;
 			m.bit.from=from;
@@ -540,11 +521,9 @@ void Movegen::generateMoves()
 		if(s.epSquare != squareNone)
 		{
 			m.bit.flags = Move::fenpassant;
-			bitMap epAttacker = nonPromotionPawns & attackFromPawn(s.epSquare,1-color);
-
-			while(epAttacker)
+			for(const tSquare& from : bitmap2( nonPromotionPawns & attackFromPawn(s.epSquare,1-color) ))
 			{
-				tSquare from = iterateBit(epAttacker);
+
 
 				bitMap captureSquare = bitHelper::getFileMask(s.epSquare) & bitHelper::getRankMask( from );
 				bitMap occ = occupiedSquares ^ bitHelper::getBitmapFromSquare(from) ^ bitHelper::getBitmapFromSquare(s.epSquare) ^ captureSquare;

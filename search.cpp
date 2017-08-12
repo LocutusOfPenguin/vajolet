@@ -371,8 +371,7 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 			{
 				reloadPv(i);
 			}*/
-			PV = rootMoves[indexPV].PV;
-			followPV = true;
+
 
 
 			globalReduction = 0;
@@ -386,6 +385,10 @@ startThinkResult Search::startThinking(int depth, Score alpha, Score beta)
 
 				maxPlyReached = 0;
 				validIteration = false;
+				ExpectedValue = rootMoves[indexPV].previousScore;
+
+				PV = rootMoves[indexPV].PV;
+				followPV = true;
 
 				//----------------------------
 				// multithread : lazy smp threads
@@ -1341,7 +1344,10 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 						{
 							printPV(val, depth/ONE_PLY+globalReduction, maxPlyReached, -SCORE_INFINITE, SCORE_INFINITE, getElapsedTime(), indexPV, pvLine, visitedNodes,tbHits);
 						}
-						validIteration = true;
+						if(val > ExpectedValue - 800)
+						{
+							validIteration = true;
+						}
 					}
 				}
 

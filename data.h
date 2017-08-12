@@ -18,6 +18,7 @@
 #ifndef DATA_H_
 #define DATA_H_
 #include "vajolet.h"
+#include "bitmap.h"
 
 //------------------------------------------------
 //enum
@@ -35,22 +36,22 @@
 class bitHelper
 {
 private:
-	static bitMap BITSET[squareNumber+1];
+	static bitmap2 BITSET[squareNumber+1];
 	static tSquare BOARDINDEX[8][8];
 	static  const int FILES[squareNumber];
 	static  const int RANKS[squareNumber];
 	static const Color SQUARE_COLOR[squareNumber];
-	static bitMap centerBitmap;
-	static bitMap bigCenterBitmap;
-	static bitMap BITMAP_COLOR[2];
-	static bitMap RANKMASK[squareNumber];
-	static bitMap FILEMASK[squareNumber];
-	static bitMap SQUARES_BETWEEN[squareNumber][squareNumber];
-	static bitMap LINES[squareNumber][squareNumber];
+	static bitmap2 centerBitmap;
+	static bitmap2 bigCenterBitmap;
+	static bitmap2 BITMAP_COLOR[2];
+	static bitmap2 RANKMASK[squareNumber];
+	static bitmap2 FILEMASK[squareNumber];
+	static bitmap2 SQUARES_BETWEEN[squareNumber][squareNumber];
+	static bitmap2 LINES[squareNumber][squareNumber];
 	static unsigned int SQUARE_DISTANCE[squareNumber][squareNumber];
-	static bitMap ISOLATED_PAWN[squareNumber];
-	static bitMap PASSED_PAWN[2][squareNumber];
-	static bitMap SQUARES_IN_FRONT_OF[2][squareNumber];
+	static bitmap2 ISOLATED_PAWN[squareNumber];
+	static bitmap2 PASSED_PAWN[2][squareNumber];
+	static bitmap2 SQUARES_IN_FRONT_OF[2][squareNumber];
 public:
 	static void initbitHelper(void);
 	/*	\brief set the Nth bit to 1
@@ -61,7 +62,7 @@ public:
 	static inline bitMap getBitmapFromSquare(const tSquare n)
 	{
 		assert( n < squareNumber+1 );
-		return (BITSET[n]);
+		return (BITSET[n].getBitmap());
 	}
 
 	/*	\brief get a tSquare from file and rank
@@ -100,34 +101,34 @@ public:
 	}
 	static inline bitMap getCenterBitmap(void)
 	{
-		return (centerBitmap);
+		return (centerBitmap.getBitmap());
 	}
 	static inline bitMap getExtCenterBitmap(void)
 	{
-		return (bigCenterBitmap);
+		return (bigCenterBitmap.getBitmap());
 	}
 
 	static inline bitMap getBigCenterBitmap(void)
 	{
-		return (centerBitmap | bigCenterBitmap);
+		return (centerBitmap | bigCenterBitmap).getBitmap();
 	}
 
 	static inline bitMap getBitmapSquareColor(const Color color)
 	{
 		assert(color < 2);
-		return (BITMAP_COLOR[color]);
+		return (BITMAP_COLOR[color].getBitmap());
 	}
 
 	static inline bitMap getRankMask(const tSquare n)
 	{
 		assert( n < squareNumber );
-		return (RANKMASK[n]);
+		return (RANKMASK[n].getBitmap());
 	}
 
 	static inline bitMap getFileMask(const tSquare n)
 	{
 		assert( n < squareNumber );
-		return (FILEMASK[n]);
+		return (FILEMASK[n].getBitmap());
 	}
 
 /*	static inline bitMap getLine(const tSquare a,const tSquare b)
@@ -141,7 +142,7 @@ public:
 	{
 		assert(a < squareNumber);
 		assert(b < squareNumber);
-		return (SQUARES_BETWEEN[a][b]);
+		return (SQUARES_BETWEEN[a][b]).getBitmap();
 	}
 
 	/*	\brief return true if the 3 squares are aligned
@@ -154,7 +155,7 @@ public:
 		assert(s1 < squareNumber);
 		assert(s2 < squareNumber);
 		assert(s3 < squareNumber);
-		return (LINES[s1][s2] & bitHelper::getBitmapFromSquare(s3));
+		return (LINES[s1][s2] & bitHelper::getBitmapFromSquare(s3)).getBitmap();
 	}
 
 	static inline unsigned int getSquareDistance(const tSquare s1, const tSquare s2)
@@ -167,7 +168,7 @@ public:
 	static inline bitMap getIsolatedBitmap(const tSquare s1)
 	{
 		assert(s1 < squareNumber);
-		return (ISOLATED_PAWN[s1]);
+		return (ISOLATED_PAWN[s1]).getBitmap();
 	}
 
 	/*static inline bitMap isIsolated(const tSquare s1, const bitMap b)
@@ -180,7 +181,7 @@ public:
 	{
 		assert(s1 < squareNumber);
 		assert(c <= black);
-		return (PASSED_PAWN[c][s1]);
+		return (PASSED_PAWN[c][s1]).getBitmap();
 
 	}
 
@@ -188,7 +189,7 @@ public:
 	{
 		assert(s1 < squareNumber);
 		assert(c <= black);
-		return (b & PASSED_PAWN[c][s1]);
+		return (b & PASSED_PAWN[c][s1].getBitmap());
 
 	}
 
@@ -198,13 +199,9 @@ public:
 	{
 		assert(s1 < squareNumber);
 		assert(c <= black);
-		return (SQUARES_IN_FRONT_OF[c][s1]);
+		return (SQUARES_IN_FRONT_OF[c][s1]).getBitmap();
 
 	}
-
-
-
-
 
 };
 
