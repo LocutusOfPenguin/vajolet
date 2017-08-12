@@ -59,7 +59,7 @@ Score Position::see(const Move& m) const
 
 	if( isEnPassantMove(m) )
 	{
-		occupied ^= to - pawnPush(color);
+		occupied ^= bitHelper::getBitmapFromSquare(to - pawnPush(color));
 		swapList[0] = pieceValue[whitePawns][0];
 	}
 	if( isCastleMove(m) )

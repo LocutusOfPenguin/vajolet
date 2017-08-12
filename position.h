@@ -125,6 +125,7 @@ public:
 	{
 		stateIndex = 0;
 		actualState = &stateInfo[stateIndex];
+		actualState->nextMove = whiteTurn;
 		Us=&bitBoard[ getNextTurn() ];
 		Them=&bitBoard[blackTurn - getNextTurn()];
 	}
