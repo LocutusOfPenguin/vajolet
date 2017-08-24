@@ -915,13 +915,7 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] >= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getNextTurn() && st.nonPawnMaterial[0] >= Position::pieceValue[Position::whiteKnights][0]))
 		){
 			// Null move dynamic reduction based on depth
-			int red = 3 * ONE_PLY + depth / 4;
-
-			// Null move dynamic reduction based on value
-			if (eval > -SCORE_INFINITE+10000 && eval - 10000 > beta)
-			{
-				red += ONE_PLY;
-			}
+			int red = 3.2 * ONE_PLY + 0.26 * depth + std::min( (eval-beta)/10000, 3 )* ONE_PLY;
 
 			pos.doNullMove();
 			sd[ply+1].skipNullMove = true;
