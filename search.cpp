@@ -915,7 +915,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 			&& ((pos.getNextTurn() && st.nonPawnMaterial[2] >= Position::pieceValue[Position::whiteKnights][0]) || (!pos.getNextTurn() && st.nonPawnMaterial[0] >= Position::pieceValue[Position::whiteKnights][0]))
 		){
 			// Null move dynamic reduction based on depth
-			int red = 3.2 * ONE_PLY + 0.26 * depth + std::min( (eval-beta)/10000, 3 )* ONE_PLY;
+			int red = 3.2 * ONE_PLY + 0.26 * depth + std::min( (eval-beta)/10000.0, 3.0 )* ONE_PLY;
+			//sync_cout<< 3.2 * ONE_PLY <<" + "<<0.26 * depth<< " + "<< std::min( (eval-beta)/10000.0, 3.0 )* ONE_PLY<< "="<<red<< " "<<eval<<" "<<beta<<sync_endl;
 
 			pos.doNullMove();
 			sd[ply+1].skipNullMove = true;
@@ -946,6 +947,8 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				}
 				//return nullVal; TODO da testare se da vantaggi o no, semplifica il codice
 
+				return nullVal;
+
 				if (depth < 12 * ONE_PLY)
 				{
 					return nullVal;
@@ -967,6 +970,10 @@ template<Search::nodeType type> Score Search::alphaBeta(unsigned int ply, int de
 				if (val >= beta)
 				{
 					return nullVal;
+				}
+				else
+				{
+					sync_cout<<"kazzooo"<<sync_endl;
 				}
 
 			}
